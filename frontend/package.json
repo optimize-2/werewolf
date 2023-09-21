@@ -1,0 +1,23 @@
+{
+    "name": "@werewolf/frontend",
+    "version": "0.0.0",
+    "description": "",
+    "scripts": {
+        "start": "vite",
+        "dev": "vite",
+        "build": "vite build",
+        "serve": "vite preview"
+    },
+    "license": "MIT",
+    "devDependencies": {
+        "autoprefixer": "^10.4.14",
+        "socket.io": "^4.7.2",
+        "solid-devtools": "^0.27.3",
+        "vite": "^4.3.9",
+        "vite-plugin-solid": "^2.7.0"
+    },
+    "dependencies": {
+        "socket.io-client": "^4.7.2",
+        "solid-js": "^1.7.6"
+    }
+}
