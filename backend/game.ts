@@ -22,8 +22,9 @@ export type Target =
 export type Period = 
         | 'discuss'
         | 'vote'
-        | 'kill'
-        | 'divine'
+        | 'werewolf'
+        | 'witch'
+        | 'seer'
 
 const players: Record<string, PlayerState> = {}
 const roles: Record<string, Role> = {}
