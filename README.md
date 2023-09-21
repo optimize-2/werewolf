@@ -21,7 +21,7 @@
 
 ### `loginResult`（`server` 做完了）
 
-参数：`state: PlayerState`
+参数：`state: GameState`
 
 ### `gameState`
 
