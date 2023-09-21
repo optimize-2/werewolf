@@ -3,7 +3,17 @@ import url from 'url'
 import fs from 'fs'
 import { Server } from 'socket.io'
 import { log } from './utils'
-import { PlayerState, Role, addPlayer, checkStart, getPlayers, getRoles, inGame, loadGame, setState } from './game'
+import {
+    PlayerState,
+    Role,
+    addPlayer,
+    checkStart,
+    getGameState,
+    getPlayers,
+    getRoles,
+    loadGame,
+    setState
+} from './game'
 
 const users: Record<string, string> = {}
 const room = 'hzgang06'
@@ -60,7 +70,7 @@ io.on('connection', socket => {
 
     socket.on('ready', () => {
         const username = users[socket.id]
-        if (!inGame) {
+        if (getGameState() === 'idle') {
             setState(username, 'ready')
             if (checkStart()) {
                 sendStart(getPlayers(), getRoles())

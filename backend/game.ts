@@ -19,7 +19,8 @@ export type Target =
         | 'villagers'
         | 'gods'
 
-export type Period = 
+export type GameState = 
+        | 'idle'
         | 'discuss'
         | 'vote'
         | 'werewolf'
@@ -35,7 +36,7 @@ export const getRoles = () => roles
 let config: ConfigType
 let requiredPlayers = 0
 
-export let inGame = false
+export let game: GameState = 'idle'
 
 export const loadGame = () => {
     config = loadConfig()
@@ -51,7 +52,7 @@ export const setState = (player: string, state: PlayerState) => {
 }
 
 export const checkStart = () => {
-    if (inGame) return
+    if (game !== 'idle') return
     const readyPlayers: Array<string> = []
     Object.entries(players).forEach(([player, state]) => {
         if (state === 'ready') {
@@ -59,15 +60,18 @@ export const checkStart = () => {
         }
     })
     if (readyPlayers.length === requiredPlayers) {
-        return inGame = true
+        game = 'werewolf'
+        return game
     }
-    return false
+    return 'idle'
 }
 
 export const addPlayer = (player: string) => {
-    if (inGame) {
-        return players[player] = 'spec'
-    } else {
+    if (game === 'idle') {
         return players[player] = 'unready'
+    } else {
+        return players[player] = 'spec'
     }
 }
+
+export const getGameState = () => game

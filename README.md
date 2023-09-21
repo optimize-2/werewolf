@@ -23,6 +23,10 @@
 
 参数：`state: PlayerState`
 
+### `gameState`
+
+参数：`state: GameState`
+
 ## client -> server:
 
 ### `login`（`server` 做完了）
@@ -50,4 +54,11 @@ export type Role =
         | 'seer'
         | 'witch'
         | 'hunter'
+
+export type GameState = 
+        | 'discuss'
+        | 'vote'
+        | 'werewolf'
+        | 'witch'
+        | 'seer'
 ```
