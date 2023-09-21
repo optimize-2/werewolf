@@ -1,0 +1,10 @@
+{
+    "roles": {
+        "werewolf": 3,
+        "villager": 3,
+        "seer": 1,
+        "witch": 1,
+        "hunter": 1
+    },
+    "target": "villagers"
+}
