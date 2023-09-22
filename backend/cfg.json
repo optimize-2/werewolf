@@ -2,7 +2,8 @@
     "roles": {
         "werewolf": 1,
         "villager": 1,
-        "seer": 1
+        "seer": 1,
+        "witch": 1
     },
     "target": "gods",
     "pass": [

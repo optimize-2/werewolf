@@ -5,7 +5,7 @@
 `username` 和 `player` 都指用户名，游戏相关的我叫 `player`。
 
 
-### `recieveMessage`（`server` 做完了）
+### `receiveMessage`（`server` 做完了）
 
 参数：`{username: string, message: string}`
 

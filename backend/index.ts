@@ -18,6 +18,7 @@ import {
     getPlayers,
     getRoles,
     getSeerResult,
+    getWerewolfKill,
     getWitchInventory,
     loadGame,
     setState
@@ -73,6 +74,7 @@ io.on('connection', socket => {
     socket.on('login', (username: string) => {
         if (users[socket.id]) return
         if (socketId[username]) return
+        if (!username) return
         users[socket.id] = username
         socketId[username] = socket.id
         log("login: " + username)
@@ -83,10 +85,9 @@ io.on('connection', socket => {
     })
 
     socket.on('sendMessage', (message: string) => {
-        if (room) {
-            const username = users[socket.id]
-            io.to(room).emit('receiveMessage', { username, message })
-        }
+        const username = users[socket.id]
+        if (!username) return
+        io.to(room).emit('receiveMessage', { username, message })
     })
 
     socket.on('disconnect', () => {
@@ -100,6 +101,7 @@ io.on('connection', socket => {
 
     socket.on('ready', () => {
         const username = users[socket.id]
+        if (!username) return
         if (getGameState() === 'idle') {
             setState(username, 'ready')
             const readyResult: Record<string, boolean> = {}
@@ -115,6 +117,7 @@ io.on('connection', socket => {
 
     socket.on('cancelReady', () => {
         const username = users[socket.id]
+        if (!username) return
         if (getGameState() === 'idle') {
             setState(username, 'unready')
             if (checkStart()) {
@@ -130,54 +133,64 @@ io.on('connection', socket => {
 
     socket.on('werewolfSelect', id => {
         const player = users[socket.id]
+        if (!player) return
         console.log('werewolf select receive', id)
         game.handleWerewolfSelect(player, id)
     })
 
     socket.on('werewolfConfirm', () => {
         const player = users[socket.id]
+        if (!player) return
         console.log('werewolf confirm receive')
         game.handleWerewolfConfirm(player)
     })
 
     socket.on('werewolfCancel', () => {
         const player = users[socket.id]
+        if (!player) return
         game.handleWerewolfCancel(player)
     })
 
     socket.on('seerConfirm', id => {
         const player = users[socket.id]
+        if (!player) return
         game.handleSeer(player, id)
     })
 
     socket.on('witchSave', () => {
         const player = users[socket.id]
+        if (!player) return
         game.handleWitchSave(player)
     })
 
     socket.on('witchPoison', id => {
         const player = users[socket.id]
+        if (!player) return
         game.handleWitchPoison(player, id)
     })
 
     socket.on('witchSkip', () => {
         const player = users[socket.id]
+        if (!player) return
         game.handleWitchSkip(player)
     })
 
     socket.on('voteConfirm', id => {
         const player = users[socket.id]
+        if (!player) return
         game.handleVote(player, id)
     })
 
     socket.on('sendDiscuss', message => {
         const player = users[socket.id]
+        if (!player) return
         console.log('sendDiscuss1', player, message)
         game.handleDiscuss(player, message)
     })
 
     socket.on('sendHunter', id => {
         const player = users[socket.id]
+        if (!player) return
         game.handleHunterKill(player, id)
     })
 })
@@ -212,14 +225,15 @@ export const updateWitchState = () => {
     Object.entries(users).forEach(([id, name]) => {
         const playerId = getId(name)
         let seerResult = false
+        const role = getRoles()[name]
         if (checkId(playerId)) {
-            if (getRoles()[name] === 'seer' && getPlayerStates()[name] === 'alive') {
+            if (role === 'seer' && getPlayerStates()[name] === 'alive') {
                 seerResult = getSeerResult(playerId) === 'werewolf'
             }
         }
         updateState({
             state: 'witch',
-            dead: [],
+            dead: role === 'witch' ? getWerewolfKill() : [],
             seerResult,
             witchInventory: getWitchInventory(name)
         }, id)
