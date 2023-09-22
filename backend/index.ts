@@ -71,6 +71,7 @@ io.on('connection', socket => {
         log("login: " + username)
         addPlayer(username)
         socket.emit('loginResult', getGameState())
+        socket.join(room)
         io.to(room).emit('updateUsers', getPlayers())
     })
 

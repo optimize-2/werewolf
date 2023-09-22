@@ -49,6 +49,7 @@
 
     // 更新用户列表事件处理
     socket.on('updateUsers', users => {
+      console.log("updateUsers", users)
       const userList = document.getElementById('userList');
       userList.innerHTML = '';
       users.forEach(user => {

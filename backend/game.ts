@@ -73,9 +73,10 @@ export const checkStart = () => {
     })
     log(readyPlayers.toString())
     if (readyPlayers.length === requiredPlayers) {
-        gameState = 'werewolf'
-        Object.assign(players, readyPlayers)
         game.assignRoles()
+        game.initialize()
+        game.startWerewolf()
+        Object.assign(players, readyPlayers)
         return true
     }
     return false
@@ -92,14 +93,29 @@ export const addPlayer = (player: string) => {
 const vote: Record<number, number> = {}
 
 const werewolfSelect: Record<number, number> = {}
+const werewolfConfirm: Record<number, boolean> = {}
+const werewolfKill: Array<number> = []
+
+const seerSelect: Record<number, number> = {}
+
+const witchSaveSelect: Record<number, number> = {}
+const witchPoisonSelect: Record<number, number> = {}
+
+interface WitchInventory {
+    save: number,
+    poison: number,
+}
+
+const witchInventories: Record<number, WitchInventory> = {}
 
 const getPlayersByRole = (role: Role) => {
     const result: Array<number> = []
     Object.entries(roles).forEach(([k, v]) => {
-        if (v === role) {
+        if (v === role && playerStates[k] === 'alive') {
             result.push(getId(k))
         }
     })
+    return result
 }
 
 export const getId = (name: string) => {
@@ -108,6 +124,8 @@ export const getId = (name: string) => {
     })
     return -1;
 }
+
+const checkId = (id: number) => _.isInteger(id) && 0 <= id && id < requiredPlayers && playerStates[players[id]] === 'alive'
 
 export const game = {
     assignRoles: () => {
@@ -124,6 +142,16 @@ export const game = {
         log("assign roles: " + roleArray.toString() + " " + players.toString())
     },
 
+    initialize: () => {
+        Object.assign(witchInventories, {})
+        players.forEach(e => {
+            playerStates[e] = 'alive'
+        })
+        getPlayersByRole('witch').forEach(e => {
+            witchInventories[e] = { save: 1, poison: 1 }
+        })
+    },
+
     startDiscuss: () => {
         gameState = 'discuss'
         updateState({
@@ -136,6 +164,13 @@ export const game = {
 
     startWerewolf: () => {
         gameState = 'werewolf'
+        Object.assign(werewolfSelect, {})
+        Object.assign(werewolfConfirm, {})
+        Object.assign(werewolfKill, [])
+        getPlayersByRole('werewolf').forEach(e => {
+            werewolfSelect[e] = -1
+            werewolfConfirm[e] = false
+        })
         updateState({
             state: gameState,
             dead: [],
@@ -154,6 +189,29 @@ export const game = {
             waiting: -1,
             voteResult: revote,
         })
+    },
+
+    startSeer: (dead: Array<number>) => {
+        Object.assign(werewolfKill, dead)
+        const seers = getPlayersByRole('seer')
+        if (seers.length) {
+            
+        } else {
+            setTimeout(() => { game.startWitch(dead) }, 20000);
+        }
+    },
+
+    startWitch: (dead: Array<number>) => {
+        const witch = getPlayersByRole('witch')
+        if (witch.length) {
+
+        } else {
+            setTimeout(() => { game.startMorning(dead) }, 20000);
+        }
+    },
+
+    startMorning: (dead: Array<number>) => {
+
     },
 
     endvote: () => {
@@ -192,7 +250,8 @@ export const game = {
         if (player === players[discussWaiting]) {
             sendDiscuss(player, message)
             if (config.pass.includes(message)) {
-                discussWaiting++;
+                discussWaiting++
+                while (discussWaiting < requiredPlayers && playerStates[players[discussWaiting]] !== 'alive') discussWaiting++
                 if (discussWaiting === requiredPlayers) {
                     discussWaiting = -1;
                     if (gameState === 'morning') {
@@ -210,12 +269,34 @@ export const game = {
     handleVote: (player: string, id: number) => {
         const playerId = getId(player)
         if (playerId === -1 || vote[playerId]) return
-        if (!(_.isInteger(id) && 0 <= id && id < requiredPlayers)) {
+        if (!checkId(id)) {
             id = -1;
         }
         vote[playerId] = id;
         if (Object.keys(vote).length === requiredPlayers) {
             game.endvote()
+        }
+    },
+
+    handleWerewolfSelect: (player: string, id: number) => {
+        const playerId = getId(player)
+        if (playerId === -1) return
+        if (roles[player] !== 'werewolf') return
+        if (playerStates[player] !== 'alive') return
+        werewolfSelect[playerId] = id
+    },
+
+    handleWerewolfConfirm: (player: string) => {
+        const playerId = getId(player)
+        if (playerId === -1) return
+        if (roles[player] !== 'werewolf') return
+        if (playerStates[player] !== 'alive') return
+        const sel = werewolfSelect[playerId]
+        if (checkId(sel))
+        werewolfConfirm[playerId] = true
+        if (getPlayersByRole('werewolf').every(e => werewolfConfirm[e])) {
+            // kill sel
+            game.startSeer([ sel ])
         }
     }
 }
