@@ -7,11 +7,14 @@ import {
     PlayerState,
     Role,
     addPlayer,
+    checkId,
     checkStart,
     getGameState,
+    getId,
     getPlayerStates,
     getPlayers,
     getRoles,
+    getSeerResult,
     loadGame,
     setState
 } from './game'
@@ -102,7 +105,7 @@ io.on('connection', socket => {
             Object.entries(getPlayerStates()).forEach(([k, v]) => {
                 readyResult[k] = (v === 'ready')
             })
-            socket.emit('readyResult', readyResult)
+            io.to(room).emit('readyResult', readyResult)
         }
     })
 
@@ -113,6 +116,11 @@ io.on('connection', socket => {
             if (checkStart()) {
                 sendStart(getPlayers(), getRoles())
             }
+            const readyResult: Record<string, boolean> = {}
+            Object.entries(getPlayerStates()).forEach(([k, v]) => {
+                readyResult[k] = (v === 'ready')
+            })
+            io.to(room).emit('readyResult', readyResult)
         }
     })
 })
@@ -134,9 +142,26 @@ const sendStart = (players: Array<string>, roles: Record<string, Role>) => {
     })
 }
 
-export const updateState = (state: StateType) => io.to(room).emit('gameState', state)
+export const updateState = (state: StateType, id = room) => io.to(id).emit('gameState', state)
 
 export const sendDiscuss = (player: string, message: string) => io.to(room).emit('receiveDiscuss', {
     player,
     message,
 })
+
+export const updateWitchState = () => {
+    Object.entries(users).forEach(([id, name]) => {
+        const playerId = getId(name)
+        let seerResult = false
+        if (checkId(playerId)) {
+            if (getRoles()[name] === 'seer' && getPlayerStates()[name] === 'alive') {
+                seerResult = getSeerResult(playerId) === 'werewolf'
+            }
+        }
+        updateState({
+            state: 'witch',
+            dead: [],
+            seerResult
+        }, id)
+    })
+}

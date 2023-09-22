@@ -1,4 +1,4 @@
-import { sendDiscuss, updateState } from "."
+import { sendDiscuss, updateState, updateWitchState } from "."
 import { loadConfig, ConfigType } from "./config"
 import { log } from "./utils"
 
@@ -98,8 +98,11 @@ const werewolfKill: Array<number> = []
 
 const seerSelect: Record<number, number> = {}
 
-const witchSaveSelect: Record<number, number> = {}
-const witchPoisonSelect: Record<number, number> = {}
+const witchSaveUsed: Record<number, boolean> = {}
+const witchPoisonUsed: Record<number, boolean> = {}
+const witchSkipped: Record<number, boolean> = {}
+
+const witchPoisionPlayers: Array<number> = []
 
 interface WitchInventory {
     save: number,
@@ -125,7 +128,17 @@ export const getId = (name: string) => {
     return -1
 }
 
-const checkId = (id: number) => _.isInteger(id) && 0 <= id && id < requiredPlayers && playerStates[players[id]] === 'alive'
+export const checkId = (id: number) => _.isInteger(id) && 0 <= id && id < requiredPlayers && playerStates[players[id]] === 'alive'
+
+export const getSeerResult = (id: number) => {
+    return roles[players[seerSelect[id]]]
+}
+
+let witchSaved = false
+
+let day = 1
+
+const dead: Array<number> = []
 
 export const game = {
     assignRoles: () => {
@@ -143,6 +156,7 @@ export const game = {
     },
 
     initialize: () => {
+        day = 1
         Object.assign(witchInventories, {})
         players.forEach(e => {
             playerStates[e] = 'alive'
@@ -192,6 +206,7 @@ export const game = {
     },
 
     startSeer: () => {
+        witchSaved = false
         const seers = getPlayersByRole('seer')
         if (seers.length) {
             Object.assign(seerSelect, {})
@@ -201,10 +216,19 @@ export const game = {
         } else {
             setTimeout(() => { game.startWitch() }, 20000)
         }
+        updateState({
+            state: 'seer'
+        })
     },
 
     startWitch: () => {
+        updateWitchState()
         const witch = getPlayersByRole('witch')
+        Object.assign(witchSaveUsed, {})
+        Object.assign(witchPoisonUsed, {})
+        Object.assign(witchPoisionPlayers, [])
+        Object.assign(witchSkipped, {})
+        witchSaved = false
         if (witch.length) {
 
         } else {
@@ -213,10 +237,21 @@ export const game = {
     },
 
     startMorning: () => {
+        day++
+        Object.assign(dead, werewolfKill.concat(Array.from(new Set(witchPoisionPlayers))))
+        updateState({
+            state: 'morning',
+            dead
+        })
+        const hunter = getPlayersByRole('hunter')
+        if (hunter.length) {
 
+        } else {
+            setTimeout(() => { game.startVote() }, 20000)
+        }
     },
 
-    endvote: () => {
+    endVote: () => {
         const voteResult = Array(requiredPlayers).fill(0)
         const voteCount: Record<number, number> = {}
         let player = -1
@@ -249,21 +284,26 @@ export const game = {
     },
 
     handleDiscuss: (player: string, message: string) => {
-        // if (gameState !== 'discuss') return
-        if (player === players[discussWaiting]) {
-            sendDiscuss(player, message)
-            if (config.pass.includes(message)) {
-                discussWaiting++
-                while (discussWaiting < requiredPlayers && playerStates[players[discussWaiting]] !== 'alive') discussWaiting++
-                if (discussWaiting === requiredPlayers) {
-                    discussWaiting = -1
-                    if (gameState === 'morning') {
-                        game.startDiscuss()
-                    } else if (gameState === 'voteend') {
-                        game.startWerewolf()
-                    } else if (gameState === 'discuss') {
+        if (gameState === 'discuss') {
+            if (player === players[discussWaiting]) {
+                sendDiscuss(player, message)
+                if (config.pass.includes(message)) {
+                    discussWaiting++
+                    while (discussWaiting < requiredPlayers && playerStates[players[discussWaiting]] !== 'alive') discussWaiting++
+                    if (discussWaiting === requiredPlayers) {
                         game.startVote()
                     }
+                }
+            }
+        } else if (gameState === 'morning') {
+            if (day === 2 && dead.includes(getId(player))) {
+                sendDiscuss(player, message)
+            }
+        } else if (gameState === 'voteend') {
+            if (player === players[discussWaiting]) {
+                sendDiscuss(player, message)
+                if (config.pass.includes(message)) {
+                    game.startWerewolf()
                 }
             }
         }
@@ -278,7 +318,7 @@ export const game = {
         }
         vote[playerId] = id
         if (Object.keys(vote).length === requiredPlayers) {
-            game.endvote()
+            game.endVote()
         }
     },
 
@@ -301,7 +341,6 @@ export const game = {
         if (checkId(sel))
         werewolfConfirm[playerId] = true
         if (getPlayersByRole('werewolf').every(e => werewolfConfirm[e])) {
-            // kill sel
             Object.assign(werewolfConfirm, [ sel ])
             game.startSeer()
         }
@@ -321,5 +360,45 @@ export const game = {
                 }
             }
         }
+    },
+
+    handleWitchSave: (player: string) => {
+        if (gameState !== 'witch')
+        if (roles[player] === 'witch' && playerStates[player] === 'alive') {
+            const playerId = getId(player)
+            if (witchInventories[playerId].save > 0 && !witchSaveUsed[playerId]) {
+                witchSaved = true
+                witchSaveUsed[playerId] = true
+                witchInventories[playerId].save -= 1
+            }
+        }
+    },
+
+    handleWitchPoison: (player: string, id: number) => {
+        if (gameState !== 'witch')
+        if (roles[player] === 'witch' && playerStates[player] === 'alive') {
+            const playerId = getId(player)
+            if (witchInventories[playerId].save > 0 && !witchPoisonUsed[playerId]) {
+                witchPoisionPlayers.push(id)
+                witchPoisonUsed[playerId] = true
+                witchInventories[playerId].poison -= 1
+            }
+        }
+    },
+
+    handleWitchSkip: (player: string) => {
+        if (gameState !== 'witch')
+        if (roles[player] === 'witch' && playerStates[player] === 'alive') {
+            const playerId = getId(player)
+            witchSkipped[playerId] = true
+            if (getPlayersByRole('witch').every(e => witchSkipped[e])) {
+                game.startMorning()
+            }
+        }
+    },
+
+    handleHunterKill: (player: string) => {
+        if (gameState !== 'voteend' && gameState !== 'morning') return
+        
     }
 }
