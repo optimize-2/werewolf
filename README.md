@@ -85,19 +85,19 @@
 
 ### `ready`（`server` 做完了）
 
-### `cancelReady`
+### `cancelReady`（`server` 做完了）
 
-### `werewolfSelect`
+### `werewolfSelect`（`server` 做完了）
 
 参数：`id: number`
 
 代表选了这个人。
 
-### `werewolfConfirm`
+### `werewolfConfirm`（`server` 做完了）
 
 确定要刀这个人。
 
-### `werewolfCancel`
+### `werewolfCancel`（`server` 做完了）
 
 不确定了。
 

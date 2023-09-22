@@ -9,6 +9,7 @@ import {
     addPlayer,
     checkId,
     checkStart,
+    game,
     getGameState,
     getId,
     getPlayerStates,
@@ -122,6 +123,56 @@ io.on('connection', socket => {
             })
             io.to(room).emit('readyResult', readyResult)
         }
+    })
+
+    socket.on('werewolfSelect', id => {
+        const player = users[socket.id]
+        game.handleWerewolfSelect(player, id)
+    })
+
+    socket.on('werewolfConfirm', () => {
+        const player = users[socket.id]
+        game.handleWerewolfConfirm(player)
+    })
+
+    socket.on('werewolfCancel', () => {
+        const player = users[socket.id]
+        game.handleWerewolfCancel(player)
+    })
+
+    socket.on('seerConfirm', id => {
+        const player = users[socket.id]
+        game.handleSeer(player, id)
+    })
+
+    socket.on('witchSave', () => {
+        const player = users[socket.id]
+        game.handleWitchSave(player)
+    })
+
+    socket.on('witchPoison', id => {
+        const player = users[socket.id]
+        game.handleWitchPoison(player, id)
+    })
+
+    socket.on('witchSkip', () => {
+        const player = users[socket.id]
+        game.handleWitchSkip(player)
+    })
+
+    socket.on('voteConfirm', id => {
+        const player = users[socket.id]
+        game.handleVote(player, id)
+    })
+
+    socket.on('sendDiscuss', message => {
+        const player = users[socket.id]
+        game.handleDiscuss(player, message)
+    })
+
+    socket.on('sendHunter', id => {
+        const player = users[socket.id]
+        game.handleHunterKill(player, id)
     })
 })
 

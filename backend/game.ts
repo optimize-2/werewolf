@@ -352,12 +352,22 @@ export const game = {
         if (playerStates[player] !== 'alive') return
         if (gameState !== 'werewolf') return
         const sel = werewolfSelect[playerId]
-        if (checkId(sel))
-        werewolfConfirm[playerId] = true
-        if (getPlayersByRole('werewolf').every(e => werewolfConfirm[e])) {
-            Object.assign(werewolfConfirm, [ sel ])
-            game.startSeer()
+        if (checkId(sel)) {
+            werewolfConfirm[playerId] = true
+            if (getPlayersByRole('werewolf').every(e => werewolfConfirm[e])) {
+                Object.assign(werewolfConfirm, [ sel ])
+                game.startSeer()
+            }
         }
+    },
+
+    handleWerewolfCancel: (player: string) => {
+        const playerId = getId(player)
+        if (playerId === -1) return
+        if (roles[player] !== 'werewolf') return
+        if (playerStates[player] !== 'alive') return
+        if (gameState !== 'werewolf') return
+        werewolfConfirm[playerId] = false
     },
 
     handleSeer: (player: string, id: number) => {
