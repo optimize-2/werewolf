@@ -1,4 +1,4 @@
-import { sendDiscuss, updateState, updateWitchState } from "."
+import { sendDiscuss, sendHunterWait, sendHunterKilled, updateState, updateWitchState } from "."
 import { loadConfig, ConfigType } from "./config"
 import { log } from "./utils"
 
@@ -102,6 +102,8 @@ const witchSaveUsed: Record<number, boolean> = {}
 const witchPoisonUsed: Record<number, boolean> = {}
 const witchSkipped: Record<number, boolean> = {}
 
+const hunterKilled: Record<number, number> = {}
+
 const witchPoisionPlayers: Array<number> = []
 
 interface WitchInventory {
@@ -139,6 +141,8 @@ let witchSaved = false
 let day = 1
 
 const dead: Array<number> = []
+
+const pendingHunter: Array<number> = []
 
 export const game = {
     assignRoles: () => {
@@ -244,8 +248,18 @@ export const game = {
             dead
         })
         const hunter = getPlayersByRole('hunter')
-        if (hunter.length) {
-
+        Object.assign(pendingHunter, [])
+        dead.forEach(e => {
+            if (!hunter.includes(e)) {
+                playerStates[players[e]] = 'spec'
+            } else {
+                pendingHunter.push(e)
+            }
+        })
+        if (pendingHunter.length) {
+            // hunter.forEach(e => [
+            //     hunterKilled[e] = -1
+            // ])
         } else {
             setTimeout(() => { game.startVote() }, 20000)
         }
@@ -397,8 +411,23 @@ export const game = {
         }
     },
 
-    handleHunterKill: (player: string) => {
+    handleHunterKill: (player: string, id: number) => {
         if (gameState !== 'voteend' && gameState !== 'morning') return
-        
+        if (roles[player] !== 'hunter') return
+        const playerId = getId(player)
+        if (pendingHunter.length && pendingHunter[0] === playerId) {
+            pendingHunter.shift()
+            if (pendingHunter.length) {
+                sendHunterKilled(playerId, id)
+                sendHunterWait(pendingHunter[0])
+            }
+        }
+        // if (checkId(id)) {
+        //     const playerId = getId(player)
+        //     if (hunterKilled[playerId] === -1) {
+        //         hunterKilled[playerId] = id
+        //     }
+        // }
+
     }
 }

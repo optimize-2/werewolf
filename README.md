@@ -59,7 +59,11 @@
 
 ### `hunterKilled`
 
-参数：`id: number`
+参数：`{ player: number, target: number }`
+
+### `hunterWait`
+
+参数：`player: number`
 
 ### `discussStart`
 

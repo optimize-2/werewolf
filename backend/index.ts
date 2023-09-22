@@ -165,3 +165,14 @@ export const updateWitchState = () => {
         }, id)
     })
 }
+
+export const sendHunterKilled = (player: number, target: number) => {
+    io.to(room).emit('hunterKilled', {
+        player,
+        target
+    })
+}
+
+export const sendHunterWait = (player: number) => {
+    io.to(room).emit('hunterWait', player)
+}
