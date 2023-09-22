@@ -120,9 +120,9 @@ const getPlayersByRole = (role: Role) => {
 
 export const getId = (name: string) => {
     players.forEach((e, i) => {
-        if (e === name) return i;
+        if (e === name) return i
     })
-    return -1;
+    return -1
 }
 
 const checkId = (id: number) => _.isInteger(id) && 0 <= id && id < requiredPlayers && playerStates[players[id]] === 'alive'
@@ -191,26 +191,28 @@ export const game = {
         })
     },
 
-    startSeer: (dead: Array<number>) => {
-        Object.assign(werewolfKill, dead)
+    startSeer: () => {
         const seers = getPlayersByRole('seer')
         if (seers.length) {
-            
+            Object.assign(seerSelect, {})
+            seers.forEach(e => {
+                seerSelect[e] = -1
+            })
         } else {
-            setTimeout(() => { game.startWitch(dead) }, 20000);
+            setTimeout(() => { game.startWitch() }, 20000)
         }
     },
 
-    startWitch: (dead: Array<number>) => {
+    startWitch: () => {
         const witch = getPlayersByRole('witch')
         if (witch.length) {
 
         } else {
-            setTimeout(() => { game.startMorning(dead) }, 20000);
+            setTimeout(() => { game.startMorning() }, 20000)
         }
     },
 
-    startMorning: (dead: Array<number>) => {
+    startMorning: () => {
 
     },
 
@@ -218,7 +220,7 @@ export const game = {
         const voteResult = Array(requiredPlayers).fill(0)
         const voteCount: Record<number, number> = {}
         let player = -1
-        let same = false;
+        let same = false
         Object.entries(vote).forEach(([k, v]) => {
             voteResult[toInteger(k)] = v
             if (v != -1) {
@@ -247,13 +249,14 @@ export const game = {
     },
 
     handleDiscuss: (player: string, message: string) => {
+        // if (gameState !== 'discuss') return
         if (player === players[discussWaiting]) {
             sendDiscuss(player, message)
             if (config.pass.includes(message)) {
                 discussWaiting++
                 while (discussWaiting < requiredPlayers && playerStates[players[discussWaiting]] !== 'alive') discussWaiting++
                 if (discussWaiting === requiredPlayers) {
-                    discussWaiting = -1;
+                    discussWaiting = -1
                     if (gameState === 'morning') {
                         game.startDiscuss()
                     } else if (gameState === 'voteend') {
@@ -269,10 +272,11 @@ export const game = {
     handleVote: (player: string, id: number) => {
         const playerId = getId(player)
         if (playerId === -1 || vote[playerId]) return
+        if (gameState !== 'vote') return
         if (!checkId(id)) {
-            id = -1;
+            id = -1
         }
-        vote[playerId] = id;
+        vote[playerId] = id
         if (Object.keys(vote).length === requiredPlayers) {
             game.endvote()
         }
@@ -283,6 +287,7 @@ export const game = {
         if (playerId === -1) return
         if (roles[player] !== 'werewolf') return
         if (playerStates[player] !== 'alive') return
+        if (gameState !== 'werewolf') return
         werewolfSelect[playerId] = id
     },
 
@@ -291,12 +296,30 @@ export const game = {
         if (playerId === -1) return
         if (roles[player] !== 'werewolf') return
         if (playerStates[player] !== 'alive') return
+        if (gameState !== 'werewolf') return
         const sel = werewolfSelect[playerId]
         if (checkId(sel))
         werewolfConfirm[playerId] = true
         if (getPlayersByRole('werewolf').every(e => werewolfConfirm[e])) {
             // kill sel
-            game.startSeer([ sel ])
+            Object.assign(werewolfConfirm, [ sel ])
+            game.startSeer()
+        }
+    },
+
+    handleSeer: (player: string, id: number) => {
+        if (!checkId(id)) return
+        if (gameState !== 'seer') return
+        if (roles[player] === 'seer' && playerStates[player] === 'alive') {
+            if (seerSelect[getId(player)] === -1) {
+                seerSelect[getId(player)] = id
+                if (Object.entries(seerSelect).every(
+                    ([k, v], _1, _2, name: string = players[_.toInteger(k)]) =>
+                        v !== -1 || roles[name] !== 'seer' || playerStates[name] !== 'alive'
+                )) {
+                    game.startWitch()
+                }
+            }
         }
     }
 }

@@ -72,7 +72,7 @@ io.on('connection', socket => {
         addPlayer(username)
         socket.emit('loginResult', getGameState())
         socket.join(room)
-        io.to(room).emit('updateUsers', getPlayers())
+        io.to(room).emit('updateUsers', getPlayerStates())
     })
 
     socket.on('sendMessage', (message: string) => {
