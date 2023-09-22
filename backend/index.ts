@@ -1,6 +1,5 @@
 import http from 'http'
-import url from 'url'
-import fs from 'fs'
+import { readFile } from 'fs'
 import { Server } from 'socket.io'
 import { log } from './utils'
 import {
@@ -10,20 +9,23 @@ import {
     addPlayer,
     checkStart,
     getGameState,
+    getPlayerStates,
     getPlayers,
     getRoles,
     loadGame,
     setState
 } from './game'
+import path from 'path'
 
 const users: Record<string, string> = {}
+const socketId: Record<string, string> = {}
 const room = 'hzgang06'
 
 const server = http.createServer((req, res) => {
-    const { pathname } = url.parse(req.url!, true)
+    const url = req.url!
 
-    if (pathname === '/') {
-        fs.readFile('index.html', (err, data) => {
+    if (url === '/') {
+        readFile('index.html', (err, data) => {
             if (err) {
                 res.writeHead(500, { 'Content-Type': 'text/plain' })
                 res.end('Internal Server Error')
@@ -32,11 +34,24 @@ const server = http.createServer((req, res) => {
                 res.end(data)
             }
         })
-    } else {
+    } else if (url.startsWith('/assets')) {
+        readFile(path.join('.', url), (err, data) => {
+            if (err) {
+                res.writeHead(500, { 'Content-Type': 'text/plain' })
+                res.end('Internal Server Error')
+            } else {
+                res.writeHead(200, {
+                    'Content-Type': 'text/javascript',
+                })
+                res.end(data)
+            }
+        })
+    }else {
         res.writeHead(404, { 'Content-Type': 'text/plain' })
         res.end('Not found')
     }
 })
+
 
 loadGame()
 
@@ -49,7 +64,10 @@ const io = new Server(server)
 
 io.on('connection', socket => {
     socket.on('login', (username: string) => {
+        if (users[socket.id]) return
+        if (socketId[username]) return
         users[socket.id] = username
+        socketId[username] = socket.id
         log("login: " + username)
         addPlayer(username)
         socket.emit('loginResult', getGameState())
@@ -66,7 +84,9 @@ io.on('connection', socket => {
     socket.on('disconnect', () => {
         const username = users[socket.id]
         delete users[socket.id]
+        delete socketId[username]
         socket.leave(room)
+        log('disconnect: ' + username)
         io.to(room).emit('updateUsers', getPlayers())
     })
 
@@ -77,6 +97,11 @@ io.on('connection', socket => {
             if (checkStart()) {
                 sendStart(getPlayers(), getRoles())
             }
+            const readyResult: Record<string, boolean> = {}
+            Object.entries(getPlayerStates()).forEach(([k, v]) => {
+                readyResult[k] = (v === 'ready')
+            })
+            socket.emit('readyResult', readyResult)
         }
     })
 

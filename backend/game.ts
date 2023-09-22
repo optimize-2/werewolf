@@ -113,13 +113,15 @@ export const game = {
     assignRoles: () => {
         const roleArray: Array<Role> = []
         Object.entries(config.roles).forEach(([role, count]) => {
-            roleArray.concat(Array(count).fill(role))
+            console.log([role, count])
+            roleArray.push(...(Array<Role>(count).fill(role as Role)))
         })
         _.shuffle(players)
         _.shuffle(roleArray)
         roleArray.forEach((e, i) => {
             roles[players[i]] = e
         })
+        log("assign roles: " + roleArray.toString() + " " + players.toString())
     },
 
     startDiscuss: () => {

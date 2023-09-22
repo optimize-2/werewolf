@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>Chat Room</title>
+  <meta charset="UTF-8">
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
@@ -16,6 +17,11 @@
     function ready() {
       const username = document.getElementById('username').value;
       socket.emit('ready');
+    }
+    
+    function caonimabuwanle() {
+      const username = document.getElementById('username').value;
+      socket.emit('cancelReady');
     }
 
     // 发送消息事件处理
@@ -34,6 +40,10 @@
     });
     
     socket.on('gameStart', data => {
+      console.log(data)
+    });
+    
+    socket.on('readyResult', data => {
       console.log(data)
     });
 
@@ -58,6 +68,7 @@
   </div>
   <div>
     <button onclick="ready()">Ready</button>
+    <button onclick="caonimabuwanle()">操你妈不玩了</button>
   </div>
   <div>
     <label for="room">Room:</label>

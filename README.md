@@ -13,6 +13,10 @@
 
 参数：`users: Record<string, PlayerState>`
 
+### `readyResult`
+
+参数：`users: Record<string, boolean>`
+
 ### `gameStart`（`server` 做完了）
 
 参数：`{ role: Role, players: Array<string> }`
