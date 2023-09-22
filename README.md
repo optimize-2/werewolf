@@ -75,6 +75,10 @@
 
 参数：`team: number`（游戏意外退出为 `0`，好人为 `1`，狼人为 `2`，方便后续扩展）。
 
+### `werewolfResult`
+
+参数：`result: Record<number, number>`
+
 ## client -> server:
 
 ### `login`（`server` 做完了）

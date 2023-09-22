@@ -125,7 +125,7 @@ const getPlayersByRole = (role: Role) => {
     return result
 }
 
-const getPlayersByFilter = (filter: (role: Role) => boolean) => {
+export const getPlayersByFilter = (filter: (role: Role) => boolean) => {
     const result: Array<number> = []
     Object.entries(roles).forEach(([k, v]) => {
         if (filter(v) && playerStates[k] === 'alive') {
@@ -186,12 +186,12 @@ export const game = {
         console.log('start discuss')
         gameState = 'discuss'
         discussWaiting = 0
-        while (discussWaiting < requiredPlayers && playerStates[discussWaiting] === 'alive') discussWaiting++
+        while (discussWaiting < requiredPlayers && playerStates[players[discussWaiting]] !== 'alive') discussWaiting++
         updateState({
             state: gameState,
             dead: [],
             seerResult: false,
-            waiting: 0,
+            waiting: discussWaiting,
         })
     },
 
@@ -267,11 +267,6 @@ export const game = {
         day++
         console.log('morning', werewolfKill, witchPoisionPlayers)
         dead = werewolfKill.concat(Array.from(new Set(witchPoisionPlayers)))
-        gameState = 'morning'
-        updateState({
-            state: gameState,
-            dead
-        })
         const hunter = getPlayersByFilter(canHunt)
         pendingHunter = []
         dead.forEach(e => {
@@ -281,51 +276,55 @@ export const game = {
                 pendingHunter.push(e)
             }
         })
+        gameState = 'morning'
+        updateState({
+            state: gameState,
+            dead
+        })
         if (game.checkEnd()) return
+        if (pendingHunter.length) {
+            sendHunterWait(pendingHunter[0])
+        }
         if ((day === 2 && dead.length) || pendingHunter.length) {
             // hunter.forEach(e => [
             //     hunterKilled[e] = -1
             // ])
         } else {
-            setTimeout(() => { game.startDiscuss() }, 20000)
+            setTimeout(() => { game.startDiscuss() }, 2000)
         }
     },
 
     endVote: () => {
         const voteResult = Array(requiredPlayers).fill(0)
-        const voteCount: Record<number, number> = {}
-        let player = -1
-        let same = false
-        Object.entries(vote).forEach(([k, v]) => {
-            voteResult[toInteger(k)] = v
-            if (v != -1) {
-                voteCount[v] += 1
-                if (player === -1) {
-                    player = v
-                    same = false
-                } else if (voteCount[player] < voteCount[v]) {
-                    player = v
-                    same = false
-                } else if (voteCount[player] === voteCount[v]) {
-                    same = true
-                }
+        const voteCount: Record<number, number> = Object.values(vote).reduce((count: Record<number, number>, num) => {
+            if (num !== -1) {
+                count[num] = (count[num] || 0) + 1
             }
-        })
-        if (same && !revote) {
+            return count;
+        }, {})
+
+        const maxVotes = Math.max(...Object.values(voteCount))
+        const maxVotePerson = _.toInteger(Object.keys(voteCount).find((key) => voteCount[_.toInteger(key)] === maxVotes))
+        
+        // const isTie = Object.values(voteCount).some(count => count !== maxVotes);
+        const isTie = !Object.entries(voteCount).every(([k, v]) => v < maxVotes || k === maxVotePerson.toString());
+
+        console.log('vote', vote, maxVotePerson, isTie, revote)
+        if (isTie && !revote) {
             gameState = 'vote'
             revote = true
             game.startVote(voteResult)
         } else {
             gameState = 'voteend'
-            if (canHunt(roles[players[player]])) {
-                pendingHunter.push(player)
+            if (canHunt(roles[players[maxVotePerson]])) {
+                pendingHunter.push(maxVotePerson)
             } else {
-                playerStates[players[player]] = 'spec'
+                playerStates[players[maxVotePerson]] = 'spec'
                 if (game.checkEnd()) return
             }
             updateState({
                 state: gameState,
-                dead: [ player ],
+                dead: [ maxVotePerson ],
                 voteResult
             })
         }
@@ -340,6 +339,11 @@ export const game = {
                     while (discussWaiting < requiredPlayers && playerStates[players[discussWaiting]] !== 'alive') discussWaiting++
                     if (discussWaiting === requiredPlayers) {
                         game.startVote()
+                    } else {
+                        updateState({
+                            state: 'discuss',
+                            waiting: discussWaiting
+                        })
                     }
                 }
             }
@@ -370,13 +374,18 @@ export const game = {
         const playerId = getId(player)
         if (playerId === -1 || vote[playerId]) return
         if (gameState !== 'vote') return
+        if (playerStates[player] !== 'alive') return
         if (!checkId(id)) {
             id = -1
         }
         vote[playerId] = id
-        if (Object.keys(vote).length === requiredPlayers) {
+        console.log('vote', playerId, vote, players.filter(e => playerStates[e] === 'alive'), players.filter(e => playerStates[e] === 'alive').every(e => Object.keys(vote).includes(e)))
+        if (players.filter(e => playerStates[e] === 'alive').every(e => Object.keys(vote).includes(getId(e).toString()))) {
             game.endVote()
         }
+        // if (Object.keys(vote).length === requiredPlayers) {
+        //     game.endVote()
+        // }
     },
 
     handleWerewolfSelect: (player: string, id: number) => {
@@ -549,9 +558,9 @@ export const game = {
 
 const survive = (e: string, id = getId(e)) => playerStates[e] === 'alive' && !werewolfKill.includes(id) && !pendingHunter.includes(id)
 
-const isGod = (e: Role) => e === 'hunter' || e === 'seer' || e === 'witch'
-const isVillager = (e: Role) => e === 'villager'
-const isWerewolf = (e: Role) => e === 'werewolf'
-const canHunt = (e: Role) => e === 'hunter'
+export const isGod = (e: Role) => e === 'hunter' || e === 'seer' || e === 'witch'
+export const isVillager = (e: Role) => e === 'villager'
+export const isWerewolf = (e: Role) => e === 'werewolf'
+export const canHunt = (e: Role) => e === 'hunter'
 
 export const getWitchInventory = (player: string) => witchInventories[getId(player)]
