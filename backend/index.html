@@ -15,7 +15,7 @@
     // 登录事件处理
     function ready() {
       const username = document.getElementById('username').value;
-      socket.emit('ready', username);
+      socket.emit('ready');
     }
 
     // 发送消息事件处理
@@ -31,6 +31,10 @@
       const messageElement = document.createElement('li');
       messageElement.textContent = `${username}: ${message}`;
       chatLog.appendChild(messageElement);
+    });
+    
+    socket.on('gameStart', data => {
+      console.log(data)
     });
 
     // 更新用户列表事件处理
@@ -51,6 +55,9 @@
     <label for="username">Username:</label>
     <input type="text" id="username" required />
     <button onclick="login()">Login</button>
+  </div>
+  <div>
+    <button onclick="ready()">Ready</button>
   </div>
   <div>
     <label for="room">Room:</label>

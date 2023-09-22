@@ -7,4 +7,4 @@ export interface ConfigType {
     pass: Array<string>
 }
 
-export const loadConfig = (): ConfigType => JSON.parse(fs.readFileSync('./config.json').toString())
+export const loadConfig = (): ConfigType => JSON.parse(fs.readFileSync('./cfg.json').toString())

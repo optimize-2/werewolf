@@ -63,6 +63,7 @@ export const setState = (player: string, state: PlayerState) => {
 }
 
 export const checkStart = () => {
+    log("check start")
     if (gameState !== 'idle') return false
     const readyPlayers: Array<string> = []
     Object.entries(playerStates).forEach(([player, state]) => {
@@ -70,6 +71,7 @@ export const checkStart = () => {
             readyPlayers.push(player)
         }
     })
+    log(readyPlayers.toString())
     if (readyPlayers.length === requiredPlayers) {
         gameState = 'werewolf'
         Object.assign(players, readyPlayers)
