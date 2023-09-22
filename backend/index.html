@@ -12,15 +12,10 @@
       socket.emit('login', username);
     }
 
-    // 加入聊天室事件处理
-    function joinRoom() {
-      const room = document.getElementById('room').value;
-      socket.emit('joinRoom', room);
-    }
-
-    // 离开聊天室事件处理
-    function leaveRoom() {
-      socket.emit('leaveRoom');
+    // 登录事件处理
+    function ready() {
+      const username = document.getElementById('username').value;
+      socket.emit('ready', username);
     }
 
     // 发送消息事件处理

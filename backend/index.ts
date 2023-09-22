@@ -4,6 +4,7 @@ import fs from 'fs'
 import { Server } from 'socket.io'
 import { log } from './utils'
 import {
+    GameState,
     PlayerState,
     Role,
     addPlayer,
@@ -50,7 +51,8 @@ io.on('connection', socket => {
     socket.on('login', (username: string) => {
         users[socket.id] = username
         log("login: " + username)
-        socket.emit('loginResult', addPlayer(username))
+        addPlayer(username)
+        socket.emit('loginResult', getGameState())
         io.to(room).emit('updateUsers', getPlayers())
     })
 
@@ -77,13 +79,38 @@ io.on('connection', socket => {
             }
         }
     })
+
+    socket.on('cancelReady', () => {
+        const username = users[socket.id]
+        if (getGameState() === 'idle') {
+            setState(username, 'unready')
+            if (checkStart()) {
+                sendStart(getPlayers(), getRoles())
+            }
+        }
+    })
 })
 
-const sendStart = (players: Record<string, PlayerState>, roles: Record<string, Role>) => {
+export interface StateType {
+    state: GameState,
+    dead?: Array<number>,
+    seerResult?: boolean,
+    waiting?: number,
+    voteResult?: Array<number>
+}
+
+const sendStart = (players: Array<string>, roles: Record<string, Role>) => {
     Object.entries(users).forEach(([id, name]) => {
         io.to(id).emit('gameStart', {
             role: roles[name],
-            users: players
+            players: players
         })
     })
 }
+
+export const updateState = (state: StateType) => io.to(room).emit('gameState', state)
+
+export const sendDiscuss = (player: string, message: string) => io.to(room).emit('receiveDiscuss', {
+    player,
+    message,
+})
