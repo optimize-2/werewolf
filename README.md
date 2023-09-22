@@ -77,7 +77,7 @@
 
 ### `werewolfResult`
 
-参数：`result: Record<number, number>`
+参数：`{ select: Record<number, number>, confirm: Record<number, boolean> }`
 
 ## client -> server:
 

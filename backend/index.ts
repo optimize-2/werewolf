@@ -20,6 +20,7 @@ import {
     getRoles,
     getSeerResult,
     getWerewolfKill,
+    getWerewolfResult,
     getWitchInventory,
     isWerewolf,
     loadGame,
@@ -261,11 +262,14 @@ export const sendGameEnd = (team: number) => {
     io.to(room).emit('gameEnd', team)
 }
 
-export const sendWerewolfResult = (selection: Record<number, number>) => {
-    const result: Array<number> = []
+export const sendWerewolfResult = () => {
+    const result: Array<string> = []
     Object.entries(getRoles()).forEach(([k, v]) => {
-        if (isWerewolf(v) || getPlayerStates()[k] !== 'spec') {
-            result.push(getId(k))
+        if (isWerewolf(v) || getPlayerStates()[k] !== 'alive') {
+            result.push(k)
         }
+    })
+    result.forEach(e => {
+        io.to(users[e]).emit('werewolfResult', getWerewolfResult())
     })
 }

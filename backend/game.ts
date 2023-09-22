@@ -1,4 +1,4 @@
-import { sendDiscuss, sendHunterWait, sendHunterKilled, updateState, updateWitchState, sendGameEnd } from "."
+import { sendDiscuss, sendHunterWait, sendHunterKilled, updateState, updateWitchState, sendGameEnd, sendWerewolfResult } from "."
 import { loadConfig, ConfigType } from "./config"
 import { log } from "./utils"
 
@@ -134,6 +134,16 @@ export const getPlayersByFilter = (filter: (role: Role) => boolean) => {
     })
     return result
 }
+
+interface WerewolfResultType {
+    select: Record<number, number>
+    confirm: Record<number, boolean>
+}
+
+export const getWerewolfResult = (): WerewolfResultType => ({
+    select: werewolfSelect,
+    confirm: werewolfConfirm
+})
 
 export const getId = (name: string) => players.indexOf(name)
 
@@ -395,6 +405,7 @@ export const game = {
         if (playerStates[player] !== 'alive') return
         if (gameState !== 'werewolf') return
         werewolfSelect[playerId] = id
+        sendWerewolfResult()
     },
 
     handleWerewolfConfirm: (player: string) => {
@@ -405,6 +416,7 @@ export const game = {
         if (playerStates[player] !== 'alive') return
         if (gameState !== 'werewolf') return
         const sel = werewolfSelect[playerId]
+        sendWerewolfResult()
         if (checkId(sel)) {
             werewolfConfirm[playerId] = true
             if (getPlayersByRole('werewolf').every(e => werewolfConfirm[e])) {
@@ -422,6 +434,7 @@ export const game = {
         if (playerStates[player] !== 'alive') return
         if (gameState !== 'werewolf') return
         werewolfConfirm[playerId] = false
+        sendWerewolfResult()
     },
 
     handleSeer: (player: string, id: number) => {
