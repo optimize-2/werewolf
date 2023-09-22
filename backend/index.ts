@@ -6,16 +6,19 @@ import {
     GameState,
     PlayerState,
     Role,
+    WitchInventory,
     addPlayer,
     checkId,
     checkStart,
     game,
+    gameState,
     getGameState,
     getId,
     getPlayerStates,
     getPlayers,
     getRoles,
     getSeerResult,
+    getWitchInventory,
     loadGame,
     setState
 } from './game'
@@ -92,21 +95,21 @@ io.on('connection', socket => {
         delete socketId[username]
         socket.leave(room)
         log('disconnect: ' + username)
-        io.to(room).emit('updateUsers', getPlayers())
+        io.to(room).emit('updateUsers', getPlayerStates())
     })
 
     socket.on('ready', () => {
         const username = users[socket.id]
         if (getGameState() === 'idle') {
             setState(username, 'ready')
-            if (checkStart()) {
-                sendStart(getPlayers(), getRoles())
-            }
             const readyResult: Record<string, boolean> = {}
             Object.entries(getPlayerStates()).forEach(([k, v]) => {
                 readyResult[k] = (v === 'ready')
             })
             io.to(room).emit('readyResult', readyResult)
+            if (checkStart()) {
+                sendStart(getPlayers(), getRoles())
+            }
         }
     })
 
@@ -127,11 +130,13 @@ io.on('connection', socket => {
 
     socket.on('werewolfSelect', id => {
         const player = users[socket.id]
+        console.log('werewolf select receive', id)
         game.handleWerewolfSelect(player, id)
     })
 
     socket.on('werewolfConfirm', () => {
         const player = users[socket.id]
+        console.log('werewolf confirm receive')
         game.handleWerewolfConfirm(player)
     })
 
@@ -167,6 +172,7 @@ io.on('connection', socket => {
 
     socket.on('sendDiscuss', message => {
         const player = users[socket.id]
+        console.log('sendDiscuss1', player, message)
         game.handleDiscuss(player, message)
     })
 
@@ -181,11 +187,13 @@ export interface StateType {
     dead?: Array<number>,
     seerResult?: boolean,
     waiting?: number,
-    voteResult?: Array<number>
+    voteResult?: Array<number>,
+    witchInventory?: WitchInventory
 }
 
 const sendStart = (players: Array<string>, roles: Record<string, Role>) => {
     Object.entries(users).forEach(([id, name]) => {
+        console.log('send', roles[name], name)
         io.to(id).emit('gameStart', {
             role: roles[name],
             players: players
@@ -212,7 +220,8 @@ export const updateWitchState = () => {
         updateState({
             state: 'witch',
             dead: [],
-            seerResult
+            seerResult,
+            witchInventory: getWitchInventory(name)
         }, id)
     })
 }
@@ -226,4 +235,8 @@ export const sendHunterKilled = (player: number, target: number) => {
 
 export const sendHunterWait = (player: number) => {
     io.to(room).emit('hunterWait', player)
+}
+
+export const sendGameEnd = (team: number) => {
+    io.to(room).emit('gameEnd', team)
 }

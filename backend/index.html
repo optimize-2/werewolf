@@ -40,23 +40,35 @@
     });
     
     socket.on('gameStart', data => {
-      console.log(data)
+      console.log("gameStart", data)
     });
     
     socket.on('readyResult', data => {
-      console.log(data)
+      console.log('readyResult', data)
+    });
+    
+    socket.on('gameState', data => {
+      console.log('gameState', data)
+    });
+    
+    socket.on('gameEnd', data => {
+      console.log('gameEnd', data)
+    });
+    
+    socket.on('receiveDiscuss', data => {
+      console.log('receiveDiscuss', data)
     });
 
     // 更新用户列表事件处理
     socket.on('updateUsers', users => {
       console.log("updateUsers", users)
-      const userList = document.getElementById('userList');
-      userList.innerHTML = '';
-      users.forEach(user => {
-        const userElement = document.createElement('li');
-        userElement.textContent = user;
-        userList.appendChild(userElement);
-      });
+      // const userList = document.getElementById('userList');
+      // userList.innerHTML = '';
+      // users.forEach(user => {
+      //   const userElement = document.createElement('li');
+      //   userElement.textContent = user;
+      //   userList.appendChild(userElement);
+      // });
     });
   </script>
 </head>

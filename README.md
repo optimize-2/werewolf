@@ -35,7 +35,7 @@
 
 ### `gameState`
 
-参数：`{ state: GameState, dead: Array<number>, seerResult: boolean, waiting: number, voteResult: Array<number> }`
+参数：`{ state: GameState, dead: Array<number>, seerResult: boolean, waiting: number, voteResult: Array<number>, witchInventory: WitchInventory }`
 
 `dead` 代表在上一轮死亡的人，不会重复发送。
 
@@ -70,6 +70,10 @@
 参数：`{ player: string, message: string }`
 
 遗言什么的都算 `discuss`，前端遗言也发 `sendDiscuss`。
+
+### `gameEnd`
+
+参数：`team: number`（游戏意外退出为 `0`，好人为 `1`，狼人为 `2`，方便后续扩展）。
 
 ## client -> server:
 
