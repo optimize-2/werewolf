@@ -534,6 +534,16 @@ export const game = {
         updateState({
             state: gameState
         })
+    },
+
+    handleLeave: (player: string) => {
+        const state = playerStates[player]
+        delete playerStates[player]
+        if (state === 'alive') {
+            game.endGame(0)
+            return true
+        }
+        return false
     }
 }
 

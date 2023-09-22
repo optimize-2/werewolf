@@ -92,6 +92,7 @@ io.on('connection', socket => {
 
     socket.on('disconnect', () => {
         const username = users[socket.id]
+        game.handleLeave(username)
         delete users[socket.id]
         delete socketId[username]
         socket.leave(room)
@@ -214,7 +215,10 @@ const sendStart = (players: Array<string>, roles: Record<string, Role>) => {
     })
 }
 
-export const updateState = (state: StateType, id = room) => io.to(id).emit('gameState', state)
+export const updateState = (state: StateType, id = room) => {
+    io.to(id).emit('gameState', state)
+    io.to(id).emit('updateUsers', getPlayerStates())
+}
 
 export const sendDiscuss = (player: string, message: string) => io.to(room).emit('receiveDiscuss', {
     player,
