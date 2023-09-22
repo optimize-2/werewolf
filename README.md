@@ -65,12 +65,6 @@
 
 参数：`player: number`
 
-### `discussStart`
-
-参数：`id: number`
-
-是 `players` 的下标。
-
 ### `receiveDiscuss`
 
 参数：`{ player: string, message: string }`
@@ -124,6 +118,10 @@
 参数：`id: number`
 
 女巫毒人。
+
+### `witchSkip`
+
+女巫结束回合。
 
 ### `voteConfirm`
 
