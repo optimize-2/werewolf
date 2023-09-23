@@ -4,19 +4,17 @@ import { Server } from 'socket.io'
 import { log } from './utils'
 import {
     GameState,
-    PlayerState,
     Role,
     WitchInventory,
     addPlayer,
     checkId,
     checkStart,
     game,
-    gameState,
+    getConfig,
     getGameState,
     getId,
     getPlayerStates,
     getPlayers,
-    getPlayersByFilter,
     getRoles,
     getSeerResult,
     getWerewolfKill,
@@ -27,6 +25,7 @@ import {
     setState
 } from './game'
 import path from 'path'
+import { ConfigType } from './config'
 
 const users: Record<string, string> = {}
 const socketId: Record<string, string> = {}
@@ -73,6 +72,11 @@ server.listen(port, () => {
 
 const io = new Server(server)
 
+interface LoginResultType {
+    state: GameState
+    config: ConfigType
+}
+
 io.on('connection', socket => {
     socket.on('login', (username: string) => {
         if (users[socket.id]) return
@@ -82,7 +86,11 @@ io.on('connection', socket => {
         socketId[username] = socket.id
         log("login: " + username)
         addPlayer(username)
-        socket.emit('loginResult', getGameState())
+        const result: LoginResultType = {
+            state: getGameState(),
+            config: getConfig()
+        }
+        socket.emit('loginResult', result)
         socket.join(room)
         io.to(room).emit('updateUsers', getPlayerStates())
     })

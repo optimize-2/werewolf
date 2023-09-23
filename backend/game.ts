@@ -51,9 +51,7 @@ export const getGameState = () => gameState
 
 export const loadGame = () => {
     config = loadConfig()
-    Object.values(config.roles).forEach(e => {
-        requiredPlayers += e
-    })
+    requiredPlayers = Object.values(config.roles).reduce((sum, e) => sum + e)
 }
 
 export const setState = (player: string, state: PlayerState) => {
@@ -590,3 +588,5 @@ export const isWerewolf = (e: Role) => e === 'werewolf'
 export const canHunt = (e: Role) => e === 'hunter'
 
 export const getWitchInventory = (player: string) => witchInventories[getId(player)]
+
+export const getConfig = () => config

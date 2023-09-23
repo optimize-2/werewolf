@@ -27,7 +27,15 @@
 
 ### `loginResult`（`server` 做完了）
 
-参数：`state: GameState`
+参数：`{ state: GameState, config: ConfigType }`
+
+```
+export interface ConfigType {
+    roles: Record<Role, number>
+    target: Target,
+    pass: Array<string>
+}
+```
 
 接下来是游戏相关
 
