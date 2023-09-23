@@ -1,39 +1,56 @@
-import { createSignal, type Component, createEffect, Show } from 'solid-js'
+import { createSignal, type Component, createEffect, Show, createContext } from 'solid-js'
 import * as api from './api'
 import Room from './components/Room';
 
-const App: Component = () => {
-    const [username, setUsername] = createSignal('');
-    // const [connecting, setConnecting] = createSignal(true)
-    const [connected, setConnected] = createSignal(false)
+export const PlayerNameContext = createContext<() => string>(() => '')
 
-    const enter = (username: string) => {
-        // setConnecting(true)
-        console.log(`connecting ${username}`)
-        setConnected(true)
+const App: Component = () => {
+    const [username, setUsername] = createSignal('')
+    const [isLoggedin, setIsLoggedin] = createSignal(false)
+
+    const [gameState, setGameState] = createSignal<api.GameState>('idle')
+
+    api.on('loginResult', (gameState) => {
+        setIsLoggedin(true)
+        setGameState(gameState)
+    })
+
+    const login = () => {
+        const name = username()
+        if (name.length > 0) {
+            api.emit('login', name)
+        }
     }
 
-    // createEffect(() => {
-    //     api.isConnected()
-    // })
+    api.on('disconnect', () => {
+        setIsLoggedin(false)
+        // api.emit('disconnect')
+    })
 
     return (
         <div>
-            <form action=''>
-                <label>用户名</label>
-                <input onInput={(e) => setUsername(e.currentTarget.value)} />
-            </form>
-
             <Show
-                when={connected()}
+                when={isLoggedin()}
                 fallback={
-                    <button
-                        type='button'
-                        onClick={() => enter(username())}>进入游戏
-                    </button>
+                    <>
+                        <div>用户名</div>
+                        <input onInput={(e) => setUsername(e.currentTarget.value)} />
+
+                        <button
+                            type='button'
+                            onClick={() => login()}>进入游戏
+                        </button>
+                    </>
                 }
             >
-                <Room />
+                <PlayerNameContext.Provider
+                    value={username}
+                >
+                    <div>用户名: {username()} </div>
+                    <Room
+                        gameStateNow={gameState()}
+                    />
+                </PlayerNameContext.Provider>
             </Show>
         </div>
     )

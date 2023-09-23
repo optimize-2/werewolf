@@ -4,7 +4,7 @@
     "description": "",
     "scripts": {
         "start": "vite",
-        "dev": "vite",
+        "dev": "vite build --minify false",
         "build": "vite build",
         "serve": "vite preview"
     },

@@ -1,0 +1,81 @@
+.chat-container {
+    position: absolute;
+    right: 1.5vw;
+    top: 2vh;
+    height: 70vh;
+    width: 27vw;
+    max-height: 70vh;
+    max-width: 27vw;
+    margin: 20px auto;
+    border: 1px solid;
+    border-radius: 8px;
+}
+
+.chat-history {
+    height: calc(91% - 16px);
+    width: calc(100% - 16px);
+    padding: 8px;
+    overflow-y: auto;
+}
+
+.chat-input {
+    height: calc(8% - 16px);
+    width: calc(100% - 16px);
+    display: flex;
+    align-items: center;
+    padding: 8px;
+}
+
+.message-input {
+    flex-grow: 1;
+    margin-right: 8px;
+    padding: 5px;
+    border: 1px solid;
+    border-radius: 5px;
+    height: 100%;
+    resize: none;
+}
+
+.message-button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* .message-container {} */
+
+.message {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* -------------------- discuss -------------------- */
+
+.discuss-container {
+    position: absolute;
+    right: 30vw;
+    top: 2vh;
+    height: 70vh;
+    width: 27vw;
+    max-height: 70vh;
+    max-width: 27vw;
+    margin: 20px auto;
+    border: 1px solid;
+    border-radius: 8px;
+}
+
+.discuss-history {
+    height: calc(91% - 16px);
+    width: calc(100% - 16px);
+    padding: 8px;
+    overflow-y: auto;
+}
+
+.discuss-input {
+    height: calc(8% - 16px);
+    width: calc(100% - 16px);
+    display: flex;
+    align-items: center;
+    padding: 8px;
+}

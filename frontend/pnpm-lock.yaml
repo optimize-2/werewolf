@@ -4,30 +4,36 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-dependencies:
-  socket.io-client:
-    specifier: ^4.7.2
-    version: 4.7.2
-  solid-js:
-    specifier: ^1.7.6
-    version: 1.7.6
+importers:
 
-devDependencies:
-  autoprefixer:
-    specifier: ^10.4.14
-    version: 10.4.14(postcss@8.4.24)
-  socket.io:
-    specifier: ^4.7.2
-    version: 4.7.2
-  solid-devtools:
-    specifier: ^0.27.3
-    version: 0.27.3(solid-js@1.7.6)(vite@4.3.9)
-  vite:
-    specifier: ^4.3.9
-    version: 4.3.9
-  vite-plugin-solid:
-    specifier: ^2.7.0
-    version: 2.7.0(solid-js@1.7.6)(vite@4.3.9)
+  .:
+    dependencies:
+      socket.io-client:
+        specifier: ^4.7.2
+        version: 4.7.2
+      solid-js:
+        specifier: ^1.7.6
+        version: 1.7.6
+    devDependencies:
+      autoprefixer:
+        specifier: ^10.4.14
+        version: 10.4.14(postcss@8.4.24)
+      socket.io:
+        specifier: ^4.7.2
+        version: 4.7.2
+      solid-devtools:
+        specifier: ^0.27.3
+        version: 0.27.3(solid-js@1.7.6)(vite@4.3.9)
+      vite:
+        specifier: ^4.3.9
+        version: 4.3.9
+      vite-plugin-solid:
+        specifier: ^2.7.0
+        version: 2.7.0(solid-js@1.7.6)(vite@4.3.9)
+
+  ..: {}
+
+  ../backend: {}
 
 packages:
 

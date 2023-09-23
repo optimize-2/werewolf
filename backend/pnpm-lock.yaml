@@ -8,14 +8,17 @@ dependencies:
   express:
     specifier: ^4.18.2
     version: 4.18.2
-  loadash:
-    specifier: ^1.0.0
-    version: 1.0.0
+  lodash:
+    specifier: ^4.17.21
+    version: 4.17.21
   socket.io:
     specifier: ^4.7.2
     version: 4.7.2
 
 devDependencies:
+  '@types/lodash':
+    specifier: ^4.14.198
+    version: 4.14.198
   '@types/node':
     specifier: ^20.6.3
     version: 20.6.3
@@ -63,6 +66,10 @@ packages:
     dependencies:
       '@types/node': 20.6.3
     dev: false
+
+  /@types/lodash@4.14.198:
+    resolution: {integrity: sha512-trNJ/vtMZYMLhfN45uLq4ShQSw0/S7xCTLLVM+WM1rmFpba/VS42jVUgaO3w/NOLiWR/09lnYk0yMaA/atdIsg==}
+    dev: true
 
   /@types/node@20.6.3:
     resolution: {integrity: sha512-HksnYH4Ljr4VQgEy2lTStbCKv/P590tmPe5HqOnv9Gprffgv5WXAY+Y5Gqniu0GGqeTCUdBnzC3QSrzPkBkAMA==}
@@ -461,9 +468,8 @@ packages:
       esprima: 4.0.1
     dev: true
 
-  /loadash@1.0.0:
-    resolution: {integrity: sha512-xlX5HBsXB3KG0FJbJJG/3kYWCfsCyCSus3T+uHVu6QL6YxAdggmm3QeyLgn54N2yi5/UE6xxL5ZWJAAiHzHYEg==}
-    deprecated: Package is unsupport. Please use the lodash package instead.
+  /lodash@4.17.21:
+    resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
     dev: false
 
   /media-typer@0.3.0:

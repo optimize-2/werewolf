@@ -1,0 +1,18 @@
+.player-container {
+    margin: 2px;
+    padding: 8px;
+    width: 10vw;
+    border: 1px solid;
+    border-radius: 4px;
+}
+
+.select-player-item {
+    margin: 2px;
+    padding: 2px;
+    border: 1px solid;
+    border-radius: 4px;
+}
+
+.select-player-item.selected {
+    border: 1px solid red;
+}
