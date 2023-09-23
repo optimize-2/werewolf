@@ -236,6 +236,10 @@ export const game = {
     },
 
     startSeer: () => {
+        if (!config.roles.seer) {
+            game.startWitch()
+            return
+        }
         console.log('start seer')
         witchSaved = false
         const seers = getPlayersByRole('seer')
@@ -254,6 +258,10 @@ export const game = {
     },
 
     startWitch: () => {
+        if (!config.roles.witch) {
+            game.startMorning()
+            return
+        }
         console.log('start witch')
         gameState = 'witch'
         updateWitchState()
