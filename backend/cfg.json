@@ -1,8 +1,9 @@
 {
     "roles": {
         "werewolf": 1,
-        "villager": 2,
-        "hunter": 1
+        "villager": 1,
+        "hunter": 1,
+        "witch": 1
     },
     "target": "villagers",
     "pass": [

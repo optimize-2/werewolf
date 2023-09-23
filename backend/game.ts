@@ -285,6 +285,11 @@ export const game = {
                 pendingHunter.push(e)
             }
         })
+        werewolfKill.forEach(e => {
+            if (canHunt(roles[players[e]])) {
+                pendingHunter.push(e)
+            }
+        })
         gameState = 'morning'
         updateState({
             state: gameState,
@@ -295,6 +300,7 @@ export const game = {
         if (pendingHunter.length) {
             sendHunterWait(pendingHunter[0])
         }
+        console.log('startMorning', pendingHunter)
         if ((day === 2 && dead.length) || pendingHunter.length) {
             // hunter.forEach(e => [
             //     hunterKilled[e] = -1
@@ -319,10 +325,15 @@ export const game = {
         const isTie = !Object.entries(voteCount).every(([k, v]) => v < maxVotes || k === maxVotePerson.toString());
 
         console.log('vote', vote, voteCount, maxVotePerson, isTie, revote)
-        if ((isTie || !Object.values(voteCount).length) && !revote) {
-            gameState = 'vote'
-            revote = true
-            game.startVote(vote)
+        const invalid = (isTie || !Object.values(voteCount).length)
+        if (invalid) {
+            if (!revote) {
+                gameState = 'vote'
+                revote = true
+                game.startVote(vote)
+            } else {
+                game.startWerewolf()
+            }
         } else {
             gameState = 'voteend'
             if (canHunt(roles[players[maxVotePerson]])) {
@@ -502,30 +513,31 @@ export const game = {
     },
 
     handleHunterKill: (player: string, id: number) => {
+        console.log('handleHunterKill', pendingHunter)
         if (gameState !== 'voteend' && gameState !== 'morning') return
         if (!canHunt(roles[player])) return
         const playerId = getId(player)
         if (pendingHunter.length && pendingHunter[0] === playerId) {
             pendingHunter.shift()
-            playerStates[player] = 'spec'
-            if (canHunt(roles[players[id]])) pendingHunter.push(id)
-            if (pendingHunter.length) {
+            if (checkId(id)) {
+                playerStates[players[id]] = 'spec'
+                if (canHunt(roles[players[id]])) pendingHunter.push(id)
                 sendHunterKilled(playerId, id)
+                if (game.checkEnd()) return
+            } else {
+                sendHunterKilled(playerId, -1)
+            }
+            if (pendingHunter.length) {
                 if (game.checkEnd()) return
                 sendHunterWait(pendingHunter[0])
             } else {
-                // if (gameState === 'voteend') {
-                //     game.startWerewolf()
-                // }
+                if (gameState === 'voteend') {
+                    game.startWerewolf()
+                } else if (gameState === 'morning') {
+                    game.startDiscuss()
+                }
             }
         }
-        // if (checkId(id)) {
-        //     const playerId = getId(player)
-        //     if (hunterKilled[playerId] === -1) {
-        //         hunterKilled[playerId] = id
-        //     }
-        // }
-
     },
 
     checkEnd: () => {
