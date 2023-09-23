@@ -6,8 +6,11 @@
     "scripts": {
         "clear": "rimraf dist",
         "build": "pnpm clear && pnpm --filter @werewolf/frontend build && node ./scripts/build.mjs",
-        "dev": "pnpm --filter @werewolf/frontend dev && node ./scripts/build.mjs dev && cd dist && node index.js"
+        "dev": "pnpm --filter @werewolf/frontend dev && node ./scripts/build.mjs dev && cd dist && node index.js",
+        "lint": "eslint frontend backend --ext ts,tsx",
+        "lint:fix": "eslint frontend backend --ext ts,tsx --fix"
     },
+    "packageManager": "pnpm@8.7.6",
     "keywords": [],
     "author": "",
     "workspaces": [
@@ -17,7 +20,11 @@
     "license": "MIT",
     "devDependencies": {
         "@types/node": "^20.6.3",
+        "@typescript-eslint/eslint-plugin": "^6.7.2",
+        "@typescript-eslint/parser": "^6.7.2",
         "esbuild": "^0.19.3",
-        "rimraf": "^5.0.1"
+        "eslint": "^8.50.0",
+        "rimraf": "^5.0.1",
+        "typescript": "^5.2.2"
     }
 }

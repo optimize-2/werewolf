@@ -4,7 +4,7 @@ import { log } from "./utils"
 
 import _ from 'lodash'
 
-export type PlayerState = 
+export type PlayerState =
         | 'unready'
         | 'ready'
         | 'alive'
@@ -22,7 +22,7 @@ export type Target =
         | 'villagers'
         | 'gods'
 
-export type GameState = 
+export type GameState =
         | 'idle'
         | 'morning'
         | 'discuss'
@@ -33,8 +33,8 @@ export type GameState =
         | 'seer'
 
 let players: Array<string> = []
-let playerStates: Record<string, PlayerState> = {}
-let roles: Record<string, Role> = {}
+const playerStates: Record<string, PlayerState> = {}
+const roles: Record<string, Role> = {}
 
 export const getPlayers = () => players
 export const getPlayerStates = () => playerStates
@@ -55,14 +55,14 @@ export const loadGame = () => {
 }
 
 export const setState = (player: string, state: PlayerState) => {
-    if (state !== 'leave') playerStates[player] = state
-    else delete playerStates[player]
+    if (state !== 'leave') {playerStates[player] = state}
+    else {delete playerStates[player]}
     return playerStates
 }
 
 export const checkStart = () => {
     log("check start")
-    if (gameState !== 'idle') return false
+    if (gameState !== 'idle') {return false}
     const readyPlayers: Array<string> = []
     Object.entries(playerStates).forEach(([player, state]) => {
         if (state === 'ready' && player) {
@@ -100,7 +100,7 @@ let witchSaveUsed: Record<number, boolean> = {}
 let witchPoisonUsed: Record<number, boolean> = {}
 let witchSkipped: Record<number, boolean> = {}
 
-let hunterKilled: Record<number, number> = {}
+const hunterKilled: Record<number, number> = {}
 
 let witchPoisionPlayers: Array<number> = []
 
@@ -194,7 +194,7 @@ export const game = {
         console.log('start discuss')
         gameState = 'discuss'
         discussWaiting = 0
-        while (discussWaiting < requiredPlayers && playerStates[players[discussWaiting]] !== 'alive') discussWaiting++
+        while (discussWaiting < requiredPlayers && playerStates[players[discussWaiting]] !== 'alive') {discussWaiting++}
         updateState({
             state: gameState,
             dead: [],
@@ -302,7 +302,7 @@ export const game = {
             dead,
             werewolfKilled: werewolfKill
         })
-        if (game.checkEnd()) return
+        if (game.checkEnd()) {return}
         if (pendingHunter.length) {
             sendHunterWait(pendingHunter[0])
         }
@@ -321,14 +321,14 @@ export const game = {
             if (num !== -1) {
                 count[num] = (count[num] || 0) + 1
             }
-            return count;
+            return count
         }, {})
-        
+
         const maxVotes = Math.max(...Object.values(voteCount))
         const maxVotePerson = _.toInteger(Object.keys(voteCount).find((key) => voteCount[_.toInteger(key)] === maxVotes))
-        
+
         // const isTie = Object.values(voteCount).some(count => count !== maxVotes);
-        const isTie = !Object.entries(voteCount).every(([k, v]) => v < maxVotes || k === maxVotePerson.toString());
+        const isTie = !Object.entries(voteCount).every(([k, v]) => v < maxVotes || k === maxVotePerson.toString())
 
         console.log('vote', vote, voteCount, maxVotePerson, isTie, revote)
         const invalid = (isTie || !Object.values(voteCount).length)
@@ -346,7 +346,7 @@ export const game = {
                 pendingHunter.push(maxVotePerson)
             } else {
                 playerStates[players[maxVotePerson]] = 'spec'
-                if (game.checkEnd()) return
+                if (game.checkEnd()) {return}
             }
             discussWaiting = maxVotePerson
             updateState({
@@ -364,7 +364,7 @@ export const game = {
                 sendDiscuss(player, message)
                 if (config.pass.includes(message)) {
                     discussWaiting++
-                    while (discussWaiting < requiredPlayers && playerStates[players[discussWaiting]] !== 'alive') discussWaiting++
+                    while (discussWaiting < requiredPlayers && playerStates[players[discussWaiting]] !== 'alive') {discussWaiting++}
                     if (discussWaiting === requiredPlayers) {
                         game.startVote()
                     } else {
@@ -400,9 +400,9 @@ export const game = {
 
     handleVote: (player: string, id: number) => {
         const playerId = getId(player)
-        if (playerId === -1 || vote[playerId]) return
-        if (gameState !== 'vote') return
-        if (playerStates[player] !== 'alive') return
+        if (playerId === -1 || vote[playerId]) {return}
+        if (gameState !== 'vote') {return}
+        if (playerStates[player] !== 'alive') {return}
         if (!checkId(id)) {
             id = -1
         }
@@ -418,11 +418,11 @@ export const game = {
 
     handleWerewolfSelect: (player: string, id: number) => {
         const playerId = getId(player)
-        if (playerId === -1) return
-        if (roles[player] !== 'werewolf') return
-        if (playerStates[player] !== 'alive') return
-        if (gameState !== 'werewolf') return
-        if (!checkId(id)) id = -1
+        if (playerId === -1) {return}
+        if (roles[player] !== 'werewolf') {return}
+        if (playerStates[player] !== 'alive') {return}
+        if (gameState !== 'werewolf') {return}
+        if (!checkId(id)) {id = -1}
         werewolfSelect[playerId] = id
         sendWerewolfResult()
     },
@@ -430,10 +430,10 @@ export const game = {
     handleWerewolfConfirm: (player: string) => {
         const playerId = getId(player)
         console.log(playerId === -1, roles[player] !== 'werewolf', playerStates[player] !== 'alive', gameState !== 'werewolf')
-        if (playerId === -1) return
-        if (roles[player] !== 'werewolf') return
-        if (playerStates[player] !== 'alive') return
-        if (gameState !== 'werewolf') return
+        if (playerId === -1) {return}
+        if (roles[player] !== 'werewolf') {return}
+        if (playerStates[player] !== 'alive') {return}
+        if (gameState !== 'werewolf') {return}
         const sel = werewolfSelect[playerId]
         if (checkId(sel) || sel === -1) {
             werewolfConfirm[playerId] = true
@@ -448,18 +448,18 @@ export const game = {
 
     handleWerewolfCancel: (player: string) => {
         const playerId = getId(player)
-        if (playerId === -1) return
-        if (roles[player] !== 'werewolf') return
-        if (playerStates[player] !== 'alive') return
-        if (gameState !== 'werewolf') return
+        if (playerId === -1) {return}
+        if (roles[player] !== 'werewolf') {return}
+        if (playerStates[player] !== 'alive') {return}
+        if (gameState !== 'werewolf') {return}
         werewolfConfirm[playerId] = false
         sendWerewolfResult()
     },
 
     handleSeer: (player: string, id: number) => {
-        if (!checkId(id)) return
+        if (!checkId(id)) {return}
         console.log('handle seer', player, id, getId(player), seerSelect, seerSelect[getId(player)])
-        if (gameState !== 'seer') return
+        if (gameState !== 'seer') {return}
         console.log('seeeeeeeer', roles[player], playerStates[player])
         if (roles[player] === 'seer' && playerStates[player] === 'alive') {
             if (seerSelect[getId(player)] === -1) {
@@ -476,7 +476,7 @@ export const game = {
     },
 
     handleWitchSave: (player: string) => {
-        if (gameState !== 'witch') return
+        if (gameState !== 'witch') {return}
         if (roles[player] === 'witch' && playerStates[player] === 'alive') {
             const playerId = getId(player)
             if (witchInventories[playerId].save > 0 && !witchSaveUsed[playerId] && (day === 1 || !werewolfKill.includes(playerId)) && !witchSkipped[playerId]) {
@@ -493,7 +493,7 @@ export const game = {
     },
 
     handleWitchPoison: (player: string, id: number) => {
-        if (gameState !== 'witch') return
+        if (gameState !== 'witch') {return}
         if (roles[player] === 'witch' && playerStates[player] === 'alive') {
             const playerId = getId(player)
             if (witchInventories[playerId].poison > 0 && !witchPoisonUsed[playerId] && !witchSkipped[playerId]) {
@@ -509,7 +509,7 @@ export const game = {
     },
 
     handleWitchSkip: (player: string) => {
-        if (gameState !== 'witch') return
+        if (gameState !== 'witch') {return}
         if (roles[player] === 'witch' && playerStates[player] === 'alive') {
             const playerId = getId(player)
             witchSkipped[playerId] = true
@@ -521,21 +521,21 @@ export const game = {
 
     handleHunterKill: (player: string, id: number) => {
         console.log('handleHunterKill', pendingHunter)
-        if (gameState !== 'voteend' && gameState !== 'morning') return
-        if (!canHunt(roles[player])) return
+        if (gameState !== 'voteend' && gameState !== 'morning') {return}
+        if (!canHunt(roles[player])) {return}
         const playerId = getId(player)
         if (pendingHunter.length && pendingHunter[0] === playerId) {
             pendingHunter.shift()
             if (checkId(id)) {
                 playerStates[players[id]] = 'spec'
-                if (canHunt(roles[players[id]])) pendingHunter.push(id)
+                if (canHunt(roles[players[id]])) {pendingHunter.push(id)}
                 sendHunterKilled(playerId, id)
-                if (game.checkEnd()) return
+                if (game.checkEnd()) {return}
             } else {
                 sendHunterKilled(playerId, -1)
             }
             if (pendingHunter.length) {
-                if (game.checkEnd()) return
+                if (game.checkEnd()) {return}
                 sendHunterWait(pendingHunter[0])
             } else {
                 if (gameState === 'voteend') {

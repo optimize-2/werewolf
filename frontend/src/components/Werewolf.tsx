@@ -52,7 +52,7 @@ const Werewolf: Component = () => {
                 请选择你要刀的人
                 <Players
                     className="select-player"
-                    filter={([name, state]) => state === 'alive'}
+                    filter={([, state]) => state === 'alive'}
                     displayState={false}
                     select={(t, isAddtion) => select(t, isAddtion)}
                     addition={{ '空刀': '空刀' }}
@@ -77,7 +77,7 @@ const Werewolf: Component = () => {
             <div class="werewolf-panel">
                 <div class="werewolf-selected">
                     <For
-                        each={Object.entries(otherSelected)}
+                        each={Object.entries(otherSelected) as [unknown, number][] as [number, number][]}
                     >
                         {
                             ([id, target]) => (

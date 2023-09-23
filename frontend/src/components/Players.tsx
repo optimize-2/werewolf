@@ -1,6 +1,6 @@
-import { Component, For, createMemo, useContext } from "solid-js";
-import { PlayerState } from "../api";
-import { PlayerStatesContext } from "./Room";
+import { Component, For, createMemo, useContext } from "solid-js"
+import { PlayerState } from "../api"
+import { PlayerStatesContext } from "./Room"
 
 import './Players.css'
 
@@ -14,7 +14,7 @@ const Players: Component<{
     const playerStates = useContext(PlayerStatesContext)
 
     const data = createMemo(() => {
-        const dat: [string, string, boolean][] =
+        const dat: [string, string | undefined, boolean][] =
             Object.entries(playerStates).filter(props.filter).map((value) => [value[0], value[1], false])
         if (props.addition) {
             for (const i in props.addition) {
@@ -24,7 +24,7 @@ const Players: Component<{
         return dat
     })
 
-    let refs: Record<string, HTMLDivElement> = {}
+    const refs: Record<string, HTMLDivElement> = {}
 
     return (
         <div class="player-container">
@@ -41,7 +41,9 @@ const Players: Component<{
                                         refs[k].classList.remove('selected')
                                     }
                                     refs[name].classList.add('selected')
-                                    props.select(name, isAddtion)
+                                    if (props.select) {
+                                        props.select(name, isAddtion)
+                                    }
                                 } : () => { }
                             }
                             title={isAddtion ? msg : undefined}

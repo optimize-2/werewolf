@@ -1,6 +1,6 @@
-import { Component, For, createMemo, createSignal, useContext } from "solid-js";
+import { Component, For, createSignal, onMount, useContext } from "solid-js"
 import './ChatBox.css'
-import { CanSendContext } from "./Room";
+import { CanSendContext } from "./Room"
 
 type Message = { username: string, message: string }
 
@@ -9,19 +9,21 @@ const ChatBox: Component<{
     recvMessage: (fn: (data: Message) => void) => void
     sendMessage: (fn: () => string) => void
 }> = (props) => {
-    let textarea: HTMLTextAreaElement
+    const textarea: HTMLTextAreaElement | undefined = undefined
 
     const [messages, setMessages] = createSignal<Message[]>([])
 
-    let history: HTMLDivElement
+    const history: HTMLDivElement | undefined = undefined
 
     const canSend = useContext(CanSendContext)
 
-    props.recvMessage((data) => {
-        console.log('receive', props.type, data)
-        setMessages([...messages(), data])
-        history.scrollTo({
-            top: history.scrollHeight,
+    onMount(() => {
+        props.recvMessage((data) => {
+            console.log('receive', props.type, data)
+            setMessages([...messages(), data])
+            history!.scrollTo({
+                top: history!.scrollHeight,
+            })
         })
     })
 
@@ -30,9 +32,9 @@ const ChatBox: Component<{
             return
         }
         props.sendMessage(() => {
-            const msg = textarea.value.trim()
+            const msg = textarea!.value.trim()
             if (msg.length > 0) {
-                textarea.value = ''
+                textarea!.value = ''
             }
             console.log('send', props.type, msg)
             return msg

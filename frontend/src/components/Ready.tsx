@@ -1,6 +1,6 @@
-import { Component, Show, createSignal, useContext } from "solid-js";
+import { Component, Show, createSignal, useContext } from "solid-js"
 import * as api from '../api'
-import { PlayerNameContext } from "../app";
+import { PlayerNameContext } from "../app"
 
 const Ready: Component<{
     playerStates: Record<string, api.PlayerState>

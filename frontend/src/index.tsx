@@ -16,5 +16,5 @@ render(
     () => (
         <App />
     ),
-    root,
+    root!,
 )

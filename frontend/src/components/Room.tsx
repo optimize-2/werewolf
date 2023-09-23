@@ -1,4 +1,4 @@
-import { createSignal, type Component, createEffect, Show, For, Switch, Match, createContext, useContext, createMemo } from 'solid-js'
+import { createSignal, type Component, Switch, Match, createContext, useContext, createMemo } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import * as api from '../api'
 import Ready from './Ready'
@@ -35,8 +35,10 @@ const Room: Component<{
         setPlayers(data.players)
     })
 
-    const [gameData, setGameData] = createSignal<api.GameData>()
-    const [seerTarget, setSeerTarget] = createSignal<number>()
+    const [gameData, setGameData] = createSignal<api.GameData>({
+        state: props.gameStateNow,
+    })
+    const [seerTarget, setSeerTarget] = createSignal(-1)
     const [seerResults, setSeerResults] = createSignal<Record<number, boolean | undefined>>([])
 
     const [round, setRound] = createSignal<number>(0)
@@ -55,27 +57,31 @@ const Room: Component<{
         setGameData(data)
     })
 
-    const canSendDiscuss = createMemo(() => (
-        gameData()
-        && (
-            (
-                gameData().state === 'discuss'
-                && players[gameData().waiting] === playerName()
-            )
-            || (
-                round() === 1
-                && gameData().state === 'morning'
-                && gameData().werewolfKilled
-                && gameData().werewolfKilled.length > 0
-                && gameData().werewolfKilled.findIndex((id) => players[id] === playerName()) !== -1
-            )
-            || (
-                gameData().state === 'voteend'
-                && gameData().dead
-                && gameData().dead.findIndex((id) => players[id] === playerName()) !== -1
+    const canSendDiscuss = createMemo(() => {
+        const data = gameData()
+        return !!(
+            data
+            && (
+                (
+                    data.state === 'discuss'
+                    && data.waiting
+                    && players[data.waiting] === playerName()
+                )
+                || (
+                    round() === 1
+                    && data.state === 'morning'
+                    && data.werewolfKilled
+                    && data.werewolfKilled.length > 0
+                    && data.werewolfKilled.findIndex((id) => players[id] === playerName()) !== -1
+                )
+                || (
+                    data.state === 'voteend'
+                    && data.dead
+                    && data.dead.findIndex((id) => players[id] === playerName()) !== -1
+                )
             )
         )
-    ))
+    })
 
     return (
         <div>

@@ -1,6 +1,5 @@
 import { Component, For, Match, Show, Switch, createEffect, createSignal, useContext } from "solid-js"
 import * as api from "../api"
-import Players from "./Players"
 import { PlayerNameContext } from "../app"
 import { CanSendContext, PlayerStatesContext as PlayerStatesContext, PlayersContext, RoundContext } from "./Room"
 import Werewolf from "./Werewolf"
@@ -9,6 +8,7 @@ import Seer from "./Seer"
 import Vote from "./Vote"
 
 const stateMessage = {
+    idle: '等待开始',
     morning: '天亮了',
     werewolf: '狼人请睁眼',
     witch: '女巫请睁眼',
@@ -51,7 +51,7 @@ const Game: Component<{
     return (
         <div class="game">
             <div class="identity">
-                你{props.role ? '的身份' : ''}是: {roleInfo[props.role]}
+                你{props.role ? '的身份' : ''}是: {roleInfo[props.role ?? 'seer']}
             </div>
             <div class="round">第{round()}轮</div>
             <div class="game-state">
@@ -69,7 +69,9 @@ const Game: Component<{
             >
                 <div class="seer-results">
                     <For
-                        each={Object.entries(props.seerResults)}
+                        each={
+                            Object.entries(props.seerResults) as [unknown, boolean | undefined][] as [number, boolean | undefined][]
+                        }
                     >
                         {
                             ([id, result]) => (
@@ -97,7 +99,7 @@ const Game: Component<{
                 >
                     <div class="death-container">
                         <Show
-                            when={props.gameData.dead.length > 0}
+                            when={props.gameData.dead && props.gameData.dead.length > 0}
                             fallback={
                                 <>昨晚是个平安夜</>
                             }
@@ -126,8 +128,8 @@ const Game: Component<{
                     when={props.gameData.state === 'witch' && props.role === 'witch' && playerState() === 'alive'}
                 >
                     <Witch
-                        witchInventory={props.gameData.witchInventory}
-                        dead={props.gameData.dead}
+                        witchInventory={props.gameData.witchInventory!}
+                        dead={props.gameData.dead!}
                     />
                 </Match>
                 <Match
@@ -146,7 +148,7 @@ const Game: Component<{
                     when={props.gameData.state === 'voteend'}
                 >
                     <div class="vote-end">
-                        投票结束，{players[props.gameData.dead[0]]}被放逐
+                        投票结束，{players[props.gameData.dead![0]]}被放逐
                     </div>
                 </Match>
             </Switch>
