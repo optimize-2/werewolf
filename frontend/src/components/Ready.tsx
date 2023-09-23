@@ -26,6 +26,8 @@ const Ready: Component<{
         for (const p in data) {
             if (data[p]) {
                 playersNow[p] = 'ready'
+            } else {
+                playersNow[p] = 'unready'
             }
         }
 
