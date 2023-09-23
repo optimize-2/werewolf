@@ -35,7 +35,7 @@
 
 ### `gameState`
 
-参数：`{ state: GameState, dead: Array<number>, seerResult: boolean, waiting: number, voteResult: Record<number, number>, witchInventory: WitchInventory }`
+参数：`{ state: GameState, dead: Array<number>, seerResult: boolean, waiting: number, voteResult: Record<number, number>, witchInventory: WitchInventory, werewolfKilled: Array<number> }`
 
 `dead` 代表在上一轮死亡的人，不会重复发送。
 
@@ -48,6 +48,8 @@
 如果上一个 `state` 是 `seer` 并且你是预言家，那么 `seerResult` 代表是不是狼人（`true` 是狼人），不然 `seerResult` 无意义。
 
 如果上一个 `state` 是 `vote` 这次还是 `vote`，说明平票了，重新投票，同时 `voteResult` 有东西。
+
+如果现在是 `morning`，那么我会发 `werewolfKilled`，如果女巫有救人那里面就没东西。
 
 在如下情况中会有意义：
 

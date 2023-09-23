@@ -62,6 +62,14 @@
     socket.on('werewolfResult', data => {
       console.log('werewolfResult', data)
     });
+    
+    socket.on('hunterWait', data => {
+      console.log('hunterWait', data)
+    });
+    
+    socket.on('hunterKilled', data => {
+      console.log('hunterKilled', data)
+    });
 
     // 更新用户列表事件处理
     socket.on('updateUsers', users => {

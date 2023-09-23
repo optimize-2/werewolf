@@ -205,7 +205,8 @@ export interface StateType {
     seerResult?: boolean,
     waiting?: number,
     voteResult?: Record<number, number>,
-    witchInventory?: WitchInventory
+    witchInventory?: WitchInventory,
+    werewolfKilled?: Array<number>
 }
 
 const sendStart = (players: Array<string>, roles: Record<string, Role>) => {

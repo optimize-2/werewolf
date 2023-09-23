@@ -280,16 +280,16 @@ export const game = {
         const hunter = getPlayersByFilter(canHunt)
         pendingHunter = []
         dead.forEach(e => {
-            if (!hunter.includes(e)) {
-                playerStates[players[e]] = 'spec'
-            } else {
+            playerStates[players[e]] = 'spec'
+            if (canHunt(roles[players[e]])) {
                 pendingHunter.push(e)
             }
         })
         gameState = 'morning'
         updateState({
             state: gameState,
-            dead
+            dead,
+            werewolfKilled: werewolfKill
         })
         if (game.checkEnd()) return
         if (pendingHunter.length) {
@@ -363,7 +363,7 @@ export const game = {
             if (day === 2 && werewolfKill.includes(getId(player)) && !witchSaved) {
                 console.log('sendDiscuss3', player, message)
                 sendDiscuss(player, message)
-                if (config.pass.includes(message)) {
+                if (config.pass.includes(message) && players[pendingHunter[0]] !== player) {
                     if (!pendingHunter.length) {
                         game.startDiscuss()
                     }

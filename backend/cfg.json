@@ -1,10 +1,10 @@
 {
     "roles": {
-        "werewolf": 2,
-        "villager": 1,
-        "seer": 1
+        "werewolf": 1,
+        "villager": 2,
+        "hunter": 1
     },
-    "target": "gods",
+    "target": "villagers",
     "pass": [
         "过",
         "pass"
