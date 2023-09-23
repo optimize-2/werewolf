@@ -35,7 +35,7 @@
 
 ### `gameState`
 
-参数：`{ state: GameState, dead: Array<number>, seerResult: boolean, waiting: number, voteResult: Array<number>, witchInventory: WitchInventory }`
+参数：`{ state: GameState, dead: Array<number>, seerResult: boolean, waiting: number, voteResult: Record<number, number>, witchInventory: WitchInventory }`
 
 `dead` 代表在上一轮死亡的人，不会重复发送。
 

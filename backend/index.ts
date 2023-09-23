@@ -204,7 +204,7 @@ export interface StateType {
     dead?: Array<number>,
     seerResult?: boolean,
     waiting?: number,
-    voteResult?: Array<number>,
+    voteResult?: Record<number, number>,
     witchInventory?: WitchInventory
 }
 
@@ -270,6 +270,6 @@ export const sendWerewolfResult = () => {
         }
     })
     result.forEach(e => {
-        io.to(users[e]).emit('werewolfResult', getWerewolfResult())
+        io.to(socketId[e]).emit('werewolfResult', getWerewolfResult())
     })
 }

@@ -2,7 +2,7 @@ import { sendDiscuss, sendHunterWait, sendHunterKilled, updateState, updateWitch
 import { loadConfig, ConfigType } from "./config"
 import { log } from "./utils"
 
-import _, { toInteger } from 'lodash'
+import _ from 'lodash'
 
 export type PlayerState = 
         | 'unready'
@@ -224,7 +224,7 @@ export const game = {
         })
     },
 
-    startVote: (revote?: Array<number>) => {
+    startVote: (revote?: Record<number, number>) => {
         console.log('start vote')
         gameState = 'vote'
         vote = {}
@@ -305,25 +305,24 @@ export const game = {
     },
 
     endVote: () => {
-        const voteResult = Array(requiredPlayers).fill(0)
         const voteCount: Record<number, number> = Object.values(vote).reduce((count: Record<number, number>, num) => {
             if (num !== -1) {
                 count[num] = (count[num] || 0) + 1
             }
             return count;
         }, {})
-
+        
         const maxVotes = Math.max(...Object.values(voteCount))
         const maxVotePerson = _.toInteger(Object.keys(voteCount).find((key) => voteCount[_.toInteger(key)] === maxVotes))
         
         // const isTie = Object.values(voteCount).some(count => count !== maxVotes);
         const isTie = !Object.entries(voteCount).every(([k, v]) => v < maxVotes || k === maxVotePerson.toString());
 
-        console.log('vote', vote, maxVotePerson, isTie, revote)
-        if (isTie && !revote) {
+        console.log('vote', vote, voteCount, maxVotePerson, isTie, revote)
+        if ((isTie || !Object.values(voteCount).length) && !revote) {
             gameState = 'vote'
             revote = true
-            game.startVote(voteResult)
+            game.startVote(vote)
         } else {
             gameState = 'voteend'
             if (canHunt(roles[players[maxVotePerson]])) {
@@ -332,10 +331,12 @@ export const game = {
                 playerStates[players[maxVotePerson]] = 'spec'
                 if (game.checkEnd()) return
             }
+            discussWaiting = maxVotePerson
             updateState({
                 state: gameState,
                 dead: [ maxVotePerson ],
-                voteResult
+                voteResult: vote,
+                waiting: maxVotePerson
             })
         }
     },
@@ -416,10 +417,10 @@ export const game = {
         if (playerStates[player] !== 'alive') return
         if (gameState !== 'werewolf') return
         const sel = werewolfSelect[playerId]
-        sendWerewolfResult()
         if (checkId(sel)) {
             werewolfConfirm[playerId] = true
-            if (getPlayersByRole('werewolf').every(e => werewolfConfirm[e])) {
+            sendWerewolfResult()
+            if (getPlayersByRole('werewolf').every(e => werewolfConfirm[e] && sel === werewolfSelect[e])) {
                 werewolfKill = [ sel ]
                 // if (game.checkEnd()) return
                 game.startSeer()

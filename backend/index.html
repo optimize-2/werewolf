@@ -58,6 +58,10 @@
     socket.on('receiveDiscuss', data => {
       console.log('receiveDiscuss', data)
     });
+    
+    socket.on('werewolfResult', data => {
+      console.log('werewolfResult', data)
+    });
 
     // 更新用户列表事件处理
     socket.on('updateUsers', users => {
@@ -73,7 +77,6 @@
   </script>
 </head>
 <body>
-  <h1>Welcome to Chat Room</h1>
   <div>
     <label for="username">Username:</label>
     <input type="text" id="username" required />
