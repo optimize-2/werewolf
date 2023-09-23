@@ -436,7 +436,7 @@ export const game = {
         if (gameState !== 'werewolf') return
         const sel = werewolfSelect[playerId]
         if (checkId(sel) || sel === -1) {
-            if (sel !== -1) werewolfConfirm[playerId] = true
+            werewolfConfirm[playerId] = true
             sendWerewolfResult()
             if (getPlayersByRole('werewolf').every(e => werewolfConfirm[e] && sel === werewolfSelect[e])) {
                 werewolfKill = sel === -1 ? [] : [ sel ]
