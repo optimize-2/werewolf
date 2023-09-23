@@ -10,7 +10,7 @@
   },
   "keywords": [],
   "author": "",
-  "packages": [
+  "workspaces": [
     "frontend",
     "backend"
   ],
