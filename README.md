@@ -183,11 +183,11 @@ export type GameState =
 
 `idle` -> `werewolf` （所有玩家都准备时）
 
-`werewolf` -> `witch`（女巫死亡也会播报此事件并且等待随机时长）
+`werewolf` -> `seer`（预言家死亡也会播报此事件并且等待随机时长）
 
-`witch` -> `seer`（预言家死亡也会播报此事件并且等待随机时长）
+`seer` -> `witch`（女巫死亡也会播报此事件并且等待随机时长）
 
-`seer` -> `morning`（`morning` 用于发送第一晚的遗言以及发动猎人技能）
+`witch` -> `morning`（`morning` 用于发送第一晚的遗言以及发动猎人技能）
 
 `morning` -> `discuss`（第一晚且遗言结束 / 猎人技能未发动 / 不是猎人，猎人击杀的会加入 `dead`）
 
