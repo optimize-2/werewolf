@@ -422,6 +422,7 @@ export const game = {
         if (roles[player] !== 'werewolf') return
         if (playerStates[player] !== 'alive') return
         if (gameState !== 'werewolf') return
+        if (!checkId(id)) id = -1
         werewolfSelect[playerId] = id
         sendWerewolfResult()
     },
@@ -434,11 +435,11 @@ export const game = {
         if (playerStates[player] !== 'alive') return
         if (gameState !== 'werewolf') return
         const sel = werewolfSelect[playerId]
-        if (checkId(sel)) {
-            werewolfConfirm[playerId] = true
+        if (checkId(sel) || sel === -1) {
+            if (sel !== -1) werewolfConfirm[playerId] = true
             sendWerewolfResult()
             if (getPlayersByRole('werewolf').every(e => werewolfConfirm[e] && sel === werewolfSelect[e])) {
-                werewolfKill = [ sel ]
+                werewolfKill = sel === -1 ? [] : [ sel ]
                 // if (game.checkEnd()) return
                 game.startSeer()
             }
