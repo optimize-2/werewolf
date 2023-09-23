@@ -1,23 +1,23 @@
 {
-  "name": "werewolf",
-  "version": "1.0.0",
-  "description": "",
-  "main": "dist/index.js",
-  "scripts": {
-    "clear": "rimraf dist",
-    "build": "pnpm clear && pnpm --filter @werewolf/frontend build && node ./scripts/build.mjs",
-    "dev": "pnpm --filter @werewolf/frontend dev && node ./scripts/build.mjs dev && cd dist && node index.js"
-  },
-  "keywords": [],
-  "author": "",
-  "workspaces": [
-    "frontend",
-    "backend"
-  ],
-  "license": "MIT",
-  "devDependencies": {
-    "@types/node": "^20.6.3",
-    "esbuild": "^0.19.3",
-    "rimraf": "^5.0.1"
-  }
+    "name": "werewolf",
+    "version": "1.0.0",
+    "description": "",
+    "main": "dist/index.js",
+    "scripts": {
+        "clear": "rimraf dist",
+        "build": "pnpm clear && pnpm --filter @werewolf/frontend build && node ./scripts/build.mjs",
+        "dev": "pnpm --filter @werewolf/frontend dev && node ./scripts/build.mjs dev && cd dist && node index.js"
+    },
+    "keywords": [],
+    "author": "",
+    "workspaces": [
+        "frontend",
+        "backend"
+    ],
+    "license": "MIT",
+    "devDependencies": {
+        "@types/node": "^20.6.3",
+        "esbuild": "^0.19.3",
+        "rimraf": "^5.0.1"
+    }
 }
