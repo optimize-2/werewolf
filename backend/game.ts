@@ -245,7 +245,7 @@ export const game = {
                 seerSelect[e] = -1
             })
         } else {
-            setTimeout(() => { game.startWitch() }, 20000)
+            setTimeout(() => { game.startWitch() }, getRandom())
         }
         gameState = 'seer'
         updateState({
@@ -266,7 +266,7 @@ export const game = {
         if (witch.length) {
 
         } else {
-            setTimeout(() => { game.startMorning() }, 20000)
+            setTimeout(() => { game.startMorning() }, getRandom())
         }
     },
 
@@ -590,3 +590,5 @@ export const canHunt = (e: Role) => e === 'hunter'
 export const getWitchInventory = (player: string) => witchInventories[getId(player)]
 
 export const getConfig = () => config
+
+const getRandom = () => 3 + Math.random() * 5
