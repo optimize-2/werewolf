@@ -591,4 +591,4 @@ export const getWitchInventory = (player: string) => witchInventories[getId(play
 
 export const getConfig = () => config
 
-const getRandom = () => 3 + Math.random() * 5
+const getRandom = () => 3000 + Math.random() * 5000
