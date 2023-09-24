@@ -91,6 +91,7 @@ io.on('connection', socket => {
         if (users[socket.id]) {return}
         if (socketId[username]) {return}
         if (!username) {return}
+        if (username.length >= 20) {return}
         users[socket.id] = username
         socketId[username] = socket.id
         log('login: ' + username)
