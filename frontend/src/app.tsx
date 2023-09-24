@@ -1,5 +1,5 @@
 import { createSignal, type Component, Show, createContext } from 'solid-js'
-import * as api from '.'
+import * as api from './api'
 import Room from './components/Room'
 
 export const PlayerNameContext = createContext<() => string>(() => '')
