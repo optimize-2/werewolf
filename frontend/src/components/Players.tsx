@@ -1,8 +1,8 @@
-import { Component, For, createMemo, useContext } from "solid-js"
-import { PlayerState } from "../api"
-import { PlayerStatesContext } from "./Room"
+import { Component, For, createMemo, useContext } from 'solid-js'
+import { PlayerState } from '../api'
+import { PlayerStatesContext } from './Room'
 import './Players.css'
-import { entries } from "@werewolf/utils"
+import { entries } from '@werewolf/utils'
 
 const Players: Component<{
     className: 'alive' | 'players' | 'select-player'

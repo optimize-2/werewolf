@@ -1,6 +1,6 @@
-import { sendDiscuss, sendHunterWait, sendHunterKilled, updateState, updateWitchState, sendGameEnd, sendWerewolfResult } from "."
-import { loadConfig, ConfigType } from "./config"
-import { log } from "./utils"
+import { sendDiscuss, sendHunterWait, sendHunterKilled, updateState, updateWitchState, sendGameEnd, sendWerewolfResult } from '.'
+import { loadConfig, ConfigType } from './config'
+import { log } from './utils'
 
 import _ from 'lodash'
 
@@ -61,7 +61,7 @@ export const setState = (player: string, state: PlayerState) => {
 }
 
 export const checkStart = () => {
-    log("check start")
+    log('check start')
     if (gameState !== 'idle') {return false}
     const readyPlayers: Array<string> = []
     Object.entries(playerStates).forEach(([player, state]) => {
@@ -173,7 +173,7 @@ export const game = {
         roleArray.forEach((e, i) => {
             roles[players[i]] = e
         })
-        log("assign roles: " + roleArray.toString() + " " + players.toString())
+        log('assign roles: ' + roleArray.toString() + ' ' + players.toString())
         console.log('roles: ', roles)
     },
 

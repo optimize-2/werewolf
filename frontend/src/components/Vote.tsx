@@ -1,7 +1,7 @@
-import { Component, createSignal, useContext } from "solid-js"
-import Players from "./Players"
-import { emit } from "../api"
-import { PlayersContext } from "./Room"
+import { Component, createSignal, useContext } from 'solid-js'
+import Players from './Players'
+import { emit } from '../api'
+import { PlayersContext } from './Room'
 
 const Vote: Component = () => {
     const [target, setTarget] = createSignal('')

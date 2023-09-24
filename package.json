@@ -8,7 +8,7 @@
         "build": "pnpm clear && pnpm --filter @werewolf/frontend build && node ./scripts/build.mjs",
         "dev": "pnpm --filter @werewolf/frontend dev && node ./scripts/build.mjs dev && cd dist && node index.js",
         "lint": "eslint frontend backend --ext ts,tsx",
-        "lint:fix": "eslint frontend backend --ext ts,tsx --fix"
+        "lint:fix": "eslint frontend backend utils --ext ts,tsx --fix"
     },
     "packageManager": "pnpm@8.7.6",
     "keywords": [],

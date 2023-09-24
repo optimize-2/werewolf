@@ -93,7 +93,7 @@ io.on('connection', socket => {
         if (!username) {return}
         users[socket.id] = username
         socketId[username] = socket.id
-        log("login: " + username)
+        log('login: ' + username)
         addPlayer(username)
         const result: LoginResultType = {
             state: getGameState(),

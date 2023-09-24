@@ -1,8 +1,8 @@
-import { Component, createSignal, useContext } from "solid-js"
-import Players from "./Players"
-import { PlayersContext } from "./Room"
-import { emit } from "../api"
-import { PlayerNameContext } from "../app"
+import { Component, createSignal, useContext } from 'solid-js'
+import Players from './Players'
+import { PlayersContext } from './Room'
+import { emit } from '../api'
+import { PlayerNameContext } from '../app'
 
 const Seer: Component<{
     setSeerTarget: (target: number) => void

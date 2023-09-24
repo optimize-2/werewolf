@@ -1,8 +1,8 @@
-import { Component, For, Show, createMemo, createSignal, useContext } from "solid-js"
-import { WitchInventory, emit } from "../api"
-import Players from "./Players"
-import { PlayersContext, RoundContext } from "./Room"
-import { PlayerNameContext } from "../app"
+import { Component, For, Show, createMemo, createSignal, useContext } from 'solid-js'
+import { WitchInventory, emit } from '../api'
+import Players from './Players'
+import { PlayersContext, RoundContext } from './Room'
+import { PlayerNameContext } from '../app'
 
 const Witch: Component<{
     witchInventory: WitchInventory

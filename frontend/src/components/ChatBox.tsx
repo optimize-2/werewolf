@@ -1,6 +1,6 @@
-import { Component, For, createSignal, onMount, useContext } from "solid-js"
+import { Component, For, createSignal, onMount, useContext } from 'solid-js'
 import './ChatBox.css'
-import { CanSendContext } from "./Room"
+import { CanSendContext } from './Room'
 
 type Message = { username: string, message: string }
 

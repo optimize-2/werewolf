@@ -1,8 +1,8 @@
-import { Component, For, Show, createSignal, useContext } from "solid-js"
-import Players from "./Players"
+import { Component, For, Show, createSignal, useContext } from 'solid-js'
+import Players from './Players'
 import * as api from '../api'
-import { createStore } from "solid-js/store"
-import { PlayersContext } from "./Room"
+import { createStore } from 'solid-js/store'
+import { PlayersContext } from './Room'
 
 const Werewolf: Component = () => {
     const [isConfirmed, setIsConfirmed] = createSignal(false)

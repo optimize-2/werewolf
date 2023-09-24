@@ -1,6 +1,6 @@
-import { Component, Show, createSignal, useContext } from "solid-js"
+import { Component, Show, createSignal, useContext } from 'solid-js'
 import * as api from '../api'
-import { PlayerNameContext } from "../app"
+import { PlayerNameContext } from '../app'
 
 const Ready: Component<{
     playerStates: Record<string, api.PlayerState>
@@ -39,7 +39,7 @@ const Ready: Component<{
             when={isReady()}
             fallback={
                 <button
-                    type='button'
+                    type="button"
                     onClick={ready}
                 >
                     准备
@@ -47,7 +47,7 @@ const Ready: Component<{
             }
         >
             <button
-                type='button'
+                type="button"
                 onClick={cancelReady}
             >
                 取消准备

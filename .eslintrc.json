@@ -19,20 +19,24 @@
     "rules": {
         // "@typescript-eslint/naming-convention": "warn",
         "@typescript-eslint/semi": [
-            "warn",
+            "error",
             "never"
         ],
         "@typescript-eslint/indent": [
-            "warn",
+            "error",
             4
+        ],
+        "quotes": [
+            "error",
+            "single"
+        ],
+        "jsx-quotes": [
+            "error",
+            "prefer-double"
         ],
         "curly": "warn",
         "eqeqeq": "warn",
         "no-throw-literal": "warn",
-        "semi": [
-            "warn",
-            "never"
-        ],
         "indent": [
             "warn",
             4,

@@ -37,7 +37,7 @@ const App: Component = () => {
                         <input onInput={(e) => setUsername(e.currentTarget.value)} />
 
                         <button
-                            type='button'
+                            type="button"
                             onClick={() => login()}>进入游戏
                         </button>
                     </>

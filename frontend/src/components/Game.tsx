@@ -1,12 +1,12 @@
-import { Component, For, Match, Show, Switch, createEffect, createSignal, useContext } from "solid-js"
-import * as api from "../api"
-import { PlayerNameContext } from "../app"
-import { CanSendContext, PlayerStatesContext as PlayerStatesContext, PlayersContext, RoundContext } from "./Room"
-import Werewolf from "./Werewolf"
-import Witch from "./Witch"
-import Seer from "./Seer"
-import Vote from "./Vote"
-import { entries } from "@werewolf/utils"
+import { Component, For, Match, Show, Switch, createEffect, createSignal, useContext } from 'solid-js'
+import * as api from '../api'
+import { PlayerNameContext } from '../app'
+import { CanSendContext, PlayerStatesContext as PlayerStatesContext, PlayersContext, RoundContext } from './Room'
+import Werewolf from './Werewolf'
+import Witch from './Witch'
+import Seer from './Seer'
+import Vote from './Vote'
+import { entries } from '@werewolf/utils'
 
 const stateMessage = {
     idle: '等待开始',
