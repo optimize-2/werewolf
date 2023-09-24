@@ -204,19 +204,20 @@ const Game: Component<{
                     <div class="vote-end">
                         投票结束，{players()[props.gameData.dead![0]]}被放逐
                     </div>
-                    <Show
-                        when={props.role === 'hunter' && waitingHunter() === playerID()}
-                    >
-                        <Hunter />
-                    </Show>
                 </Match>
             </Switch>
+
+            <Show
+                when={props.role === 'hunter' && waitingHunter() === playerID()}
+            >
+                <Hunter />
+            </Show>
 
             <Show
                 when={hunterTarget() === playerID()}
                 fallback={
                     <div>
-                        {hunterTarget() ? `猎人击杀了: ${players()[hunterTarget()!]}` : ''}
+                        {typeof hunterTarget() !== 'undefined' && hunterTarget() !== -1 ? `猎人击杀了: ${players()[hunterTarget()!]}` : ''}
                     </div>
                 }
             >

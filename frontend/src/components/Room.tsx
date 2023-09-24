@@ -14,6 +14,7 @@ export const RoundContext = createContext<() => number>(() => 0)
 export const CanSendContext = createContext<() => boolean>(() => true)
 
 const Room: Component<{
+    gameConfig: api.ConfigType
     gameStateNow: api.GameState
 }> = (props) => {
     const playerName = useContext(PlayerNameContext)
@@ -115,6 +116,14 @@ const Room: Component<{
                     filter={() => true}
                     displayState={true}
                 />
+
+                <div
+                    class="config"
+                >
+                    <div>
+                        {props.gameConfig.pass}
+                    </div>
+                </div>
 
                 <Switch>
                     <Match

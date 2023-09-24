@@ -9,11 +9,22 @@ const App: Component = () => {
     const [isLoggedin, setIsLoggedin] = createSignal(false)
 
     const [gameState, setGameState] = createSignal<api.GameState>('idle')
+    const [config, setConfig] = createSignal<api.ConfigType>({
+        pass: [],
+        roles: {
+            hunter: 0,
+            seer: 0,
+            villager: 0,
+            werewolf: 0,
+            witch: 0,
+        },
+        target: 'villagers',
+    })
 
     api.on('loginResult', (data) => {
         setIsLoggedin(true)
         setGameState(data.state)
-        // TODO config
+        setConfig(data.config)
     })
 
     const login = () => {
@@ -25,7 +36,6 @@ const App: Component = () => {
 
     api.on('disconnect', () => {
         setIsLoggedin(false)
-        // api.emit('disconnect')
     })
 
     return (
@@ -49,6 +59,7 @@ const App: Component = () => {
                 >
                     <div>用户名: {username()} </div>
                     <Room
+                        gameConfig={config()}
                         gameStateNow={gameState()}
                     />
                 </PlayerNameContext.Provider>
