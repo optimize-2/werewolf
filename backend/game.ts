@@ -21,6 +21,8 @@ export type Role =
 export type Target =
         | 'villagers'
         | 'gods'
+        | 'all'
+        | 'side'
 
 export type GameState =
         | 'idle'
@@ -543,11 +545,21 @@ export const game = {
         // players.forEach(e => {
         //     console.log(e, roles[e], isVillager(roles[e]), survive(e))
         // })
-        if (config.target === 'gods' && players.every(e => !isGod(roles[e]) || !survive(e))) {
+        const gods = players.every(e => !isGod(roles[e]) || !survive(e))
+        const villagers = players.every(e => !isVillager(roles[e]) || !survive(e))
+        if (config.target === 'gods' && gods) {
             game.endGame(2)
             return true
         }
-        if (config.target === 'villagers' && players.every(e => !isVillager(roles[e]) || !survive(e))) {
+        if (config.target === 'villagers' && villagers) {
+            game.endGame(2)
+            return true
+        }
+        if (config.target === 'side' && (gods || villagers)) {
+            game.endGame(2)
+            return true
+        }
+        if (config.target === 'all' && (gods && villagers)) {
             game.endGame(2)
             return true
         }

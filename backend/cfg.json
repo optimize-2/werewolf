@@ -5,7 +5,7 @@
         "hunter": 1,
         "witch": 1
     },
-    "target": "villagers",
+    "target": "all",
     "pass": [
         "过",
         "pass"

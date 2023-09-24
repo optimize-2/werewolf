@@ -6,7 +6,7 @@
         "witch": 1,
         "hunter": 1
     },
-    "target": "villagers",
+    "target": "side",
     "pass": [
         "过",
         "pass"
