@@ -109,6 +109,7 @@ io.on('connection', socket => {
     socket.on('sendMessage', (message: string) => {
         const username = users[socket.id]
         if (!username) {return}
+        if (message.trim().length === 0) {return}
         io.to(room).emit('receiveMessage', { username, message })
     })
 
@@ -207,6 +208,7 @@ io.on('connection', socket => {
     socket.on('sendDiscuss', message => {
         const player = users[socket.id]
         if (!player) {return}
+        if (message.trim().length === 0) {return}
         console.log('sendDiscuss1', player, message)
         game.handleDiscuss(player, message)
     })
