@@ -18,7 +18,7 @@ const App: Component = () => {
             werewolf: 0,
             witch: 0,
         },
-        target: 'villagers',
+        target: 'side',
     })
 
     api.on('loginResult', (data) => {
@@ -45,7 +45,10 @@ const App: Component = () => {
                 fallback={
                     <>
                         <div>用户名</div>
-                        <input onInput={(e) => setUsername(e.currentTarget.value)} />
+                        <input
+                            onInput={(e) => setUsername(e.currentTarget.value)}
+                            style="width: 200px"
+                        />
 
                         <button
                             type="button"

@@ -65,6 +65,12 @@ const Game: Component<{
         setHunterTarget(data.target)
     })
 
+    createEffect(() => {
+        if (hunterTarget() === playerID()) {
+            alert('人生自古谁无死？不幸的，你已被击杀！')
+        }
+    })
+
     return (
         <div class="game">
             <div class="identity">
@@ -203,6 +209,15 @@ const Game: Component<{
                 >
                     <div class="vote-end">
                         投票结束，{players()[props.gameData.dead![0]]}被放逐
+                        <div class="vote-result">
+                            <For
+                                each={props.gameData.voteResult!}
+                            >
+                                {
+                                    (name) => (<div>{name}</div>)
+                                }
+                            </For>
+                        </div>
                     </div>
                 </Match>
             </Switch>
@@ -210,7 +225,9 @@ const Game: Component<{
             <Show
                 when={props.role === 'hunter' && waitingHunter() === playerID()}
             >
-                <Hunter />
+                <Hunter
+                    hasShot={() => setWaitingHunter(undefined)}
+                />
             </Show>
 
             <Show

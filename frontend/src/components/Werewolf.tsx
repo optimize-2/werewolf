@@ -79,7 +79,7 @@ const Werewolf: Component = () => {
                                 <div>
                                     {players()[id]} {otherConfirmed[id] ? '确认' : '选择'}了
                                     <span
-                                        title={target === -1 ? '空刀' : undefined}
+                                        style={target === -1 ? 'font-weight: bold;' : undefined}
                                     >
                                         {target === -1 ? '空刀' : players()[target]}
                                     </span>

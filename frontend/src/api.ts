@@ -48,6 +48,8 @@ export type DeadPlayers = DeadPlayer[]
 export type Target =
     | 'villagers'
     | 'gods'
+    | 'all'
+    | 'side'
 
 export type ConfigType = {
     roles: Record<Role, number>
