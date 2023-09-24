@@ -100,8 +100,6 @@ let witchSaveUsed: Record<number, boolean> = {}
 let witchPoisonUsed: Record<number, boolean> = {}
 let witchSkipped: Record<number, boolean> = {}
 
-const hunterKilled: Record<number, number> = {}
-
 let witchPoisionPlayers: Array<number> = []
 
 export const getWerewolfKill = () => werewolfKill
@@ -271,9 +269,7 @@ export const game = {
         witchPoisionPlayers = []
         witchSkipped = {}
         witchSaved = false
-        if (witch.length) {
-
-        } else {
+        if (!witch.length) {
             setTimeout(() => { game.startMorning() }, getRandom())
         }
     },
@@ -283,7 +279,6 @@ export const game = {
         day++
         console.log('morning', werewolfKill, witchPoisionPlayers)
         dead = werewolfKill.concat(Array.from(new Set(witchPoisionPlayers)))
-        const hunter = getPlayersByFilter(canHunt)
         pendingHunter = []
         dead.forEach(e => {
             playerStates[players[e]] = 'spec'
@@ -403,10 +398,7 @@ export const game = {
         if (playerId === -1 || vote[playerId]) {return}
         if (gameState !== 'vote') {return}
         if (playerStates[player] !== 'alive') {return}
-        if (!checkId(id)) {
-            id = -1
-        }
-        vote[playerId] = id
+        vote[playerId] = checkId(id) ? id : -1
         console.log('vote', playerId, vote, players.filter(e => playerStates[e] === 'alive'), players.filter(e => playerStates[e] === 'alive').every(e => Object.keys(vote).includes(e)))
         if (players.filter(e => playerStates[e] === 'alive').every(e => Object.keys(vote).includes(getId(e).toString()))) {
             game.endVote()
@@ -422,8 +414,7 @@ export const game = {
         if (roles[player] !== 'werewolf') {return}
         if (playerStates[player] !== 'alive') {return}
         if (gameState !== 'werewolf') {return}
-        if (!checkId(id)) {id = -1}
-        werewolfSelect[playerId] = id
+        werewolfSelect[playerId] = checkId(id) ? id : -1
         sendWerewolfResult()
     },
 
