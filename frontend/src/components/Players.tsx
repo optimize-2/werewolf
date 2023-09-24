@@ -21,12 +21,13 @@ const Players: Component<{
 
     const data = createMemo(() => {
         const dat: [string, string | undefined, boolean][] =
-            entries(playerStates).filter(props.filter).map((value) => [value[0], value[1], false])
+            entries(playerStates()).filter(props.filter).map((value) => [value[0], value[1], false])
         if (props.addition) {
             for (const i in props.addition) {
                 dat.push([i, props.addition[i], true])
             }
         }
+        console.log('---', dat)
         return dat
     })
 
