@@ -4,6 +4,7 @@
     },
     "eslint.format.enable": true,
     "conventionalCommits.scopes": [
-        "frontend"
+        "frontend",
+        "root"
     ]
 }
