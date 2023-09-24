@@ -4,7 +4,9 @@ import { emit } from '../api'
 import { PlayersContext } from './Room'
 import { PlayerNameContext } from '../app'
 
-const Hunter: Component = () => {
+const Hunter: Component<{
+    hasShot: () => void,
+}> = (props) => {
     const players = useContext(PlayersContext)
     const playerName = useContext(PlayerNameContext)
 
@@ -12,6 +14,7 @@ const Hunter: Component = () => {
     const [isCancel, setIsCancel] = createSignal(false)
 
     const shoot = () => {
+        props.hasShot()
         emit('sendHunter', isCancel() ? -1 : players().findIndex((name) => name === target()))
     }
 

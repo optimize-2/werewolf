@@ -1,4 +1,4 @@
-import { createSignal, type Component, Switch, Match, createContext, useContext, createMemo } from 'solid-js'
+import { createSignal, type Component, Switch, Match, createContext, useContext, createMemo, createEffect, For } from 'solid-js'
 import * as api from '../api'
 import Ready from './Ready'
 import ChatBox from './ChatBox'
@@ -12,6 +12,13 @@ export const PlayersContext = createContext<() => string[]>(() => [])
 export const PlayerIDContext = createContext<() => number>(() => -1)
 export const RoundContext = createContext<() => number>(() => 0)
 export const CanSendContext = createContext<() => boolean>(() => true)
+
+const targetMsg = {
+    villagers: '屠民',
+    gods: '屠神',
+    all: '屠城',
+    side: '屠边',
+}
 
 const Room: Component<{
     gameConfig: api.ConfigType
@@ -81,6 +88,13 @@ const Room: Component<{
         setGameData(data)
     })
 
+    createEffect(() => {
+        const dead = gameData().dead
+        if (typeof dead !== 'undefined' && dead.findIndex((id) => id === playerID()) !== -1) {
+            alert('人生自古谁无死？不幸的，你已被击杀！')
+        }
+    })
+
     const canSendDiscuss = createMemo(() => {
         const data = gameData()
         return !!(
@@ -120,8 +134,26 @@ const Room: Component<{
                 <div
                     class="config"
                 >
-                    <div>
-                        {props.gameConfig.pass}
+                    <div
+                        class="pass-msg"
+                    >
+                        发言结束关键词：
+                        <For
+                            each={props.gameConfig.pass}
+                        >
+                            {
+                                (msg) => (<div>{msg}</div>)
+                            }
+                        </For>
+                    </div>
+                    <div
+                        class="target"
+                    >
+                        游戏目标：
+                        {targetMsg[props.gameConfig.target]}
+                    </div>
+                    <div class="发言顺序">
+                        {players().toString()}
                     </div>
                 </div>
 

@@ -74,7 +74,7 @@ const Players: Component<{
                             onClick={
                                 props.select ? () => select(name, msg, isAddition) : () => { }
                             }
-                            title={isAddition ? msg : undefined}
+                            style={isAddition ? 'font-weight: bold;' : undefined}
                         >
                             {name} {props.displayState ? msg : ''}
                         </div>
