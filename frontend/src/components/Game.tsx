@@ -6,6 +6,7 @@ import Werewolf from "./Werewolf"
 import Witch from "./Witch"
 import Seer from "./Seer"
 import Vote from "./Vote"
+import { entries } from "@werewolf/utils"
 
 const stateMessage = {
     idle: '等待开始',
@@ -69,9 +70,7 @@ const Game: Component<{
             >
                 <div class="seer-results">
                     <For
-                        each={
-                            Object.entries(props.seerResults) as [unknown, boolean | undefined][] as [number, boolean | undefined][]
-                        }
+                        each={entries(props.seerResults)}
                     >
                         {
                             ([id, result]) => (

@@ -1,8 +1,8 @@
 import { Component, For, createMemo, useContext } from "solid-js"
 import { PlayerState } from "../api"
 import { PlayerStatesContext } from "./Room"
-
 import './Players.css'
+import { entries } from "@werewolf/utils"
 
 const Players: Component<{
     className: 'alive' | 'players' | 'select-player'
@@ -15,7 +15,7 @@ const Players: Component<{
 
     const data = createMemo(() => {
         const dat: [string, string | undefined, boolean][] =
-            Object.entries(playerStates).filter(props.filter).map((value) => [value[0], value[1], false])
+            entries(playerStates).filter(props.filter).map((value) => [value[0], value[1], false])
         if (props.addition) {
             for (const i in props.addition) {
                 dat.push([i, props.addition[i], true])

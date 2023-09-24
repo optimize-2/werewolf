@@ -48,6 +48,9 @@ importers:
 
   frontend:
     dependencies:
+      '@werewolf/utils':
+        specifier: workspace:^
+        version: link:../utils
       socket.io-client:
         specifier: ^4.7.2
         version: 4.7.2
@@ -67,6 +70,8 @@ importers:
       vite-plugin-solid:
         specifier: ^2.7.0
         version: 2.7.0(solid-js@1.7.12)(vite@4.4.9)
+
+  utils: {}
 
 packages:
 

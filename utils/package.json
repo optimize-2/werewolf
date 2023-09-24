@@ -1,0 +1,11 @@
+{
+  "name": "@werewolf/utils",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./src/index.ts",
+  "scripts": {
+  },
+  "keywords": [],
+  "author": "Cyanogenaq",
+  "license": "MIT"
+}
