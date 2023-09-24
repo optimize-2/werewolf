@@ -282,9 +282,9 @@ export const game = {
         pendingHunter = []
         dead.forEach(e => {
             playerStates[players[e]] = 'spec'
-            if (canHunt(roles[players[e]])) {
-                pendingHunter.push(e)
-            }
+            // if (canHunt(roles[players[e]])) {
+            //     pendingHunter.push(e)
+            // }
         })
         werewolfKill.forEach(e => {
             if (canHunt(roles[players[e]])) {
