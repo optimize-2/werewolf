@@ -27,7 +27,6 @@ const Players: Component<{
                 dat.push([i, props.addition[i], true])
             }
         }
-        console.log('---', dat)
         return dat
     })
 
