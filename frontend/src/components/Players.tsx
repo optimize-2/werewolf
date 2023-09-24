@@ -27,23 +27,27 @@ const Players: Component<{
                 dat.push([i, props.addition[i], true])
             }
         }
+
         return dat
     })
 
-    const refs: Record<string, HTMLDivElement> = {}
-
     const select = (name: string, msg: string | undefined, isAddition: boolean) => {
-        for (const k in refs) {
-            refs[k].classList.remove('selected')
+        const tags = Array.from(document.querySelectorAll(`div.${props.className}-item`))
+        for (const e of tags) {
+            if (e.id === name) {
+                e.classList.add('selected')
+            } else {
+                e.classList.remove('selected')
+            }
         }
-        refs[name].classList.add('selected')
+
         if (props.select) {
             props.select.invoke(name, isAddition)
         }
     }
 
     onMount(() => {
-        if (props.select && props.select.default) {
+        if (typeof props.select?.default !== 'undefined') {
             const dft = props.select.default
             let name: string | undefined = undefined
             if (typeof dft.nameOrID === 'string') {
@@ -66,11 +70,11 @@ const Players: Component<{
                     ([name, msg, isAddition]) => (
                         <div
                             class={`${props.className}-item`}
+                            id={name}
                             onClick={
                                 props.select ? () => select(name, msg, isAddition) : () => { }
                             }
                             title={isAddition ? msg : undefined}
-                            ref={refs[name]}
                         >
                             {name} {props.displayState ? msg : ''}
                         </div>

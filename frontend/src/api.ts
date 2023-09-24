@@ -42,6 +42,8 @@ export type GameData = {
     werewolfKilled?: Array<number>
 }
 
+export type DeadPlayer = { round: number, isHunter: boolean, deadPlayers: number[] }
+export type DeadPlayers = DeadPlayer[]
 
 export type Target =
     | 'villagers'

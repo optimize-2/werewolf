@@ -33,6 +33,9 @@ const Game: Component<{
     gameData: api.GameData
     seerResults: Record<number, boolean | undefined>
     setSeerTarget: (target: number) => void
+    deadPlayers: api.DeadPlayers
+    voteConfirmed: boolean
+    setVoteConfirmed: (v: boolean) => void
     role?: api.Role
 }> = (props) => {
     const playerName = useContext(PlayerNameContext)
@@ -70,6 +73,62 @@ const Game: Component<{
             <div class="round">第{round()}轮</div>
             <div class="game-state">
                 当前: {stateMessage[props.gameData.state]}
+            </div>
+
+            <div class="death-container">
+                <For
+                    each={props.deadPlayers}
+                >
+                    {
+                        ({ round, isHunter, deadPlayers}) => (
+                            <div class="death-per-round">
+                                <Switch
+                                    fallback={
+                                        <>这可能是个 bug !</>
+                                    }
+                                >
+                                    <Match
+                                        when={isHunter && deadPlayers.length > 0}
+                                    >
+                                        第{round}轮被猎人击杀的有:
+                                        <For
+                                            each={deadPlayers}
+                                        >
+                                            {
+                                                (id) => (
+                                                    <div class="death">
+                                                        {players()[id]}
+                                                    </div>
+                                                )
+                                            }
+                                        </For>
+                                    </Match>
+                                    <Match
+                                        when={!isHunter && deadPlayers.length > 0}
+                                    >
+                                        第{round}轮死亡的有:
+                                        <For
+                                            each={deadPlayers}
+                                        >
+                                            {
+                                                (id) => (
+                                                    <div class="death">
+                                                        {players()[id]}
+                                                    </div>
+                                                )
+                                            }
+                                        </For>
+                                    </Match>
+                                    <Match
+                                        when={!isHunter && deadPlayers.length === 0}
+                                    >
+                                        第{round}晚是个平安夜
+                                    </Match>
+                                </Switch>
+                            </div>
+                        )
+                    }
+                </For>
             </div>
 
             <Show
@@ -112,31 +171,6 @@ const Game: Component<{
                     <></>
                 </Match>
                 <Match
-                    when={props.gameData.state === 'morning'}
-                >
-                    <div class="death-container">
-                        <Show
-                            when={props.gameData.dead && props.gameData.dead.length > 0}
-                            fallback={
-                                <>昨晚是个平安夜</>
-                            }
-                        >
-                            上一轮死亡的有:
-                            <For
-                                each={props.gameData.dead}
-                            >
-                                {
-                                    (id) => (
-                                        <div class="death">
-                                            {players()[id]}
-                                        </div>
-                                    )
-                                }
-                            </For>
-                        </Show>
-                    </div>
-                </Match>
-                <Match
                     when={props.gameData.state === 'werewolf' && props.role === 'werewolf' && playerState() === 'alive'}
                 >
                     <Werewolf />
@@ -159,7 +193,10 @@ const Game: Component<{
                 <Match
                     when={props.gameData.state === 'vote' && props.role && playerState() === 'alive'}
                 >
-                    <Vote />
+                    <Vote
+                        voteConfirmed={props.voteConfirmed}
+                        setVoteConfirmed={props.setVoteConfirmed}
+                    />
                 </Match>
                 <Match
                     when={props.gameData.state === 'voteend'}

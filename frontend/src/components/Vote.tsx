@@ -3,16 +3,18 @@ import Players from './Players'
 import { emit } from '../api'
 import { PlayersContext } from './Room'
 
-const Vote: Component = () => {
+const Vote: Component<{
+    voteConfirmed: boolean
+    setVoteConfirmed: (v: boolean) => void
+}> = (props) => {
     const [target, setTarget] = createSignal('')
+    const [isAddition, setIsAddtion] = createSignal(false)
 
     const players = useContext(PlayersContext)
 
-    const [isConfirmed, setIsConfirmed] = createSignal(false)
-
     const voteConfirm = () => {
-        setIsConfirmed(true)
-        emit('voteConfirm', players().findIndex((name) => name === target()))
+        props.setVoteConfirmed(true)
+        emit('voteConfirm', isAddition() ? -1 : players().findIndex((name) => name === target()))
     }
 
     return (
@@ -21,14 +23,18 @@ const Vote: Component = () => {
                 className="select-player"
                 displayState={false}
                 filter={([, state]) => state === 'alive'}
+                addition={{'弃票': '弃票'}}
                 select={{
-                    invoke: (t) => setTarget(t),
-                    default: { nameOrID: 0, isAdditon: false },
+                    invoke: (t, isAddition) => {
+                        setTarget(t)
+                        setIsAddtion(isAddition)
+                    },
+                    default: { nameOrID: '弃票', isAdditon: true },
                 }}
             />
             <button
                 onClick={voteConfirm}
-                disabled={isConfirmed()}
+                disabled={props.voteConfirmed}
             >
                 确认
             </button>

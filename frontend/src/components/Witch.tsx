@@ -11,7 +11,16 @@ const Witch: Component<{
     const players = useContext(PlayersContext)
     const [target, setTarget] = createSignal('')
 
-    const selectPoison = () => {
+    const [isSelectedPoison, setIsSelectedPoison] = createSignal(false)
+
+    const useSave = () => {
+        emit('witchSave')
+    }
+
+    const usePoison = () => {
+        if (!isSelectedPoison()) {
+            return
+        }
         const tar = players().findIndex((name) => name === target())
 
         emit('witchPoison', tar)
@@ -65,7 +74,7 @@ const Witch: Component<{
                         }
                     >
                         <button
-                            onClick={() => emit('witchSave')}
+                            onClick={useSave}
                         >
                             使用解药
                         </button>
@@ -86,15 +95,14 @@ const Witch: Component<{
                     filter={([name, state]) => state === 'alive' && deadName().findIndex((value) => value === name) === -1}
                     displayState={false}
                     select={{
-                        invoke: (t) => setTarget(t),
-                        default: {
-                            nameOrID: 0,
-                            isAdditon: false,
+                        invoke: (t) => {
+                            setTarget(t)
+                            setIsSelectedPoison(true)
                         },
                     }}
                 />
                 <button
-                    onClick={() => selectPoison()}
+                    onClick={usePoison}
                 >
                     使用毒药
                 </button>

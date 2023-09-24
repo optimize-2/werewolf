@@ -5,6 +5,7 @@ import ChatBox from './ChatBox'
 import Game from './Game'
 import Players from './Players'
 import { PlayerNameContext } from '../app'
+import { createStore } from 'solid-js/store'
 
 export const PlayerStatesContext = createContext<() => api.PlayerStatesType>(() => ({}))
 export const PlayersContext = createContext<() => string[]>(() => [])
@@ -44,8 +45,10 @@ const Room: Component<{
 
     const [round, setRound] = createSignal<number>(0)
 
+    const [deadPlayers, setDeadPlayers] = createStore<api.DeadPlayers>([])
+    const [voteConfirmed, setVoteConfirmed] = createSignal<boolean>(false)
+
     api.on('gameState', (data) => {
-        console.log('receive event gameState')
         if (data.state === 'witch' && role() === 'seer') {
             const results = {
                 ...seerResults(),
@@ -53,7 +56,26 @@ const Room: Component<{
             results[seerTarget()] = data.seerResult
             setSeerResults(results)
         } else if (data.state === 'werewolf') {
+            if (typeof data.dead !== 'undefined' && data.dead.length > 0) {
+                const newItem: api.DeadPlayer = {
+                    round: round(),
+                    isHunter: true,
+                    deadPlayers: data.dead,
+                }
+                setDeadPlayers([...deadPlayers, newItem])
+            }
+
             setRound(round() + 1)
+        } else if (data.state === 'morning') {
+            const newItem: api.DeadPlayer = {
+                round: round(),
+                isHunter: false,
+                deadPlayers: data.dead ?? [],
+            }
+            setDeadPlayers([...deadPlayers, newItem])
+        }
+        if (data.state === 'vote') {
+            setVoteConfirmed(false)
         }
         setGameData(data)
     })
@@ -65,19 +87,18 @@ const Room: Component<{
             && (
                 (
                     data.state === 'discuss'
-                    && data.waiting
                     && data.waiting === playerID()
                 )
                 || (
                     round() === 1
                     && data.state === 'morning'
-                    && data.werewolfKilled
+                    && typeof data.werewolfKilled !== 'undefined'
                     && data.werewolfKilled.length > 0
                     && data.werewolfKilled.findIndex((id) => id === playerID()) !== -1
                 )
                 || (
                     data.state === 'voteend'
-                    && data.dead
+                    && typeof data.dead !== 'undefined'
                     && data.dead.findIndex((id) => id === playerID()) !== -1
                 )
             )
@@ -124,6 +145,9 @@ const Room: Component<{
                                             seerResults={seerResults()}
                                             setSeerTarget={setSeerTarget}
                                             role={role()}
+                                            deadPlayers={deadPlayers}
+                                            voteConfirmed={voteConfirmed()}
+                                            setVoteConfirmed={setVoteConfirmed}
                                         />
                                     </CanSendContext.Provider>
                                 </RoundContext.Provider>
