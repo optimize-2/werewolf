@@ -3,6 +3,7 @@ import Players from './Players'
 import * as api from '../api'
 import { createStore } from 'solid-js/store'
 import { PlayersContext } from './Room'
+import { entries } from '@werewolf/utils'
 
 const Werewolf: Component = () => {
     const [isConfirmed, setIsConfirmed] = createSignal(false)
@@ -10,18 +11,10 @@ const Werewolf: Component = () => {
     const players = useContext(PlayersContext)
 
     const select = (target: string, isEmptyKnife: boolean) => {
-        let tar = -1
-
-        if (isEmptyKnife) {
-            tar = -1
-        } else {
-            tar = players.findIndex((name) => name === target)
-        }
-
-        console.log(players, target, tar)
-
         if (!isConfirmed()) {
-            api.emit('werewolfSelect', tar)
+            // console.log(players(), target, tar)
+
+            api.emit('werewolfSelect', isEmptyKnife ? -1 : players().findIndex((name) => name === target))
         }
     }
 
@@ -41,7 +34,6 @@ const Werewolf: Component = () => {
     const [otherConfirmed, setOtherConfirmed] = createStore<Record<number, boolean>>()
 
     api.on('werewolfResult', (data) => {
-        console.log('werewolfResult receive', data)
         setOtherSelected(data.select)
         setOtherConfirmed(data.confirm)
     })
@@ -54,8 +46,11 @@ const Werewolf: Component = () => {
                     className="select-player"
                     filter={([, state]) => state === 'alive'}
                     displayState={false}
-                    select={(t, isAddtion) => select(t, isAddtion)}
                     addition={{ '空刀': '空刀' }}
+                    select={{
+                        invoke: (t, isAddtion) => select(t, isAddtion),
+                        default: {nameOrID: '空刀', isAdditon: true,},
+                    }}
                 />
                 <Show
                     when={!isConfirmed()}
@@ -77,16 +72,16 @@ const Werewolf: Component = () => {
             <div class="werewolf-panel">
                 <div class="werewolf-selected">
                     <For
-                        each={Object.entries(otherSelected) as [unknown, number][] as [number, number][]}
+                        each={entries(otherSelected)}
                     >
                         {
                             ([id, target]) => (
                                 <div>
-                                    {players[id]} {otherConfirmed[id] ? '确认' : '选择'}了
+                                    {players()[id]} {otherConfirmed[id] ? '确认' : '选择'}了
                                     <span
                                         title={target === -1 ? '空刀' : undefined}
                                     >
-                                        {target === -1 ? '空刀' : players[target]}
+                                        {target === -1 ? '空刀' : players()[target]}
                                     </span>
                                 </div>
                             )

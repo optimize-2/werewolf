@@ -1,13 +1,15 @@
 import { Component, Show, createSignal, useContext } from 'solid-js'
 import * as api from '../api'
 import { PlayerNameContext } from '../app'
+import { PlayerStatesContext } from './Room'
 
 const Ready: Component<{
-    playerStates: Record<string, api.PlayerState>
     setPlayerStates: (players: Record<string, api.PlayerState>) => void
 }> = (props) => {
     const playerName = useContext(PlayerNameContext)
     const [isReady, setIsReady] = createSignal(false)
+
+    const playerStates = useContext(PlayerStatesContext)
 
     const ready = () => {
         api.emit('ready')
@@ -21,7 +23,7 @@ const Ready: Component<{
     api.on('readyResult', (data) => {
         setIsReady(data[playerName()])
 
-        const playersNow = { ...props.playerStates }
+        const playersNow = { ...playerStates() }
 
         for (const p in data) {
             if (data[p]) {

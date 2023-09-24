@@ -13,7 +13,7 @@ const Seer: Component<{
     const playerName = useContext(PlayerNameContext)
 
     const select = () => {
-        const t = players.findIndex((name) => name === target())
+        const t = players().findIndex((name) => name === target())
         props.setSeerTarget(t)
         emit('seerConfirm', t)
     }
@@ -23,8 +23,13 @@ const Seer: Component<{
             <Players
                 className="select-player"
                 filter={([name, state]) => state === 'alive' && name !== playerName()}
-                displayState={false}
-                select={(t) => setTarget(t)}
+                select={{
+                    invoke: (t) => setTarget(t),
+                    default: {
+                        nameOrID: 0,
+                        isAdditon: false,
+                    },
+                }}
             />
 
             <button onClick={() => select()}>确认</button>

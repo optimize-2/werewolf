@@ -1,4 +1,4 @@
-import { Component, For, createSignal, onMount, useContext } from 'solid-js'
+import { Component, For, createSignal, useContext } from 'solid-js'
 import './ChatBox.css'
 import { CanSendContext } from './Room'
 
@@ -9,21 +9,19 @@ const ChatBox: Component<{
     recvMessage: (fn: (data: Message) => void) => void
     sendMessage: (fn: () => string) => void
 }> = (props) => {
-    const textarea: HTMLTextAreaElement | undefined = undefined
+    let textarea: HTMLTextAreaElement | undefined
 
     const [messages, setMessages] = createSignal<Message[]>([])
 
-    const history: HTMLDivElement | undefined = undefined
+    let history: HTMLDivElement | undefined
 
     const canSend = useContext(CanSendContext)
 
-    onMount(() => {
-        props.recvMessage((data) => {
-            console.log('receive', props.type, data)
-            setMessages([...messages(), data])
-            history!.scrollTo({
-                top: history!.scrollHeight,
-            })
+    props.recvMessage((data) => {
+        console.log('receive', props.type, data)
+        setMessages([...messages(), data])
+        history!.scrollTo({
+            top: history!.scrollHeight,
         })
     })
 

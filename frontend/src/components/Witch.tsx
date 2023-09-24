@@ -12,12 +12,12 @@ const Witch: Component<{
     const [target, setTarget] = createSignal('')
 
     const selectPoison = () => {
-        const tar = players.findIndex((name) => name === target())
+        const tar = players().findIndex((name) => name === target())
 
         emit('witchPoison', tar)
     }
 
-    const deadName = createMemo(() => props.dead.map((value) => players[value]))
+    const deadName = createMemo(() => props.dead.map((value) => players()[value]))
 
     const round = useContext(RoundContext)
     const playerName = useContext(PlayerNameContext)
@@ -85,7 +85,13 @@ const Witch: Component<{
                     className="select-player"
                     filter={([name, state]) => state === 'alive' && deadName().findIndex((value) => value === name) === -1}
                     displayState={false}
-                    select={(t) => setTarget(t)}
+                    select={{
+                        invoke: (t) => setTarget(t),
+                        default: {
+                            nameOrID: 0,
+                            isAdditon: false,
+                        },
+                    }}
                 />
                 <button
                     onClick={() => selectPoison()}

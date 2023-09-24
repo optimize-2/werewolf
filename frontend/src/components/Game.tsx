@@ -1,12 +1,13 @@
 import { Component, For, Match, Show, Switch, createEffect, createSignal, useContext } from 'solid-js'
 import * as api from '../api'
 import { PlayerNameContext } from '../app'
-import { CanSendContext, PlayerStatesContext as PlayerStatesContext, PlayersContext, RoundContext } from './Room'
+import { CanSendContext, PlayerIDContext, PlayerStatesContext as PlayerStatesContext, PlayersContext, RoundContext } from './Room'
 import Werewolf from './Werewolf'
 import Witch from './Witch'
 import Seer from './Seer'
 import Vote from './Vote'
 import { entries } from '@werewolf/utils'
+import Hunter from './Hunter'
 
 const stateMessage = {
     idle: '等待开始',
@@ -35,19 +36,31 @@ const Game: Component<{
     role?: api.Role
 }> = (props) => {
     const playerName = useContext(PlayerNameContext)
-
     const playerStates = useContext(PlayerStatesContext)
     const players = useContext(PlayersContext)
+    const playerID = useContext(PlayerIDContext)
 
-    const [playerState, setPlayerState] = createSignal(playerStates[playerName()])
+    const [playerState, setPlayerState] = createSignal(playerStates()[playerName()])
 
     createEffect(() => {
-        setPlayerState(playerStates[playerName()])
+        setPlayerState(playerStates()[playerName()])
     })
 
     const round = useContext(RoundContext)
 
     const canSendDiscuss = useContext(CanSendContext)
+
+    const [waitingHunter, setWaitingHunter] = createSignal<number | undefined>()
+
+    api.on('hunterWait', (data) => {
+        setWaitingHunter(data)
+    })
+
+    const [hunterTarget, setHunterTarget] = createSignal<number | undefined>()
+
+    api.on('hunterKilled', (data) => {
+        setHunterTarget(data.target)
+    })
 
     return (
         <div class="game">
@@ -75,7 +88,7 @@ const Game: Component<{
                         {
                             ([id, result]) => (
                                 <div>
-                                    {players[id]} : {result ? '查杀' : '金水'}
+                                    {players()[id]}: {result ? '查杀' : '金水'}
                                 </div>
                             )
                         }
@@ -94,6 +107,11 @@ const Game: Component<{
                 }
             >
                 <Match
+                    when={canSendDiscuss()}
+                >
+                    <></>
+                </Match>
+                <Match
                     when={props.gameData.state === 'morning'}
                 >
                     <div class="death-container">
@@ -110,7 +128,7 @@ const Game: Component<{
                                 {
                                     (id) => (
                                         <div class="death">
-                                            {players[id]}
+                                            {players()[id]}
                                         </div>
                                     )
                                 }
@@ -147,10 +165,28 @@ const Game: Component<{
                     when={props.gameData.state === 'voteend'}
                 >
                     <div class="vote-end">
-                        投票结束，{players[props.gameData.dead![0]]}被放逐
+                        投票结束，{players()[props.gameData.dead![0]]}被放逐
                     </div>
+                    <Show
+                        when={props.role === 'hunter' && waitingHunter() === playerID()}
+                    >
+                        <Hunter />
+                    </Show>
                 </Match>
             </Switch>
+
+            <Show
+                when={hunterTarget() === playerID()}
+                fallback={
+                    <div>
+                        {hunterTarget() ? `猎人击杀了: ${players()[hunterTarget()!]}` : ''}
+                    </div>
+                }
+            >
+                <div>
+                    你被猎人击杀
+                </div>
+            </Show>
         </div>
     )
 }

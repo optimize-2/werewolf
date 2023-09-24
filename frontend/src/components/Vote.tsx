@@ -12,7 +12,7 @@ const Vote: Component = () => {
 
     const voteConfirm = () => {
         setIsConfirmed(true)
-        emit('voteConfirm', players.findIndex((name) => name === target()))
+        emit('voteConfirm', players().findIndex((name) => name === target()))
     }
 
     return (
@@ -21,7 +21,10 @@ const Vote: Component = () => {
                 className="select-player"
                 displayState={false}
                 filter={([, state]) => state === 'alive'}
-                select={(t) => setTarget(t)}
+                select={{
+                    invoke: (t) => setTarget(t),
+                    default: { nameOrID: 0, isAdditon: false },
+                }}
             />
             <button
                 onClick={voteConfirm}

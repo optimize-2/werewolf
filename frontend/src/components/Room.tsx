@@ -1,5 +1,4 @@
 import { createSignal, type Component, Switch, Match, createContext, useContext, createMemo } from 'solid-js'
-import { createStore } from 'solid-js/store'
 import * as api from '../api'
 import Ready from './Ready'
 import ChatBox from './ChatBox'
@@ -7,8 +6,9 @@ import Game from './Game'
 import Players from './Players'
 import { PlayerNameContext } from '../app'
 
-export const PlayerStatesContext = createContext<api.PlayerStatesType>({})
-export const PlayersContext = createContext<string[]>([])
+export const PlayerStatesContext = createContext<() => api.PlayerStatesType>(() => ({}))
+export const PlayersContext = createContext<() => string[]>(() => [])
+export const PlayerIDContext = createContext<() => number>(() => -1)
 export const RoundContext = createContext<() => number>(() => 0)
 export const CanSendContext = createContext<() => boolean>(() => true)
 
@@ -16,11 +16,12 @@ const Room: Component<{
     gameStateNow: api.GameState
 }> = (props) => {
     const playerName = useContext(PlayerNameContext)
-    const [playerStates, setPlayerStates] = createStore<api.PlayerStatesType>({})
-    const [players, setPlayers] = createStore<string[]>([])
+    const [playerStates, setPlayerStates] = createSignal<api.PlayerStatesType>({})
+    const [players, setPlayers] = createSignal<string[]>([])
+
+    const playerID = createMemo(() => players().findIndex((name) => name === playerName()))
 
     api.on('updateUsers', (data) => {
-        console.log('updateUsers', data)
         setPlayerStates(data)
     })
 
@@ -65,19 +66,19 @@ const Room: Component<{
                 (
                     data.state === 'discuss'
                     && data.waiting
-                    && players[data.waiting] === playerName()
+                    && data.waiting === playerID()
                 )
                 || (
                     round() === 1
                     && data.state === 'morning'
                     && data.werewolfKilled
                     && data.werewolfKilled.length > 0
-                    && data.werewolfKilled.findIndex((id) => players[id] === playerName()) !== -1
+                    && data.werewolfKilled.findIndex((id) => id === playerID()) !== -1
                 )
                 || (
                     data.state === 'voteend'
                     && data.dead
-                    && data.dead.findIndex((id) => players[id] === playerName()) !== -1
+                    && data.dead.findIndex((id) => id === playerID()) !== -1
                 )
             )
         )
@@ -96,10 +97,9 @@ const Room: Component<{
 
                 <Switch>
                     <Match
-                        when={!isGameStart() && playerStates[playerName()] !== 'spec'}
+                        when={!isGameStart() && playerStates()[playerName()] !== 'spec'}
                     >
                         <Ready
-                            playerStates={playerStates}
                             setPlayerStates={(players) => setPlayerStates(players)}
                         />
                     </Match>
@@ -110,20 +110,24 @@ const Room: Component<{
                         <PlayersContext.Provider
                             value={players}
                         >
-                            <RoundContext.Provider
-                                value={round}
+                            <PlayerIDContext.Provider
+                                value={playerID}
                             >
-                                <CanSendContext.Provider
-                                    value={canSendDiscuss}
+                                <RoundContext.Provider
+                                    value={round}
                                 >
-                                    <Game
-                                        gameData={gameData()}
-                                        seerResults={seerResults()}
-                                        setSeerTarget={setSeerTarget}
-                                        role={role()}
-                                    />
-                                </CanSendContext.Provider>
-                            </RoundContext.Provider>
+                                    <CanSendContext.Provider
+                                        value={canSendDiscuss}
+                                    >
+                                        <Game
+                                            gameData={gameData()}
+                                            seerResults={seerResults()}
+                                            setSeerTarget={setSeerTarget}
+                                            role={role()}
+                                        />
+                                    </CanSendContext.Provider>
+                                </RoundContext.Provider>
+                            </PlayerIDContext.Provider>
                         </PlayersContext.Provider>
                     </Match>
                 </Switch>

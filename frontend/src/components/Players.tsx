@@ -1,4 +1,4 @@
-import { Component, For, createMemo, useContext } from 'solid-js'
+import { Component, For, createMemo, onMount, useContext } from 'solid-js'
 import { PlayerState } from '../api'
 import { PlayerStatesContext } from './Room'
 import './Players.css'
@@ -7,8 +7,14 @@ import { entries } from '@werewolf/utils'
 const Players: Component<{
     className: 'alive' | 'players' | 'select-player'
     filter: (player: [string, PlayerState]) => boolean
-    displayState: boolean
-    select?: (target: string, isAddtion: boolean) => void
+    displayState?: boolean
+    select?: {
+        invoke: (target: string, isAddtion: boolean) => void
+        default?: {
+            nameOrID: string | number
+            isAdditon: boolean
+        }
+    }
     addition?: Record<string, string | undefined>
 }> = (props) => {
     const playerStates = useContext(PlayerStatesContext)
@@ -26,27 +32,44 @@ const Players: Component<{
 
     const refs: Record<string, HTMLDivElement> = {}
 
+    const select = (name: string, msg: string | undefined, isAddition: boolean) => {
+        for (const k in refs) {
+            refs[k].classList.remove('selected')
+        }
+        refs[name].classList.add('selected')
+        if (props.select) {
+            props.select.invoke(name, isAddition)
+        }
+    }
+
+    onMount(() => {
+        if (props.select && props.select.default) {
+            const dft = props.select.default
+            let name: string | undefined = undefined
+            if (typeof dft.nameOrID === 'string') {
+                name = dft.nameOrID
+            } else if (data().length > 0) {
+                name = data()[dft.nameOrID][0]
+            }
+            if (name) {
+                select(name, undefined, dft.isAdditon)
+            }
+        }
+    })
+
     return (
         <div class="player-container">
             <For
                 each={data()}
             >
                 {
-                    ([name, msg, isAddtion]) => (
+                    ([name, msg, isAddition]) => (
                         <div
                             class={`${props.className}-item`}
                             onClick={
-                                props.select ? () => {
-                                    for (const k in refs) {
-                                        refs[k].classList.remove('selected')
-                                    }
-                                    refs[name].classList.add('selected')
-                                    if (props.select) {
-                                        props.select(name, isAddtion)
-                                    }
-                                } : () => { }
+                                props.select ? () => select(name, msg, isAddition) : () => { }
                             }
-                            title={isAddtion ? msg : undefined}
+                            title={isAddition ? msg : undefined}
                             ref={refs[name]}
                         >
                             {name} {props.displayState ? msg : ''}

@@ -42,8 +42,19 @@ export type GameData = {
     werewolfKilled?: Array<number>
 }
 
+
+export type Target =
+    | 'villagers'
+    | 'gods'
+
+export type ConfigType = {
+    roles: Record<Role, number>
+    target: Target
+    pass: Array<string>
+}
+
 export function on(event: 'login', fn: (data: string) => void): void
-export function on(event: 'loginResult', fn: (data: GameState) => void): void
+export function on(event: 'loginResult', fn: (data: { state: GameState, config: ConfigType }) => void): void
 export function on(event: 'updateUsers', fn: (data: PlayerStatesType) => void): void
 export function on(event: 'readyResult', fn: (data: Record<string, boolean>) => void): void
 export function on(event: 'gameStart', fn: (data: { role: Role, players: Array<string> }) => void): void
@@ -63,8 +74,14 @@ export function on(
 
 export function on(event: 'receiveDiscuss', fn: (data: { player: string, message: string }) => void): void
 
+export function on(event: 'hunterWait', fn: (data: number) => void): void
+export function on(event: 'hunterKilled', fn: (data: { player: number, target: number }) => void): void
+
 export function on<T>(event: string, fn: (data: T) => void) {
-    io.on(event, fn)
+    io.on(event, (data) => {
+        console.log(`on(${event}):`, data)
+        fn(data)
+    })
 }
 
 export function emit(event: 'login', data: string): void
@@ -89,6 +106,9 @@ export function emit(event: 'seerConfirm', data: number): void
 
 export function emit(event: 'voteConfirm', data: number): void
 
+export function emit(event: 'sendHunter', data: number): void
+
 export function emit<T>(event: string, data?: T) {
+    console.log(`emit(${event}):`, data)
     io.emit(event, data)
 }

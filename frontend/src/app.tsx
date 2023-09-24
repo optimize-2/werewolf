@@ -1,5 +1,5 @@
 import { createSignal, type Component, Show, createContext } from 'solid-js'
-import * as api from './api'
+import * as api from '.'
 import Room from './components/Room'
 
 export const PlayerNameContext = createContext<() => string>(() => '')
@@ -10,9 +10,10 @@ const App: Component = () => {
 
     const [gameState, setGameState] = createSignal<api.GameState>('idle')
 
-    api.on('loginResult', (gameState) => {
+    api.on('loginResult', (data) => {
         setIsLoggedin(true)
-        setGameState(gameState)
+        setGameState(data.state)
+        // TODO config
     })
 
     const login = () => {
