@@ -15,7 +15,8 @@
     "author": "",
     "workspaces": [
         "frontend",
-        "backend"
+        "backend",
+        "utils"
     ],
     "license": "MIT",
     "devDependencies": {
