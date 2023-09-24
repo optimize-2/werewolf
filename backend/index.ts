@@ -92,7 +92,7 @@ io.on('connection', socket => {
         if (socketId[username]) {return}
         if (!username) {return}
         if (username.length >= 20) {return}
-        if (['空刀', '弃票', '不开枪', '跳过'].includes(username.trim()))
+        if (['空刀', '弃票', '不开枪', '跳过'].includes(username.trim())) {return}
         users[socket.id] = username
         socketId[username] = socket.id
         log('login: ' + username)
