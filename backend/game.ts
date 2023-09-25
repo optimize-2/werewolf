@@ -69,6 +69,8 @@ export const checkStart = () => {
     Object.entries(playerStates).forEach(([player, state]) => {
         if (state === 'ready' && player) {
             readyPlayers.push(player)
+        } else {
+            state = 'spec'
         }
     })
     log(readyPlayers.toString())
