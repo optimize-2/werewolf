@@ -310,7 +310,7 @@ export const game = {
             sendHunterWait(pendingHunter[0])
         }
         console.log('startMorning', pendingHunter)
-        if ((day === 2 && dead.length) || pendingHunter.length) {
+        if ((day === 2 && werewolfKill.length) || pendingHunter.length) {
             // hunter.forEach(e => [
             //     hunterKilled[e] = -1
             // ])
