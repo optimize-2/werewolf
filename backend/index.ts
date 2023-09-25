@@ -20,6 +20,7 @@ import {
     getWerewolfKill,
     getWerewolfResult,
     getWitchInventory,
+    hasSave,
     isWerewolf,
     loadGame,
     setState
@@ -262,7 +263,7 @@ export const updateWitchState = () => {
         }
         updateState({
             state: 'witch',
-            dead: role === 'witch' ? getWerewolfKill() : [],
+            dead: hasSave(name) ? getWerewolfKill() : [],
             seerResult,
             witchInventory: getWitchInventory(name)
         }, id)

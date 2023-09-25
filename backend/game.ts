@@ -631,3 +631,9 @@ export const getWitchInventory = (player: string) => witchInventories[getId(play
 export const getConfig = () => config
 
 const getRandom = () => 3000 + Math.random() * 5000
+
+export const hasSave = (player: string) => {
+    const id = getId(player)
+    if (id === -1) return false
+    return roles[player] === 'witch' && witchInventories[id].save > 0
+}
