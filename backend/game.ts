@@ -160,6 +160,7 @@ let revote = false
 let dead: Array<number> = []
 
 let pendingHunter: Array<number> = []
+let hunterKilled: Array<number> = []
 
 export const game = {
     assignRoles: () => {
@@ -190,20 +191,20 @@ export const game = {
         })
     },
 
-    startDiscuss: () => {
+    startDiscuss: (dead?: Array<number>) => {
         console.log('start discuss')
         gameState = 'discuss'
         discussWaiting = 0
         while (discussWaiting < requiredPlayers && playerStates[players[discussWaiting]] !== 'alive') {discussWaiting++}
         updateState({
             state: gameState,
-            dead: [],
+            dead,
             seerResult: false,
             waiting: discussWaiting,
         })
     },
 
-    startWerewolf: () => {
+    startWerewolf: (dead?: Array<number>) => {
         console.log('start werewolf')
         revote = false
         gameState = 'werewolf'
@@ -216,7 +217,7 @@ export const game = {
         })
         updateState({
             state: gameState,
-            dead: [],
+            dead,
             seerResult: false,
             waiting: -1,
         })
@@ -519,6 +520,7 @@ export const game = {
         const playerId = getId(player)
         if (pendingHunter.length && pendingHunter[0] === playerId) {
             pendingHunter.shift()
+            hunterKilled.push(id)
             if (checkId(id)) {
                 playerStates[players[id]] = 'spec'
                 if (canHunt(roles[players[id]])) {pendingHunter.push(id)}
@@ -532,10 +534,11 @@ export const game = {
                 sendHunterWait(pendingHunter[0])
             } else {
                 if (gameState === 'voteend') {
-                    game.startWerewolf()
+                    game.startWerewolf(hunterKilled)
                 } else if (gameState === 'morning') {
-                    game.startDiscuss()
+                    game.startDiscuss(hunterKilled)
                 }
+                hunterKilled = []
             }
         }
     },
