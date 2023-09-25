@@ -167,6 +167,8 @@ let dead: Array<number> = []
 let pendingHunter: Array<number> = []
 let hunterKilled: Array<number> = []
 
+let morningDiscuss: Array<number> = [] 
+
 export const game = {
     assignRoles: () => {
         let roleArray: Array<Role> = []
@@ -310,7 +312,8 @@ export const game = {
             sendHunterWait(pendingHunter[0])
         }
         console.log('startMorning', pendingHunter)
-        if ((day === 2 && werewolfKill.length) || pendingHunter.length) {
+        if ((day === 2 && dead.length)) {
+            discussWaiting = 0
             // hunter.forEach(e => [
             //     hunterKilled[e] = -1
             // ])
@@ -379,16 +382,31 @@ export const game = {
                 }
             }
         } else if (gameState === 'morning') {
-            console.log('sendDiscuss2', day, werewolfConfirm, getId(player), witchSaved)
-            if (day === 2 && werewolfKill.includes(getId(player)) && !witchSaved) {
-                console.log('sendDiscuss3', player, message)
+            if (player === players[discussWaiting]) {
                 sendDiscuss(player, message)
-                if (config.pass.includes(message) && players[pendingHunter[0]] !== player) {
-                    if (!pendingHunter.length) {
+                if (config.pass.includes(message)) {
+                    discussWaiting++
+                    while (discussWaiting < requiredPlayers && !dead.includes(discussWaiting)) {discussWaiting++}
+                    if (discussWaiting === requiredPlayers && !pendingHunter.length) {
                         game.startDiscuss()
+                    } else {
+                        updateState({
+                            state: 'morning',
+                            waiting: discussWaiting
+                        })
                     }
                 }
             }
+            // console.log('sendDiscuss2', day, werewolfConfirm, getId(player), witchSaved)
+            // if (day === 2 && werewolfKill.includes(getId(player)) && !witchSaved) {
+            //     console.log('sendDiscuss3', player, message)
+            //     sendDiscuss(player, message)
+            //     if (config.pass.includes(message) && players[pendingHunter[0]] !== player) {
+            //         if (!pendingHunter.length) {
+            //             game.startDiscuss()
+            //         }
+            //     }
+            // }
             // if (!pendingHunter.length) {
             // }
         } else if (gameState === 'voteend') {
@@ -539,9 +557,9 @@ export const game = {
                 if (game.checkEnd()) {return}
                 sendHunterWait(pendingHunter[0])
             } else {
-                if (gameState === 'voteend') {
+                if (gameState === 'voteend' && discussWaiting === requiredPlayers) {
                     game.startWerewolf(hunterKilled)
-                } else if (gameState === 'morning') {
+                } else if (gameState === 'morning' && discussWaiting === requiredPlayers) {
                     game.startDiscuss(hunterKilled)
                 }
                 hunterKilled = []
