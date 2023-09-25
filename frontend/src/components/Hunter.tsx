@@ -1,7 +1,7 @@
 import { Component, createSignal, useContext } from 'solid-js'
 import Players from './Players'
 import { emit } from '../api'
-import { PlayersContext } from './Room'
+import { IsConfirmedContext, PlayersContext } from './Room'
 import { PlayerNameContext } from '../app'
 
 const Hunter: Component<{
@@ -9,12 +9,17 @@ const Hunter: Component<{
 }> = (props) => {
     const players = useContext(PlayersContext)
     const playerName = useContext(PlayerNameContext)
+    const [isConfirmed, setIsConfirmed] = useContext(IsConfirmedContext)!
 
     const [target, setTarget] = createSignal('')
     const [isCancel, setIsCancel] = createSignal(false)
 
     const shoot = () => {
+        if (isConfirmed.hunter) {
+            return
+        }
         props.hasShot()
+        setIsConfirmed('hunter', true)
         emit('sendHunter', isCancel() ? -1 : players().findIndex((name) => name === target()))
     }
 
@@ -27,8 +32,12 @@ const Hunter: Component<{
                 addition={{ '不开枪': '不开枪' }}
                 select={{
                     invoke: (t, isCancel) => {
-                        setTarget(t)
-                        setIsCancel(isCancel)
+                        if (!isConfirmed.hunter) {
+                            setTarget(t)
+                            setIsCancel(isCancel)
+                            return true
+                        }
+                        return false
                     },
                     default: {
                         nameOrID: '不开枪',

@@ -34,8 +34,6 @@ const Game: Component<{
     seerResults: Record<number, boolean | undefined>
     setSeerTarget: (target: number) => void
     deadPlayers: api.DeadPlayers
-    voteConfirmed: boolean
-    setVoteConfirmed: (v: boolean) => void
     role?: api.Role
 }> = (props) => {
     const playerName = useContext(PlayerNameContext)
@@ -215,10 +213,7 @@ const Game: Component<{
                 <Match
                     when={props.gameData.state === 'vote' && props.role && playerState() === 'alive'}
                 >
-                    <Vote
-                        voteConfirmed={props.voteConfirmed}
-                        setVoteConfirmed={props.setVoteConfirmed}
-                    />
+                    <Vote/>
                 </Match>
                 <Match
                     when={props.gameData.state === 'voteend'}

@@ -9,7 +9,7 @@ const Players: Component<{
     filter: (player: [string, PlayerState]) => boolean
     displayState?: boolean
     select?: {
-        invoke: (target: string, isAddtion: boolean) => void
+        invoke: (target: string, isAddtion: boolean) => boolean
         default?: {
             nameOrID: string | number
             isAdditon: boolean
@@ -32,6 +32,12 @@ const Players: Component<{
     })
 
     const select = (name: string, msg: string | undefined, isAddition: boolean) => {
+        if (props.select) {
+            const res = props.select.invoke(name, isAddition)
+            if (!res) {
+                return
+            }
+        }
         const tags = Array.from(document.querySelectorAll(`div.${props.className}-item`))
         for (const e of tags) {
             if (e.id === name) {
@@ -39,10 +45,6 @@ const Players: Component<{
             } else {
                 e.classList.remove('selected')
             }
-        }
-
-        if (props.select) {
-            props.select.invoke(name, isAddition)
         }
     }
 

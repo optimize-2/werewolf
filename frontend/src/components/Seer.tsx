@@ -1,6 +1,6 @@
 import { Component, createSignal, useContext } from 'solid-js'
 import Players from './Players'
-import { PlayersContext } from './Room'
+import { IsConfirmedContext, PlayersContext } from './Room'
 import { emit } from '../api'
 import { PlayerNameContext } from '../app'
 
@@ -12,9 +12,12 @@ const Seer: Component<{
     const players = useContext(PlayersContext)
     const playerName = useContext(PlayerNameContext)
 
-    const select = () => {
+    const [isConfirmed, setIsConfirmed] = useContext(IsConfirmedContext)!
+
+    const confirm = () => {
         const t = players().findIndex((name) => name === target())
         props.setSeerTarget(t)
+        setIsConfirmed('seer', true)
         emit('seerConfirm', t)
     }
 
@@ -24,7 +27,13 @@ const Seer: Component<{
                 className="select-player"
                 filter={([name, state]) => state === 'alive' && name !== playerName()}
                 select={{
-                    invoke: (t) => setTarget(t),
+                    invoke: (t) => {
+                        if (!isConfirmed.seer) {
+                            setTarget(t)
+                            return true
+                        }
+                        return false
+                    },
                     default: {
                         nameOrID: 0,
                         isAdditon: false,
@@ -32,7 +41,7 @@ const Seer: Component<{
                 }}
             />
 
-            <button onClick={() => select()}>确认</button>
+            <button onClick={() => confirm()}>确认</button>
         </div>
     )
 }

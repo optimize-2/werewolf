@@ -1,20 +1,20 @@
 import { Component, createSignal, useContext } from 'solid-js'
 import Players from './Players'
 import { emit } from '../api'
-import { PlayersContext } from './Room'
+import { IsConfirmedContext, PlayersContext } from './Room'
 
-const Vote: Component<{
-    voteConfirmed: boolean
-    setVoteConfirmed: (v: boolean) => void
-}> = (props) => {
+const Vote: Component = () => {
     const [target, setTarget] = createSignal('')
     const [isAddition, setIsAddtion] = createSignal(false)
 
     const players = useContext(PlayersContext)
+    const [isConfirmed, setIsConfirmed] = useContext(IsConfirmedContext)!
 
     const voteConfirm = () => {
-        props.setVoteConfirmed(true)
-        emit('voteConfirm', isAddition() ? -1 : players().findIndex((name) => name === target()))
+        if (!isConfirmed.vote) {
+            setIsConfirmed('vote', true)
+            emit('voteConfirm', isAddition() ? -1 : players().findIndex((name) => name === target()))
+        }
     }
 
     return (
@@ -26,15 +26,22 @@ const Vote: Component<{
                 addition={{'弃票': '弃票'}}
                 select={{
                     invoke: (t, isAddition) => {
-                        setTarget(t)
-                        setIsAddtion(isAddition)
+                        if (!isConfirmed.vote) {
+                            setTarget(t)
+                            setIsAddtion(isAddition)
+                            return true
+                        }
+                        return false
                     },
-                    default: { nameOrID: '弃票', isAdditon: true },
+                    default: {
+                        nameOrID: '弃票',
+                        isAdditon: true,
+                    },
                 }}
             />
             <button
                 onClick={voteConfirm}
-                disabled={props.voteConfirmed}
+                disabled={isConfirmed.vote}
             >
                 确认
             </button>

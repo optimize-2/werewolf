@@ -1,31 +1,28 @@
-import { Component, For, Show, createSignal, useContext } from 'solid-js'
+import { Component, For, Show, useContext } from 'solid-js'
 import Players from './Players'
 import * as api from '../api'
 import { createStore } from 'solid-js/store'
-import { PlayersContext } from './Room'
+import { IsConfirmedContext, PlayersContext } from './Room'
 import { entries } from '@werewolf/utils'
 
 const Werewolf: Component = () => {
-    const [isConfirmed, setIsConfirmed] = createSignal(false)
-
     const players = useContext(PlayersContext)
+    const [isConfirmed, setIsConfirmed] = useContext(IsConfirmedContext)!
 
     const select = (target: string, isEmptyKnife: boolean) => {
-        if (!isConfirmed()) {
-            // console.log(players(), target, tar)
-
+        if (!isConfirmed.werewolf) {
             api.emit('werewolfSelect', isEmptyKnife ? -1 : players().findIndex((name) => name === target))
         }
     }
 
     const cancelComfirmation = () => {
-        setIsConfirmed(false)
+        setIsConfirmed('werewolf', false)
         api.emit('werewolfCancel')
     }
 
     const confirm = () => {
-        if (!isConfirmed()) {
-            setIsConfirmed(true)
+        if (!isConfirmed.werewolf) {
+            setIsConfirmed('werewolf', true)
             api.emit('werewolfConfirm')
         }
     }
@@ -48,12 +45,18 @@ const Werewolf: Component = () => {
                     displayState={false}
                     addition={{ '空刀': '空刀' }}
                     select={{
-                        invoke: (t, isAddtion) => select(t, isAddtion),
-                        default: {nameOrID: '空刀', isAdditon: true,},
+                        invoke: (t, isAddtion) => {
+                            if (!isConfirmed.werewolf) {
+                                select(t, isAddtion)
+                                return true
+                            }
+                            return false
+                        },
+                        default: { nameOrID: '空刀', isAdditon: true, },
                     }}
                 />
                 <Show
-                    when={!isConfirmed()}
+                    when={!isConfirmed.werewolf}
                     fallback={
                         <button
                             onClick={() => cancelComfirmation()}

@@ -1,7 +1,7 @@
 import { Component, For, Show, createMemo, createSignal, useContext } from 'solid-js'
 import { WitchInventory, emit } from '../api'
 import Players from './Players'
-import { PlayersContext, RoundContext } from './Room'
+import { IsConfirmedContext, PlayersContext, RoundContext } from './Room'
 import { PlayerNameContext } from '../app'
 
 const Witch: Component<{
@@ -9,18 +9,19 @@ const Witch: Component<{
     dead: number[]
 }> = (props) => {
     const players = useContext(PlayersContext)
-    const [target, setTarget] = createSignal('')
+    const [isConfirmed, setIsConfirmed] = useContext(IsConfirmedContext)!
 
-    const [isSelectedPoison, setIsSelectedPoison] = createSignal(false)
+    const [target, setTarget] = createSignal<string | undefined>()
 
     const useSave = () => {
         emit('witchSave')
     }
 
     const usePoison = () => {
-        if (!isSelectedPoison()) {
+        if (typeof target() === 'undefined') {
             return
         }
+        setIsConfirmed('witch', true)
         const tar = players().findIndex((name) => name === target())
 
         emit('witchPoison', tar)
@@ -97,7 +98,7 @@ const Witch: Component<{
                     select={{
                         invoke: (t) => {
                             setTarget(t)
-                            setIsSelectedPoison(true)
+                            return !isConfirmed.witch
                         },
                     }}
                 />

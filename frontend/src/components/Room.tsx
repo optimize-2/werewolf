@@ -5,13 +5,23 @@ import ChatBox from './ChatBox'
 import Game from './Game'
 import Players from './Players'
 import { PlayerNameContext } from '../app'
-import { createStore } from 'solid-js/store'
+import { SetStoreFunction, createStore } from 'solid-js/store'
 
 export const PlayerStatesContext = createContext<() => api.PlayerStatesType>(() => ({}))
 export const PlayersContext = createContext<() => string[]>(() => [])
 export const PlayerIDContext = createContext<() => number>(() => -1)
 export const RoundContext = createContext<() => number>(() => 0)
 export const CanSendContext = createContext<() => boolean>(() => true)
+
+type IsConfirmedType = {
+    werewolf: boolean
+    witch: boolean
+    seer: boolean
+    hunter: boolean
+    vote: boolean
+}
+
+export const IsConfirmedContext = createContext<[IsConfirmedType, SetStoreFunction<IsConfirmedType>]>()
 
 const targetMsg = {
     villagers: '屠民',
@@ -25,6 +35,15 @@ const Room: Component<{
     gameStateNow: api.GameState
 }> = (props) => {
     const playerName = useContext(PlayerNameContext)
+
+    const [isConfirmed, setIsConfirmed] = createStore({
+        werewolf: false,
+        witch: false,
+        seer: false,
+        hunter: false,
+        vote: false,
+    })
+
     const [playerStates, setPlayerStates] = createSignal<api.PlayerStatesType>({})
     const [players, setPlayers] = createSignal<string[]>([])
 
@@ -54,20 +73,15 @@ const Room: Component<{
     const [round, setRound] = createSignal<number>(0)
 
     const [deadPlayers, setDeadPlayers] = createStore<api.DeadPlayers>([])
-    const [voteConfirmed, setVoteConfirmed] = createSignal<boolean>(false)
 
     const addDeadPlayers = (newItem: api.DeadPlayer) => {
         setDeadPlayers([...deadPlayers, newItem])
     }
 
     api.on('gameState', (data) => {
-        if (data.state === 'witch' && role() === 'seer') {
-            const results = {
-                ...seerResults(),
-            }
-            results[seerTarget()] = data.seerResult
-            setSeerResults(results)
-        } else if (data.state === 'werewolf') {
+        if (data.state === 'werewolf') {
+            setIsConfirmed('werewolf', false)
+
             if (typeof data.dead !== 'undefined' && data.dead.length > 0) {
                 addDeadPlayers({
                     round: round(),
@@ -77,12 +91,27 @@ const Room: Component<{
             }
 
             setRound(round() + 1)
+        } else if (data.state === 'witch') {
+            setIsConfirmed('witch', false)
+
+            if (role() === 'seer') {
+                const results = {
+                    ...seerResults(),
+                }
+                results[seerTarget()] = data.seerResult
+                setSeerResults(results)
+            }
+        } else if (data.state === 'seer') {
+            setIsConfirmed('seer', false)
         } else if (data.state === 'morning') {
+            setIsConfirmed('hunter', false)
             addDeadPlayers({
                 round: round(),
                 type: 'night',
                 deadPlayers: data.dead ?? [],
             })
+        } else if (data.state === 'vote') {
+            setIsConfirmed('vote', false)
         } else if (data.state === 'voteend') {
             addDeadPlayers({
                 round: round(),
@@ -92,7 +121,7 @@ const Room: Component<{
         }
 
         if (data.state === 'vote') {
-            setVoteConfirmed(false)
+            setIsConfirmed('vote', false)
         }
         setGameData(data)
     })
@@ -184,31 +213,33 @@ const Room: Component<{
                     <Match
                         when={isGameStart()}
                     >
-                        <PlayersContext.Provider
-                            value={players}
+                        <IsConfirmedContext.Provider
+                            value={[isConfirmed, setIsConfirmed]}
                         >
-                            <PlayerIDContext.Provider
-                                value={playerID}
+                            <PlayersContext.Provider
+                                value={players}
                             >
-                                <RoundContext.Provider
-                                    value={round}
+                                <PlayerIDContext.Provider
+                                    value={playerID}
                                 >
-                                    <CanSendContext.Provider
-                                        value={canSendDiscuss}
+                                    <RoundContext.Provider
+                                        value={round}
                                     >
-                                        <Game
-                                            gameData={gameData()}
-                                            seerResults={seerResults()}
-                                            setSeerTarget={setSeerTarget}
-                                            role={role()}
-                                            deadPlayers={deadPlayers}
-                                            voteConfirmed={voteConfirmed()}
-                                            setVoteConfirmed={setVoteConfirmed}
-                                        />
-                                    </CanSendContext.Provider>
-                                </RoundContext.Provider>
-                            </PlayerIDContext.Provider>
-                        </PlayersContext.Provider>
+                                        <CanSendContext.Provider
+                                            value={canSendDiscuss}
+                                        >
+                                            <Game
+                                                gameData={gameData()}
+                                                seerResults={seerResults()}
+                                                setSeerTarget={setSeerTarget}
+                                                role={role()}
+                                                deadPlayers={deadPlayers}
+                                            />
+                                        </CanSendContext.Provider>
+                                    </RoundContext.Provider>
+                                </PlayerIDContext.Provider>
+                            </PlayersContext.Provider>
+                        </IsConfirmedContext.Provider>
                     </Match>
                 </Switch>
             </PlayerStatesContext.Provider>
