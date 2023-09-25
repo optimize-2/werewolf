@@ -9,6 +9,7 @@ import Vote from './Vote'
 import { entries } from '@werewolf/utils'
 import Hunter from './Hunter'
 import { isDead, isWerewolfKilled } from '../utils'
+import { openAlert } from './Alert'
 
 const stateMessage = {
     idle: '等待开始',
@@ -66,13 +67,15 @@ const Game: Component<{
 
     createEffect(() => {
         if (hunterTarget() === playerID()) {
-            alert('人生自古谁无死？不幸的，你已被击杀！')
+            // alert('人生自古谁无死？不幸的，你已被击杀！')
+            openAlert('人生自古谁无死？不幸的，你已被击杀！')
         }
     })
 
     createEffect(() => {
         if (canSendDiscuss()) {
-            alert('轮到你发言了')
+            // alert('轮到你发言了')
+            openAlert('轮到你发言了')
         }
     })
 

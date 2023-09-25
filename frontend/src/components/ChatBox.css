@@ -3,9 +3,9 @@
     right: 1.5vw;
     top: 2vh;
     height: 70vh;
-    width: 27vw;
+    width: 24vw;
     max-height: 70vh;
-    max-width: 27vw;
+    max-width: 24vw;
     margin: 20px auto;
     border: 1px solid;
     border-radius: 8px;
@@ -54,12 +54,12 @@
 
 .discuss-container {
     position: absolute;
-    right: 30vw;
+    right: 28vw;
     top: 2vh;
     height: 70vh;
-    width: 27vw;
+    width: 24vw;
     max-height: 70vh;
-    max-width: 27vw;
+    max-width: 24vw;
     margin: 20px auto;
     border: 1px solid;
     border-radius: 8px;

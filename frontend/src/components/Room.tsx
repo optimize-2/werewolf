@@ -8,6 +8,7 @@ import { PlayerNameContext } from '../app'
 import { SetStoreFunction, createStore } from 'solid-js/store'
 import { isDead, isWerewolfKilled } from '../utils'
 import './Room.css'
+import { openAlert } from './Alert'
 
 export const PlayerStatesContext = createContext<() => api.PlayerStatesType>(() => ({}))
 export const PlayersContext = createContext<() => string[]>(() => [])
@@ -138,7 +139,8 @@ const Room: Component<{
 
     createEffect(() => {
         if (gameData().state !== 'werewolf' && gameData().state !== 'witch' && isDead(gameData().dead, playerID())) {
-            alert('人生自古谁无死？不幸的，你已被击杀！')
+            // alert('人生自古谁无死？不幸的，你已被击杀！')
+            openAlert('人生自古谁无死？不幸的，你已被击杀！')
         }
     })
 
@@ -164,10 +166,14 @@ const Room: Component<{
         )
     })
 
-    const [gameEnd, setGameEnd] = createSignal(-1)
-
     api.on('gameEnd', (data) => {
-        setGameEnd(data)
+        if (data === 0) {
+            openAlert('游戏异常退出')
+        } else if (data === 1) {
+            openAlert('好人获胜')
+        } else {
+            openAlert('狼人获胜')
+        }
     })
 
     return (
@@ -206,7 +212,15 @@ const Room: Component<{
                             {targetMsg[props.gameConfig.target]}
                         </div>
                         <div class="发言顺序">
-                            {players().toString()}
+                            <For
+                                each={players()}
+                            >
+                                {
+                                    (name) => (
+                                        <div>{name}</div>
+                                    )
+                                }
+                            </For>
                         </div>
                     </div>
                 </div>
@@ -255,30 +269,6 @@ const Room: Component<{
                     </Switch>
                 </div>
             </PlayerStatesContext.Provider>
-
-            <div class="panel">
-                <div
-                    class="game-end"
-                >
-                    <Switch>
-                        <Match
-                            when={gameEnd() === 0}
-                        >
-                        游戏异常退出
-                        </Match>
-                        <Match
-                            when={gameEnd() === 1}
-                        >
-                        好人获胜！
-                        </Match>
-                        <Match
-                            when={gameEnd() === 2}
-                        >
-                        狼人获胜！
-                        </Match>
-                    </Switch>
-                </div>
-            </div>
 
             <CanSendContext.Provider
                 value={canSendDiscuss}
