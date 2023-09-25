@@ -312,8 +312,8 @@ export const game = {
             sendHunterWait(pendingHunter[0])
         }
         console.log('startMorning', pendingHunter)
-        if ((day === 2 && dead.length)) {
-            discussWaiting = 0
+        if (day === 2 && dead.length) {
+            discussWaiting = dead[0]
             updateState({
                 state: gameState,
                 waiting: discussWaiting
