@@ -79,7 +79,7 @@ export const checkStart = () => {
         game.startWerewolf()
         Object.entries(playerStates).forEach(([player, state]) => {
             if (state === 'unready' && player) {
-                playerStates[player] = 'ready'
+                playerStates[player] = 'spec'
             }
         })
         return true
