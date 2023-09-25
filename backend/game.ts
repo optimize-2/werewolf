@@ -70,7 +70,7 @@ export const checkStart = () => {
         if (state === 'ready' && player) {
             readyPlayers.push(player)
         } else {
-            state = 'spec'
+            playerStates[player] = 'spec'
         }
     })
     log(readyPlayers.toString())
