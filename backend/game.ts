@@ -340,12 +340,8 @@ export const game = {
             }
         } else {
             gameState = 'voteend'
-            if (canHunt(roles[players[maxVotePerson]])) {
-                pendingHunter.push(maxVotePerson)
-            } else {
-                playerStates[players[maxVotePerson]] = 'spec'
-                if (game.checkEnd()) {return}
-            }
+            playerStates[players[maxVotePerson]] = 'spec'
+            if (game.checkEnd()) {return}
             discussWaiting = maxVotePerson
             updateState({
                 state: gameState,
@@ -353,6 +349,10 @@ export const game = {
                 voteResult: vote,
                 waiting: maxVotePerson
             })
+            if (canHunt(roles[players[maxVotePerson]])) {
+                pendingHunter.push(maxVotePerson)
+                sendHunterWait(pendingHunter[0])
+            }
         }
     },
 
