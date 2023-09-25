@@ -71,6 +71,12 @@ const Game: Component<{
         }
     })
 
+    createEffect(() => {
+        if (canSendDiscuss()) {
+            alert('轮到你发言了')
+        }
+    })
+
     return (
         <div class="game">
             <div class="identity">
@@ -86,7 +92,7 @@ const Game: Component<{
                     each={props.deadPlayers}
                 >
                     {
-                        ({ round, isHunter, deadPlayers}) => (
+                        ({ round, type, deadPlayers}) => (
                             <div class="death-per-round">
                                 <Switch
                                     fallback={
@@ -94,7 +100,7 @@ const Game: Component<{
                                     }
                                 >
                                     <Match
-                                        when={isHunter && deadPlayers.length > 0}
+                                        when={type === 'hunter' && deadPlayers.length > 0}
                                     >
                                         第{round}轮被猎人击杀的有:
                                         <For
@@ -110,9 +116,9 @@ const Game: Component<{
                                         </For>
                                     </Match>
                                     <Match
-                                        when={!isHunter && deadPlayers.length > 0}
+                                        when={type === 'night' && deadPlayers.length > 0}
                                     >
-                                        第{round}轮死亡的有:
+                                        第{round}晚死亡的有:
                                         <For
                                             each={deadPlayers}
                                         >
@@ -126,9 +132,25 @@ const Game: Component<{
                                         </For>
                                     </Match>
                                     <Match
-                                        when={!isHunter && deadPlayers.length === 0}
+                                        when={type === 'night' && deadPlayers.length === 0}
                                     >
                                         第{round}晚是个平安夜
+                                    </Match>
+                                    <Match
+                                        when={type === 'vote' && deadPlayers.length > 0}
+                                    >
+                                        第{round}轮被放逐的有
+                                        <For
+                                            each={deadPlayers}
+                                        >
+                                            {
+                                                (id) => (
+                                                    <div class="death">
+                                                        {players()[id]}
+                                                    </div>
+                                                )
+                                            }
+                                        </For>
                                     </Match>
                                 </Switch>
                             </div>
@@ -136,12 +158,6 @@ const Game: Component<{
                     }
                 </For>
             </div>
-
-            <Show
-                when={canSendDiscuss()}
-            >
-                轮到你发言了！！！
-            </Show>
 
             <Show
                 when={props.role === 'seer'}
@@ -221,6 +237,12 @@ const Game: Component<{
                     </div>
                 </Match>
             </Switch>
+
+            <Show
+                when={canSendDiscuss()}
+            >
+                轮到你发言了！！！
+            </Show>
 
             <Show
                 when={props.role === 'hunter' && waitingHunter() === playerID()}

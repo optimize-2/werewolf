@@ -56,6 +56,10 @@ const Room: Component<{
     const [deadPlayers, setDeadPlayers] = createStore<api.DeadPlayers>([])
     const [voteConfirmed, setVoteConfirmed] = createSignal<boolean>(false)
 
+    const addDeadPlayers = (newItem: api.DeadPlayer) => {
+        setDeadPlayers([...deadPlayers, newItem])
+    }
+
     api.on('gameState', (data) => {
         if (data.state === 'witch' && role() === 'seer') {
             const results = {
@@ -65,23 +69,28 @@ const Room: Component<{
             setSeerResults(results)
         } else if (data.state === 'werewolf') {
             if (typeof data.dead !== 'undefined' && data.dead.length > 0) {
-                const newItem: api.DeadPlayer = {
+                addDeadPlayers({
                     round: round(),
-                    isHunter: true,
+                    type: 'hunter',
                     deadPlayers: data.dead,
-                }
-                setDeadPlayers([...deadPlayers, newItem])
+                })
             }
 
             setRound(round() + 1)
         } else if (data.state === 'morning') {
-            const newItem: api.DeadPlayer = {
+            addDeadPlayers({
                 round: round(),
-                isHunter: false,
+                type: 'night',
                 deadPlayers: data.dead ?? [],
-            }
-            setDeadPlayers([...deadPlayers, newItem])
+            })
+        } else if (data.state === 'voteend') {
+            addDeadPlayers({
+                round: round(),
+                type: 'vote',
+                deadPlayers: data.dead ?? [],
+            })
         }
+
         if (data.state === 'vote') {
             setVoteConfirmed(false)
         }
@@ -118,6 +127,12 @@ const Room: Component<{
                 )
             )
         )
+    })
+
+    const [gameEnd, setGameEnd] = createSignal(-1)
+
+    api.on('gameEnd', (data) => {
+        setGameEnd(data)
     })
 
     return (
@@ -197,6 +212,28 @@ const Room: Component<{
                     </Match>
                 </Switch>
             </PlayerStatesContext.Provider>
+
+            <div
+                class="game-end"
+            >
+                <Switch>
+                    <Match
+                        when={gameEnd() === 0}
+                    >
+                        游戏异常退出
+                    </Match>
+                    <Match
+                        when={gameEnd() === 1}
+                    >
+                        好人获胜！
+                    </Match>
+                    <Match
+                        when={gameEnd() === 2}
+                    >
+                        狼人获胜！
+                    </Match>
+                </Switch>
+            </div>
 
             <CanSendContext.Provider
                 value={canSendDiscuss}
