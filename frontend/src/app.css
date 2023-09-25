@@ -1,0 +1,12 @@
+.username-container {
+    display: flex;
+    flex-direction: row;
+    margin: 2px;
+    padding: 2px;
+    align-items: center;
+    height: 22px;
+}
+
+.username {
+    margin-left: 4px;
+}

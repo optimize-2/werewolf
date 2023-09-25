@@ -1,6 +1,7 @@
 import { createSignal, type Component, Show, createContext } from 'solid-js'
 import * as api from './api'
 import Room from './components/Room'
+import './app.css'
 
 export const PlayerNameContext = createContext<() => string>(() => '')
 
@@ -44,11 +45,16 @@ const App: Component = () => {
                 when={isLoggedin()}
                 fallback={
                     <>
-                        <div>用户名</div>
-                        <input
-                            onInput={(e) => setUsername(e.currentTarget.value)}
-                            style="width: 200px"
-                        />
+                        <div
+                            class="username-container"
+                        >
+                            <div class="username-label">用户名: </div>
+                            <input
+                                class="username"
+                                onInput={(e) => setUsername(e.currentTarget.value)}
+                                style="width: 200px"
+                            />
+                        </div>
 
                         <button
                             type="button"
@@ -60,7 +66,12 @@ const App: Component = () => {
                 <PlayerNameContext.Provider
                     value={username}
                 >
-                    <div>用户名: {username()} </div>
+                    <div
+                        class="username-container"
+                    >
+                        <div class="username-label">用户名: </div>
+                        <div class="username">{username()}</div>
+                    </div>
                     <Room
                         gameConfig={config()}
                         gameStateNow={gameState()}

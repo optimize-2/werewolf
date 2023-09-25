@@ -42,7 +42,11 @@ export type GameData = {
     werewolfKilled?: Array<number>
 }
 
-export type DeadPlayer = { round: number, isHunter: boolean, deadPlayers: number[] }
+export type DeadPlayer = {
+    round: number,
+    type: 'hunter' | 'vote' | 'night',
+    deadPlayers: number[],
+}
 export type DeadPlayers = DeadPlayer[]
 
 export type Target =
@@ -62,6 +66,7 @@ export function on(event: 'loginResult', fn: (data: { state: GameState, config: 
 export function on(event: 'updateUsers', fn: (data: PlayerStatesType) => void): void
 export function on(event: 'readyResult', fn: (data: Record<string, boolean>) => void): void
 export function on(event: 'gameStart', fn: (data: { role: Role, players: Array<string> }) => void): void
+export function on(event: 'gameEnd', fn: (data: number) => void): void
 
 export function on(
     event: 'gameState',
