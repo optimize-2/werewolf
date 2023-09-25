@@ -277,18 +277,25 @@ const Game: Component<{
                 </Show>
             </Show>
 
-            <Show
+            {/* <Show
                 when={hunterTarget() === playerID()}
                 fallback={
-                    <div>
-                        {typeof hunterTarget() !== 'undefined' && hunterTarget() !== -1 ? `猎人击杀了: ${players()[hunterTarget()!]}` : ''}
-                    </div>
+                    <Show
+                        when={
+                            (props.gameData.state === 'voteend' || props.gameData.state === 'morning')
+                            && (typeof hunterTarget() !== 'undefined' && hunterTarget() !== -1)
+                        }
+                    >
+                        <div>
+                            猎人击杀了: {players()[hunterTarget()!]}
+                        </div>
+                    </Show>
                 }
             >
                 <div>
                     你被猎人击杀
                 </div>
-            </Show>
+            </Show> */}
         </div>
     )
 }

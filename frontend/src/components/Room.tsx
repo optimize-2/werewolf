@@ -7,6 +7,7 @@ import Players from './Players'
 import { PlayerNameContext } from '../app'
 import { SetStoreFunction, createStore } from 'solid-js/store'
 import { isDead, isWerewolfKilled } from '../utils'
+import './Room.css'
 
 export const PlayerStatesContext = createContext<() => api.PlayerStatesType>(() => ({}))
 export const PlayersContext = createContext<() => string[]>(() => [])
@@ -119,6 +120,14 @@ const Room: Component<{
                 type: 'vote',
                 deadPlayers: data.dead ?? [],
             })
+        } else if (data.state === 'discuss') {
+            if (typeof data.dead !== 'undefined') {
+                addDeadPlayers({
+                    round: round(),
+                    type: 'hunter',
+                    deadPlayers: data.dead,
+                })
+            }
         }
 
         if (data.state === 'vote') {
@@ -128,7 +137,7 @@ const Room: Component<{
     })
 
     createEffect(() => {
-        if (isDead(gameData().dead, playerID())) {
+        if (gameData().state !== 'werewolf' && gameData().state !== 'witch' && isDead(gameData().dead, playerID())) {
             alert('人生自古谁无死？不幸的，你已被击杀！')
         }
     })
@@ -162,105 +171,113 @@ const Room: Component<{
     })
 
     return (
-        <div>
+        <div class="root">
             <PlayerStatesContext.Provider
                 value={playerStates}
             >
-                <Players
-                    className="players"
-                    filter={() => true}
-                    displayState={true}
-                />
-
                 <div
-                    class="config"
+                    class="panel"
                 >
+                    <Players
+                        className="players"
+                        filter={() => true}
+                        displayState={true}
+                    />
+
                     <div
-                        class="pass-msg"
+                        class="config"
                     >
-                        发言结束关键词：
-                        <For
-                            each={props.gameConfig.pass}
+                        <div
+                            class="pass-msg"
                         >
-                            {
-                                (msg) => (<div>{msg}</div>)
-                            }
-                        </For>
-                    </div>
-                    <div
-                        class="target"
-                    >
+                        发言结束关键词：
+                            <For
+                                each={props.gameConfig.pass}
+                            >
+                                {
+                                    (msg) => (<div>{msg}</div>)
+                                }
+                            </For>
+                        </div>
+                        <div
+                            class="target"
+                        >
                         游戏目标：
-                        {targetMsg[props.gameConfig.target]}
-                    </div>
-                    <div class="发言顺序">
-                        {players().toString()}
+                            {targetMsg[props.gameConfig.target]}
+                        </div>
+                        <div class="发言顺序">
+                            {players().toString()}
+                        </div>
                     </div>
                 </div>
 
-                <Switch>
-                    <Match
-                        when={!isGameStart() && playerStates()[playerName()] !== 'spec'}
-                    >
-                        <Ready
-                            setPlayerStates={(players) => setPlayerStates(players)}
-                        />
-                    </Match>
-
-                    <Match
-                        when={isGameStart()}
-                    >
-                        <IsConfirmedContext.Provider
-                            value={[isConfirmed, setIsConfirmed]}
+                <div class="panel">
+                    <Switch>
+                        <Match
+                            when={!isGameStart() && playerStates()[playerName()] !== 'spec'}
                         >
-                            <PlayersContext.Provider
-                                value={players}
+                            <Ready
+                                setPlayerStates={(players) => setPlayerStates(players)}
+                            />
+                        </Match>
+
+                        <Match
+                            when={isGameStart()}
+                        >
+                            <IsConfirmedContext.Provider
+                                value={[isConfirmed, setIsConfirmed]}
                             >
-                                <PlayerIDContext.Provider
-                                    value={playerID}
+                                <PlayersContext.Provider
+                                    value={players}
                                 >
-                                    <RoundContext.Provider
-                                        value={round}
+                                    <PlayerIDContext.Provider
+                                        value={playerID}
                                     >
-                                        <CanSendContext.Provider
-                                            value={canSendDiscuss}
+                                        <RoundContext.Provider
+                                            value={round}
                                         >
-                                            <Game
-                                                gameData={gameData()}
-                                                seerResults={seerResults()}
-                                                setSeerTarget={setSeerTarget}
-                                                role={role()}
-                                                deadPlayers={deadPlayers}
-                                            />
-                                        </CanSendContext.Provider>
-                                    </RoundContext.Provider>
-                                </PlayerIDContext.Provider>
-                            </PlayersContext.Provider>
-                        </IsConfirmedContext.Provider>
-                    </Match>
-                </Switch>
+                                            <CanSendContext.Provider
+                                                value={canSendDiscuss}
+                                            >
+                                                <Game
+                                                    gameData={gameData()}
+                                                    seerResults={seerResults()}
+                                                    setSeerTarget={setSeerTarget}
+                                                    role={role()}
+                                                    deadPlayers={deadPlayers}
+                                                />
+                                            </CanSendContext.Provider>
+                                        </RoundContext.Provider>
+                                    </PlayerIDContext.Provider>
+                                </PlayersContext.Provider>
+                            </IsConfirmedContext.Provider>
+                        </Match>
+                    </Switch>
+                </div>
             </PlayerStatesContext.Provider>
 
-            <div
-                class="game-end"
-            >
-                <Switch>
-                    <Match
-                        when={gameEnd() === 0}
-                    >
+            <div class="panel">
+                <div
+                    class="game-end"
+                >
+                    <Switch>
+                        <Match
+                            when={gameEnd() === 0}
+                        >
                         游戏异常退出
-                    </Match>
-                    <Match
-                        when={gameEnd() === 1}
-                    >
+                        </Match>
+                        <Match
+                            when={gameEnd() === 1}
+                        >
                         好人获胜！
-                    </Match>
-                    <Match
-                        when={gameEnd() === 2}
-                    >
+                        </Match>
+                        <Match
+                            when={gameEnd() === 2}
+                        >
                         狼人获胜！
-                    </Match>
-                </Switch>
+                        </Match>
+                    </Switch>
+                </div>
             </div>
 
             <CanSendContext.Provider

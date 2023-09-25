@@ -1,4 +1,4 @@
-import { Component, For, createMemo, onMount, useContext } from 'solid-js'
+import { Component, For, createMemo, createSignal, useContext } from 'solid-js'
 import { PlayerState } from '../api'
 import { PlayerStatesContext } from './Room'
 import './Players.css'
@@ -31,6 +31,8 @@ const Players: Component<{
         return dat
     })
 
+    const [selected, setSelected] = createSignal<string | undefined>()
+
     const select = (name: string, msg: string | undefined, isAddition: boolean) => {
         if (props.select) {
             const res = props.select.invoke(name, isAddition)
@@ -38,30 +40,21 @@ const Players: Component<{
                 return
             }
         }
-        const tags = Array.from(document.querySelectorAll(`div.${props.className}-item`))
-        for (const e of tags) {
-            if (e.id === name) {
-                e.classList.add('selected')
-            } else {
-                e.classList.remove('selected')
-            }
-        }
+        setSelected(name)
     }
 
-    onMount(() => {
-        if (typeof props.select?.default !== 'undefined') {
-            const dft = props.select.default
-            let name: string | undefined = undefined
-            if (typeof dft.nameOrID === 'string') {
-                name = dft.nameOrID
-            } else if (data().length > 0) {
-                name = data()[dft.nameOrID][0]
-            }
-            if (name) {
-                select(name, undefined, dft.isAdditon)
-            }
+    if (typeof props.select?.default !== 'undefined') {
+        const dft = props.select.default
+        let name: string | undefined = undefined
+        if (typeof dft.nameOrID === 'string') {
+            name = dft.nameOrID
+        } else if (data().length > 0) {
+            name = data()[dft.nameOrID][0]
         }
-    })
+        if (name) {
+            select(name, undefined, dft.isAdditon)
+        }
+    }
 
     return (
         <div class="player-container">
@@ -71,7 +64,7 @@ const Players: Component<{
                 {
                     ([name, msg, isAddition]) => (
                         <div
-                            class={`${props.className}-item`}
+                            class={`${props.className}-item${selected() === name ? ' selected' : ''}`}
                             id={name}
                             onClick={
                                 props.select ? () => select(name, msg, isAddition) : () => { }

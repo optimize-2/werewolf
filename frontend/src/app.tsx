@@ -40,7 +40,9 @@ const App: Component = () => {
     })
 
     return (
-        <div>
+        <div
+            class="app"
+        >
             <Show
                 when={isLoggedin()}
                 fallback={
@@ -58,6 +60,7 @@ const App: Component = () => {
 
                         <button
                             type="button"
+                            class="enter-game"
                             onClick={() => login()}>进入游戏
                         </button>
                     </>

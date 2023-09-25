@@ -1,3 +1,14 @@
+.app {
+    display: flex;
+    flex-direction: column;
+}
+
+button {
+    width: 100px;
+    height: 25px;
+    margin: 2px;
+}
+
 .username-container {
     display: flex;
     flex-direction: row;
