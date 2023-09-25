@@ -314,6 +314,10 @@ export const game = {
         console.log('startMorning', pendingHunter)
         if ((day === 2 && dead.length)) {
             discussWaiting = 0
+            updateState({
+                state: gameState,
+                waiting: discussWaiting
+            })
             // hunter.forEach(e => [
             //     hunterKilled[e] = -1
             // ])
