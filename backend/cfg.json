@@ -5,7 +5,7 @@
         "hunter": 1,
         "witch": 1
     },
-    "target": "all",
+    "target": "side",
     "pass": [
         "过",
         "pass"
