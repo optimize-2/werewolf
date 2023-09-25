@@ -311,7 +311,7 @@ export const game = {
         }
         console.log('startMorning', pendingHunter)
         if (day === 2 && dead.length) {
-            discussWaiting = dead[0]
+            discussWaiting = _.min(dead)!
             updateState({
                 state: gameState,
                 waiting: discussWaiting,
