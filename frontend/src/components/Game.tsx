@@ -240,11 +240,26 @@ const Game: Component<{
             </Show>
 
             <Show
-                when={props.role === 'hunter' && waitingHunter() === playerID()}
+                when={
+                    typeof props.gameData.dead !== 'undefined'
+                    && props.gameData.dead.findIndex((id) => id === playerID()) !== -1
+                    && typeof props.gameData.werewolfKilled !== 'undefined'
+                    && props.gameData.werewolfKilled.findIndex((id) => id === playerID()) !== -1
+                    && props.role === 'hunter'
+                }
+                fallback={
+                    <div>
+                            你不能开枪/kk
+                    </div>
+                }
             >
-                <Hunter
-                    hasShot={() => setWaitingHunter(undefined)}
-                />
+                <Show
+                    when={props.role === 'hunter' && waitingHunter() === playerID()}
+                >
+                    <Hunter
+                        hasShot={() => setWaitingHunter(undefined)}
+                    />
+                </Show>
             </Show>
 
             <Show
