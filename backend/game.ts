@@ -380,6 +380,8 @@ export const game = {
                     } else {
                         updateState({
                             state: 'discuss',
+                            dead: [],
+                            werewolfKilled: [],
                             waiting: discussWaiting
                         })
                     }
@@ -396,6 +398,8 @@ export const game = {
                     } else {
                         updateState({
                             state: 'morning',
+                            dead: [],
+                            werewolfKilled: [],
                             waiting: discussWaiting
                         })
                     }
