@@ -167,8 +167,6 @@ let dead: Array<number> = []
 let pendingHunter: Array<number> = []
 let hunterKilled: Array<number> = []
 
-let morningDiscuss: Array<number> = [] 
-
 export const game = {
     assignRoles: () => {
         let roleArray: Array<Role> = []
@@ -316,7 +314,9 @@ export const game = {
             discussWaiting = dead[0]
             updateState({
                 state: gameState,
-                waiting: discussWaiting
+                waiting: discussWaiting,
+                dead,
+                werewolfKilled: werewolfKill
             })
             // hunter.forEach(e => [
             //     hunterKilled[e] = -1
@@ -380,8 +380,6 @@ export const game = {
                     } else {
                         updateState({
                             state: 'discuss',
-                            dead: [],
-                            werewolfKilled: [],
                             waiting: discussWaiting
                         })
                     }
@@ -398,8 +396,8 @@ export const game = {
                     } else {
                         updateState({
                             state: 'morning',
-                            dead: [],
-                            werewolfKilled: [],
+                            dead,
+                            werewolfKilled: werewolfKill,
                             waiting: discussWaiting
                         })
                     }
@@ -642,6 +640,6 @@ const getRandom = () => 3000 + Math.random() * 5000
 
 export const hasSave = (player: string) => {
     const id = getId(player)
-    if (id === -1) return false
+    if (id === -1) {return false}
     return roles[player] === 'witch' && witchInventories[id].save > 0
 }
