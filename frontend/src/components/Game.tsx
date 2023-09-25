@@ -8,6 +8,7 @@ import Seer from './Seer'
 import Vote from './Vote'
 import { entries } from '@werewolf/utils'
 import Hunter from './Hunter'
+import { isDead, isWerewolfKilled } from '../utils'
 
 const stateMessage = {
     idle: '等待开始',
@@ -78,7 +79,7 @@ const Game: Component<{
     return (
         <div class="game">
             <div class="identity">
-                你{props.role ? '的身份' : ''}是: {roleInfo[props.role ?? 'seer']}
+                你{props.role ? '的身份' : ''}是: {roleInfo[props.role ?? 'spec']}
             </div>
             <div class="round">第{round()}轮</div>
             <div class="game-state">
@@ -220,18 +221,24 @@ const Game: Component<{
                 >
                     <div class="vote-end">
                         投票结束，{players()[props.gameData.dead![0]]}被放逐
-                        <div class="vote-result">
-                            <For
-                                each={props.gameData.voteResult!}
-                            >
-                                {
-                                    (name) => (<div>{name}</div>)
-                                }
-                            </For>
-                        </div>
                     </div>
                 </Match>
             </Switch>
+
+            <Show
+                when={typeof props.gameData.voteResult !== 'undefined'}
+            >
+                投票结果：
+                <div class="vote-result">
+                    <For
+                        each={entries(props.gameData.voteResult!)}
+                    >
+                        {
+                            ([source, target]) => (<div>{players()[source]}: {target === -1 ? '弃票' : players()[target]}</div>)
+                        }
+                    </For>
+                </div>
+            </Show>
 
             <Show
                 when={canSendDiscuss()}
@@ -241,24 +248,32 @@ const Game: Component<{
 
             <Show
                 when={
-                    typeof props.gameData.dead !== 'undefined'
-                    && props.gameData.dead.findIndex((id) => id === playerID()) !== -1
-                    && typeof props.gameData.werewolfKilled !== 'undefined'
-                    && props.gameData.werewolfKilled.findIndex((id) => id === playerID()) !== -1
-                    && props.role === 'hunter'
-                }
-                fallback={
-                    <div>
-                            你不能开枪/kk
-                    </div>
+                    props.role === 'hunter'
+                    && isDead(props.gameData.dead, playerID())
                 }
             >
                 <Show
-                    when={props.role === 'hunter' && waitingHunter() === playerID()}
+                    when={
+                        isWerewolfKilled(props.gameData.dead, props.gameData.werewolfKilled, playerID())
+                        || (
+                            props.gameData.state === 'voteend'
+                            && props.gameData.dead![0] === playerID()
+                        )
+                    }
+
+                    fallback={
+                        <div>
+                            你不能开枪/kk
+                        </div>
+                    }
                 >
-                    <Hunter
-                        hasShot={() => setWaitingHunter(undefined)}
-                    />
+                    <Show
+                        when={waitingHunter() === playerID()}
+                    >
+                        <Hunter
+                            hasShot={() => setWaitingHunter(undefined)}
+                        />
+                    </Show>
                 </Show>
             </Show>
 

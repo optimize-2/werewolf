@@ -37,7 +37,7 @@ export type GameData = {
     dead?: Array<number>
     seerResult?: boolean
     waiting?: number
-    voteResult?: Array<number>
+    voteResult?: Record<number, number>
     witchInventory?: WitchInventory
     werewolfKilled?: Array<number>
 }

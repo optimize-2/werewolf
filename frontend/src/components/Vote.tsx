@@ -4,14 +4,14 @@ import { emit } from '../api'
 import { IsConfirmedContext, PlayersContext } from './Room'
 
 const Vote: Component = () => {
-    const [target, setTarget] = createSignal('')
+    const [target, setTarget] = createSignal<string | undefined>()
     const [isAddition, setIsAddtion] = createSignal(false)
 
     const players = useContext(PlayersContext)
     const [isConfirmed, setIsConfirmed] = useContext(IsConfirmedContext)!
 
     const voteConfirm = () => {
-        if (!isConfirmed.vote) {
+        if (!isConfirmed.vote && typeof target() !== 'undefined') {
             setIsConfirmed('vote', true)
             emit('voteConfirm', isAddition() ? -1 : players().findIndex((name) => name === target()))
         }

@@ -6,6 +6,7 @@ import Game from './Game'
 import Players from './Players'
 import { PlayerNameContext } from '../app'
 import { SetStoreFunction, createStore } from 'solid-js/store'
+import { isDead, isWerewolfKilled } from '../utils'
 
 export const PlayerStatesContext = createContext<() => api.PlayerStatesType>(() => ({}))
 export const PlayersContext = createContext<() => string[]>(() => [])
@@ -127,8 +128,7 @@ const Room: Component<{
     })
 
     createEffect(() => {
-        const dead = gameData().dead
-        if (typeof dead !== 'undefined' && dead.findIndex((id) => id === playerID()) !== -1) {
+        if (isDead(gameData().dead, playerID())) {
             alert('人生自古谁无死？不幸的，你已被击杀！')
         }
     })
@@ -145,14 +145,11 @@ const Room: Component<{
                 || (
                     round() === 1
                     && data.state === 'morning'
-                    && typeof data.werewolfKilled !== 'undefined'
-                    && data.werewolfKilled.length > 0
-                    && data.werewolfKilled.findIndex((id) => id === playerID()) !== -1
+                    && isWerewolfKilled(data.dead, data.werewolfKilled, playerID())
                 )
                 || (
                     data.state === 'voteend'
-                    && typeof data.dead !== 'undefined'
-                    && data.dead.findIndex((id) => id === playerID()) !== -1
+                    && isDead(data.dead, playerID())
                 )
             )
         )
