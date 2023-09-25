@@ -492,6 +492,7 @@ export const game = {
             const playerId = getId(player)
             if (witchInventories[playerId].poison > 0 && !witchPoisonUsed[playerId] && !witchSkipped[playerId]) {
                 witchPoisionPlayers.push(id)
+                werewolfKill = werewolfKill.filter(e => e !== id)
                 witchPoisonUsed[playerId] = true
                 witchInventories[playerId].poison -= 1
                 witchSkipped[playerId] = true
