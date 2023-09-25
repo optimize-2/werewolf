@@ -74,7 +74,7 @@ const server = http.createServer((req, res) => {
 
 loadGame()
 
-const port = 1337
+const port = 1338
 server.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`)
 })
