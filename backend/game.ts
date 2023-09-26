@@ -216,7 +216,7 @@ export const game = {
         })
     },
 
-    startWerewolf: (dead?: Array<number>) => {
+    startWerewolf: (vote?: Record<number, number>, dead?: Array<number>) => {
         console.log('start werewolf')
         revote = false
         gameState = 'werewolf'
@@ -360,7 +360,7 @@ export const game = {
                 revote = true
                 game.startVote(vote)
             } else {
-                game.startWerewolf()
+                game.startWerewolf(vote)
             }
         } else {
             gameState = 'voteend'
@@ -579,7 +579,7 @@ export const game = {
                 sendHunterWait(pendingHunter[0])
             } else {
                 if (gameState === 'voteend' && discussWaiting === requiredPlayers) {
-                    game.startWerewolf(hunterKilled)
+                    game.startWerewolf(undefined, hunterKilled)
                 } else if (gameState === 'morning' && discussWaiting === requiredPlayers) {
                     game.startDiscuss(hunterKilled)
                 }
