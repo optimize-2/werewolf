@@ -1,4 +1,4 @@
-import { sendDiscuss, sendHunterWait, sendHunterKilled, updateState, updateWitchState, sendGameEnd, sendWerewolfResult } from '.'
+import { sendDiscuss, sendHunterWait, sendHunterKilled, updateState, updateWitchState, sendGameEnd, sendWerewolfResult, sendSpecInfo } from '.'
 import { loadConfig, ConfigType } from './config'
 import { log } from './utils'
 
@@ -301,13 +301,10 @@ export const game = {
         pendingHunter = []
         dead.forEach(e => {
             playerStates[players[e]] = 'spec'
-            // if (canHunt(roles[players[e]])) {
-            //     pendingHunter.push(e)
-            // }
-        })
-        werewolfKill.forEach(e => {
-            if (canHunt(roles[players[e]])) {
+            if (werewolfKill.includes(e) && canHunt(roles[players[e]])) {
                 pendingHunter.push(e)
+            } else {
+                sendSpecInfo(players[e])
             }
         })
         gameState = 'morning'
@@ -378,6 +375,8 @@ export const game = {
             if (canHunt(roles[players[maxVotePerson]])) {
                 pendingHunter.push(maxVotePerson)
                 sendHunterWait(pendingHunter[0])
+            } else {
+                sendSpecInfo(players[maxVotePerson])
             }
         }
     },
@@ -565,6 +564,7 @@ export const game = {
         if (!canHunt(roles[player])) {return}
         const playerId = getId(player)
         if (pendingHunter.length && pendingHunter[0] === playerId) {
+            sendSpecInfo(player)
             pendingHunter.shift()
             hunterKilled.push(id)
             if (checkId(id)) {

@@ -309,6 +309,6 @@ export const sendWerewolfResult = () => {
     })
 }
 
-export const sendSpecInfo = () => {
-    
+export const sendSpecInfo = (player: string) => {
+    io.to(socketId[player]).emit('specInfo', getRoles())
 }
