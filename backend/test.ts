@@ -1,3 +1,5 @@
-import _ from 'lodash'
+import { randomUUID } from 'crypto'
+import md5 from 'md5'
 
-console.log(_.toInteger('-Infinity'))
+const uuid = randomUUID()
+console.log(uuid, md5(uuid))
