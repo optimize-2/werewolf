@@ -79,7 +79,7 @@ const server = http.createServer((req, res) => {
 
 loadGame()
 
-const port = 1338
+const port = 1335
 server.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`)
 })
@@ -310,5 +310,5 @@ export const sendWerewolfResult = () => {
 }
 
 export const sendSpecInfo = () => {
-    
+
 }
