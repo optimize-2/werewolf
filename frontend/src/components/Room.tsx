@@ -66,7 +66,13 @@ const Room: Component<{
 
     const [role, setRole] = createSignal<api.Role | undefined>(undefined)
 
+    const [canSendDiscuss, setCanSendDiscuss] = createSignal(false)
+
     const sendDiscuss = (msg: string) => {
+        console.log(props.loginResult()?.config.pass)
+        if (props.loginResult()?.config.pass.includes(msg)) {
+            setCanSendDiscuss(false)
+        }
         api.emit('sendDiscuss', msg)
     }
 
@@ -104,6 +110,10 @@ const Room: Component<{
         }
     })
 
+    api.on('specInfo', (data) => {
+        setRoles(data)
+    })
+
     const [seerTarget, setSeerTarget] = createSignal(-1)
     const [seerResults, setSeerResults] = createSignal<Record<number, boolean | undefined>>([])
 
@@ -116,8 +126,6 @@ const Room: Component<{
     const deadAlert = (type: 'killed' | 'vote') => {
         openAlert(`人生自古谁无死？不幸的，你已被${type === 'vote' ? '放逐' : '击杀'}！`)
     }
-
-    const [canSendDiscuss, setCanSendDiscuss] = createSignal(false)
 
     const [voteResults, setVoteResults] = createSignal<Record<number, number>[]>([])
 
@@ -184,6 +192,18 @@ const Room: Component<{
         } else {
             openAlert('狼人获胜')
         }
+    })
+
+    const canShowRoles = createMemo(() => {
+        return (
+            (
+                isGameEnd()
+                || typeof role() === 'undefined'
+                || role() === 'spec'
+                || playerStates()[playerName()] === 'spec'
+            )
+            && !canSendDiscuss()
+        )
     })
 
     return (
@@ -255,29 +275,14 @@ const Room: Component<{
                         <br />
 
                         <div class="turns">
-                            发言顺序{
-                                (
-                                    isGameEnd()
-                                    || typeof role() === 'undefined'
-                                    || role() === 'spec'
-                                    || playerStates()[playerName()] === 'spec'
-                                ) ? '/身份公示' : ''
-                            }：
+                            发言顺序{ canShowRoles() ? '/身份公示' : '' }：
                             <For
                                 each={players()}
                             >
                                 {
                                     (name) => (
                                         <div>
-                                            {name} {
-                                                (
-                                                    isGameEnd()
-                                                    || typeof role() === 'undefined'
-                                                    || role() === 'spec'
-                                                    || playerStates()[playerName()] === 'spec'
-                                                )
-                                                    ? roleInfo[((roles() ?? {})[name]) ?? 'spec'] : ''
-                                            }
+                                            {name} { canShowRoles() ? roleInfo[((roles() ?? {})[name]) ?? 'spec'] : '' }
                                         </div>
                                     )
                                 }

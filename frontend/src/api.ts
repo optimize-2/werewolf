@@ -96,6 +96,8 @@ export function on(event: 'receiveDiscuss', fn: (data: { player: string, message
 export function on(event: 'hunterWait', fn: (data: number) => void): void
 export function on(event: 'hunterKilled', fn: (data: { player: number, target: number }) => void): void
 
+export function on(event: 'specInfo', fn: (data: Record<string, Role>) => void): void
+
 export function on<T>(event: string, fn: (data: T) => void) {
     io.on(event, (data) => {
         console.log(`on(${event}):`, data)
