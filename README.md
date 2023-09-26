@@ -27,7 +27,7 @@
 
 ### `loginResult`（`server` 做完了）
 
-参数：`{ state: GameState, config: ConfigType, players?: Array<string>, roles?: Record<string, string>, day?: number}`
+参数：`{ username: string, state: GameState, config: ConfigType, players?: Array<string>, roles?: Record<string, string>, day?: number}`
 
 ```
 export interface ConfigType {

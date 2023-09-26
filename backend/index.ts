@@ -31,6 +31,7 @@ import {
 } from './game'
 import path from 'path'
 import { ConfigType, getTokens } from './config'
+import md5 from 'md5'
 
 const users: Record<string, string> = {}
 const socketId: Record<string, string> = {}
@@ -87,6 +88,7 @@ server.listen(port, () => {
 const io = new Server(server)
 
 interface LoginResultType {
+    username: string
     state: GameState
     config: ConfigType
     day?: number
@@ -97,7 +99,7 @@ interface LoginResultType {
 io.on('connection', socket => {
     socket.on('login', (token: string) => {
         if (users[socket.id]) {return}
-        const username = getTokens().tokens[token]
+        const username = getTokens().tokens[md5(token)]
         if (!username) {return}
         if (socketId[username]) {return}
         if (username.length >= 20) {return}
@@ -107,6 +109,7 @@ io.on('connection', socket => {
         log('login: ' + username)
         addPlayer(username)
         const result: LoginResultType = {
+            username,
             state: getGameState(),
             config: getConfig(),
             day: getLoginResultDay(username),

@@ -19,3 +19,4 @@ esbuild.buildSync({
 
 copyFileSync('./backend/cfg.json', './dist/cfg.json')
 copyFileSync('./backend/cfg_2.json', './dist/cfg_2.json')
+copyFileSync('./backend/tokens.json', './dist/tokens.json')
