@@ -293,7 +293,7 @@ export const sendHunterWait = (player: number) => {
 }
 
 export const sendGameEnd = (team: number) => {
-    io.to(room).emit('gameEnd', team)
+    io.to(room).emit('gameEnd', { team, roles: getRoles() })
 }
 
 export const sendWerewolfResult = () => {

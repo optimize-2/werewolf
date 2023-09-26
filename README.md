@@ -27,7 +27,7 @@
 
 ### `loginResult`（`server` 做完了）
 
-参数：`{ state: GameState, config: ConfigType }`
+参数：`{ state: GameState, config: ConfigType, players?: Array<string>, roles?: Record<string, string>, day?: number}`
 
 ```
 export interface ConfigType {
@@ -83,7 +83,7 @@ export interface ConfigType {
 
 ### `gameEnd`
 
-参数：`team: number`（游戏意外退出为 `0`，好人为 `1`，狼人为 `2`，方便后续扩展）。
+参数：`{ team: number, roles: Record<string, string> }`（游戏意外退出为 `0`，好人为 `1`，狼人为 `2`，方便后续扩展）。
 
 ### `werewolfResult`
 
