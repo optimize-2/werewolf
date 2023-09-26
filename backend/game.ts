@@ -44,6 +44,7 @@ export const getRoles = () => roles
 
 export const getLoginResultPlayers = () => gameState === 'idle' ? undefined : players
 export const getLoginResultRoles = () => gameState === 'idle' ? undefined : roles
+export const getLoginResultDay = () => gameState === 'idle' ? undefined : day
 
 let discussWaiting: number
 
@@ -209,6 +210,7 @@ export const game = {
             dead,
             seerResult: false,
             waiting: discussWaiting,
+            day
         })
     },
 
@@ -228,6 +230,7 @@ export const game = {
             dead,
             seerResult: false,
             waiting: -1,
+            day
         })
     },
 
@@ -241,6 +244,7 @@ export const game = {
             seerResult: false,
             waiting: -1,
             voteResult: revote,
+            day
         })
     },
 
@@ -262,7 +266,8 @@ export const game = {
         }
         gameState = 'seer'
         updateState({
-            state: gameState
+            state: gameState,
+            day
         })
     },
 
@@ -273,7 +278,7 @@ export const game = {
         }
         console.log('start witch')
         gameState = 'witch'
-        updateWitchState()
+        updateWitchState(day)
         const witch = getPlayersByRole('witch')
         witchSaveUsed = {}
         witchPoisonUsed = {}
@@ -306,7 +311,8 @@ export const game = {
         updateState({
             state: gameState,
             dead,
-            werewolfKilled: werewolfKill
+            werewolfKilled: werewolfKill,
+            day
         })
         if (game.checkEnd()) {return}
         if (pendingHunter.length) {
@@ -319,7 +325,8 @@ export const game = {
                 state: gameState,
                 waiting: discussWaiting,
                 dead,
-                werewolfKilled: werewolfKill
+                werewolfKilled: werewolfKill,
+                day
             })
             // hunter.forEach(e => [
             //     hunterKilled[e] = -1
@@ -362,7 +369,8 @@ export const game = {
                 state: gameState,
                 dead: [ maxVotePerson ],
                 voteResult: vote,
-                waiting: maxVotePerson
+                waiting: maxVotePerson,
+                day
             })
             if (canHunt(roles[players[maxVotePerson]])) {
                 pendingHunter.push(maxVotePerson)
@@ -383,7 +391,8 @@ export const game = {
                     } else {
                         updateState({
                             state: 'discuss',
-                            waiting: discussWaiting
+                            waiting: discussWaiting,
+                            day
                         })
                     }
                 }
@@ -401,7 +410,8 @@ export const game = {
                             state: 'morning',
                             dead,
                             werewolfKilled: werewolfKill,
-                            waiting: discussWaiting
+                            waiting: discussWaiting,
+                            day
                         })
                     }
                 }
@@ -613,7 +623,8 @@ export const game = {
         ])
         gameState = 'idle'
         updateState({
-            state: gameState
+            state: gameState,
+            day
         })
     },
 

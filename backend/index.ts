@@ -87,6 +87,7 @@ const io = new Server(server)
 interface LoginResultType {
     state: GameState
     config: ConfigType
+    day?: number
     players?: Array<string>
     roles?: Record<string, string>
 }
@@ -105,6 +106,7 @@ io.on('connection', socket => {
         const result: LoginResultType = {
             state: getGameState(),
             config: getConfig(),
+            day: getLoginResultDay(),
             players: getLoginResultPlayers(),
             roles: getLoginResultRoles(),
         }
@@ -229,6 +231,7 @@ io.on('connection', socket => {
 
 export interface StateType {
     state: GameState,
+    day: number
     dead?: Array<number>,
     seerResult?: boolean,
     waiting?: number,
@@ -257,7 +260,7 @@ export const sendDiscuss = (player: string, message: string) => io.to(room).emit
     message,
 })
 
-export const updateWitchState = () => {
+export const updateWitchState = (day: number) => {
     Object.entries(users).forEach(([id, name]) => {
         const playerId = getId(name)
         let seerResult = false
@@ -271,7 +274,8 @@ export const updateWitchState = () => {
             state: 'witch',
             dead: hasSave(name) ? getWerewolfKill() : [],
             seerResult,
-            witchInventory: getWitchInventory(name)
+            witchInventory: getWitchInventory(name),
+            day
         }, id)
     })
 }
