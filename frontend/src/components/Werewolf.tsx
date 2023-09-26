@@ -2,12 +2,15 @@ import { Component, For, Show, useContext } from 'solid-js'
 import Players from './Players'
 import * as api from '../api'
 import { createStore } from 'solid-js/store'
-import { IsConfirmedContext, PlayersContext } from './Room'
+import { IsConfirmedContext, PlayerStatesContext, PlayersContext } from './Room'
 import { entries } from '@werewolf/utils'
+import { PlayerNameContext } from '../app'
 
 const Werewolf: Component = () => {
     const players = useContext(PlayersContext)
     const [isConfirmed, setIsConfirmed] = useContext(IsConfirmedContext)!
+    const playerStates = useContext(PlayerStatesContext)
+    const playerName = useContext(PlayerNameContext)
 
     const select = (target: string, isEmptyKnife: boolean) => {
         if (!isConfirmed.werewolf) {
@@ -37,41 +40,45 @@ const Werewolf: Component = () => {
 
     return (
         <div class="werewolf">
-            <div class="werewolf-action">
-                请选择你要刀的人
-                <Players
-                    className="select-player"
-                    filter={([, state]) => state === 'alive'}
-                    displayState={false}
-                    addition={{ '空刀': '空刀' }}
-                    select={{
-                        invoke: (t, isAddtion) => {
-                            if (!isConfirmed.werewolf) {
-                                select(t, isAddtion)
-                                return true
-                            }
-                            return false
-                        },
-                        default: { nameOrID: '空刀', isAdditon: true, },
-                    }}
-                />
-                <Show
-                    when={!isConfirmed.werewolf}
-                    fallback={
-                        <button
-                            onClick={() => cancelComfirmation()}
-                        >
+            <Show
+                when={playerStates()[playerName()] !== 'spec'}
+            >
+                <div class="werewolf-action">
+                    请选择你要刀的人
+                    <Players
+                        className="select-player"
+                        filter={([, state]) => state === 'alive'}
+                        displayState={false}
+                        addition={{ '空刀': '空刀' }}
+                        select={{
+                            invoke: (t, isAddtion) => {
+                                if (!isConfirmed.werewolf) {
+                                    select(t, isAddtion)
+                                    return true
+                                }
+                                return false
+                            },
+                            default: { nameOrID: '空刀', isAdditon: true, },
+                        }}
+                    />
+                    <Show
+                        when={!isConfirmed.werewolf}
+                        fallback={
+                            <button
+                                onClick={() => cancelComfirmation()}
+                            >
                             取消
-                        </button>
-                    }
-                >
-                    <button
-                        onClick={() => confirm()}
+                            </button>
+                        }
                     >
+                        <button
+                            onClick={() => confirm()}
+                        >
                         确认
-                    </button>
-                </Show>
-            </div>
+                        </button>
+                    </Show>
+                </div>
+            </Show>
             <div class="werewolf-panel">
                 <div class="werewolf-selected">
                     <For

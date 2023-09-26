@@ -4,12 +4,13 @@
     "description": "",
     "scripts": {
         "start": "vite",
-        "dev": "vite build --minify false",
+        "dev": "vite build --minify false -m development",
         "build": "vite build",
         "serve": "vite preview"
     },
     "license": "MIT",
     "devDependencies": {
+        "@faker-js/faker": "^8.1.0",
         "autoprefixer": "^10.4.14",
         "solid-devtools": "^0.27.3",
         "vite": "^4.3.9",

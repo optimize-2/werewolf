@@ -1,55 +1,35 @@
 import { Component, For, Match, Show, Switch, createEffect, createSignal, useContext } from 'solid-js'
 import * as api from '../api'
 import { PlayerNameContext } from '../app'
-import { CanSendContext, PlayerIDContext, PlayerStatesContext as PlayerStatesContext, PlayersContext, RoundContext } from './Room'
+import { CanSendContext, GameDataContext, PlayerIDContext, PlayerStatesContext as PlayerStatesContext, PlayersContext } from './Room'
 import Werewolf from './Werewolf'
 import Witch from './Witch'
 import Seer from './Seer'
 import Vote from './Vote'
 import { entries } from '@werewolf/utils'
 import Hunter from './Hunter'
-import { isDead, isWerewolfKilled } from '../utils'
+import { isDead, isWerewolfKilled, roleInfo, stateMessage } from '../utils'
 import { openAlert } from './Alert'
 
-const stateMessage = {
-    idle: '等待开始',
-    morning: '天亮了',
-    werewolf: '狼人请睁眼',
-    witch: '女巫请睁眼',
-    seer: '预言家请睁眼',
-    discuss: '等待发言',
-    vote: '请投票',
-    voteend: '投票结束',
-}
-
-const roleInfo = {
-    villager: '平民',
-    werewolf: '狼人',
-    seer: '预言家',
-    witch: '女巫',
-    hunter: '猎人',
-    spec: '旁观者',
-}
-
 const Game: Component<{
-    gameData: api.GameData
     seerResults: Record<number, boolean | undefined>
+    seerTarget: () => number
     setSeerTarget: (target: number) => void
     deadPlayers: api.DeadPlayers
+    addDeadPlayers: (i: api.DeadPlayer) => void
     role?: api.Role
 }> = (props) => {
     const playerName = useContext(PlayerNameContext)
     const playerStates = useContext(PlayerStatesContext)
     const players = useContext(PlayersContext)
     const playerID = useContext(PlayerIDContext)
+    const gameData = useContext(GameDataContext)
 
     const [playerState, setPlayerState] = createSignal(playerStates()[playerName()])
 
     createEffect(() => {
         setPlayerState(playerStates()[playerName()])
     })
-
-    const round = useContext(RoundContext)
 
     const canSendDiscuss = useContext(CanSendContext)
 
@@ -66,9 +46,19 @@ const Game: Component<{
     })
 
     createEffect(() => {
-        if (hunterTarget() === playerID()) {
+        if (typeof hunterTarget() !== 'undefined') {
+            props.addDeadPlayers({
+                round: gameData().day,
+                type: 'hunter',
+                deadPlayers: [hunterTarget()!],
+            })
+
+            if (hunterTarget() === playerID()) {
             // alert('人生自古谁无死？不幸的，你已被击杀！')
-            openAlert('人生自古谁无死？不幸的，你已被击杀！')
+                openAlert('人生自古谁无死？不幸的，你已被猎人击杀！')
+            }
+
+            setHunterTarget(undefined)
         }
     })
 
@@ -84,9 +74,9 @@ const Game: Component<{
             <div class="identity">
                 你{props.role ? '的身份' : ''}是: {roleInfo[props.role ?? 'spec']}
             </div>
-            <div class="round">第{round()}轮</div>
+            <div class="round">第{gameData().day}轮</div>
             <div class="game-state">
-                当前: {stateMessage[props.gameData.state]}
+                当前: {stateMessage[gameData().state]}
             </div>
 
             <div class="death-container">
@@ -162,7 +152,7 @@ const Game: Component<{
             </div>
 
             <Show
-                when={props.role === 'seer'}
+                when={props.role === 'seer' || playerState() === 'spec'}
             >
                 <div class="seer-results">
                     <For
@@ -190,51 +180,79 @@ const Game: Component<{
                 }
             >
                 <Match
-                    when={canSendDiscuss()}
+                    when={
+                        canSendDiscuss() || (
+                            (
+                                isWerewolfKilled(gameData().dead, gameData().werewolfKilled, playerID())
+                                || (
+                                    gameData().state === 'voteend'
+                                    && gameData().dead![0] === playerID()
+                                )
+                            ) && (
+                                waitingHunter() === playerID()
+                            )
+                        )
+                    }
                 >
                     <></>
                 </Match>
                 <Match
-                    when={props.gameData.state === 'werewolf' && props.role === 'werewolf' && playerState() === 'alive'}
+                    when={
+                        gameData().state === 'werewolf'
+                        && (
+                            (
+                                props.role === 'werewolf'
+                                && playerState() === 'alive'
+                            )
+                            || playerState() === 'spec'
+                        )
+                    }
                 >
                     <Werewolf />
                 </Match>
                 <Match
-                    when={props.gameData.state === 'witch' && props.role === 'witch' && playerState() === 'alive'}
+                    when={
+                        gameData().state === 'witch'
+                        && (
+                            props.role === 'witch'
+                            && playerState() === 'alive'
+                        )
+                    }
                 >
-                    <Witch
-                        witchInventory={props.gameData.witchInventory!}
-                        dead={props.gameData.dead!}
-                    />
+                    <Witch/>
                 </Match>
                 <Match
-                    when={props.gameData.state === 'seer' && props.role === 'seer' && playerState() === 'alive'}
+                    when={
+                        gameData().state === 'seer'
+                        && props.role === 'seer'
+                        && playerState() === 'alive'
+                    }
                 >
                     <Seer
                         setSeerTarget={props.setSeerTarget}
                     />
                 </Match>
                 <Match
-                    when={props.gameData.state === 'vote' && props.role && playerState() === 'alive'}
+                    when={gameData().state === 'vote' && props.role && playerState() === 'alive'}
                 >
                     <Vote/>
                 </Match>
                 <Match
-                    when={props.gameData.state === 'voteend'}
+                    when={gameData().state === 'voteend'}
                 >
                     <div class="vote-end">
-                        投票结束，{players()[props.gameData.dead![0]]}被放逐
+                        投票结束，{players()[gameData().dead![0]]}被放逐
                     </div>
                 </Match>
             </Switch>
 
             <Show
-                when={typeof props.gameData.voteResult !== 'undefined'}
+                when={typeof gameData().voteResult !== 'undefined'}
             >
                 投票结果：
                 <div class="vote-result">
                     <For
-                        each={entries(props.gameData.voteResult!)}
+                        each={entries(gameData().voteResult!)}
                     >
                         {
                             ([source, target]) => (<div>{players()[source]}: {target === -1 ? '弃票' : players()[target]}</div>)
@@ -252,15 +270,15 @@ const Game: Component<{
             <Show
                 when={
                     props.role === 'hunter'
-                    && isDead(props.gameData.dead, playerID())
+                    && isDead(gameData().dead, playerID())
                 }
             >
                 <Show
                     when={
-                        isWerewolfKilled(props.gameData.dead, props.gameData.werewolfKilled, playerID())
+                        isWerewolfKilled(gameData().dead, gameData().werewolfKilled, playerID())
                         || (
-                            props.gameData.state === 'voteend'
-                            && props.gameData.dead![0] === playerID()
+                            gameData().state === 'voteend'
+                            && gameData().dead![0] === playerID()
                         )
                     }
 
