@@ -105,9 +105,7 @@ const Room: Component<{
             day: props.loginResult()?.day ?? 0,
         })
         setRoles(props.loginResult()?.roles)
-        if (typeof props.loginResult()?.players !== 'undefined') {
-            setPlayers(props.loginResult()!.players!)
-        }
+        setPlayers(props.loginResult()?.players ?? [])
     })
 
     api.on('specInfo', (data) => {
@@ -156,7 +154,6 @@ const Room: Component<{
                     deadPlayers: data.dead ?? [],
                 })
             }
-
         } else if (data.state === 'vote') {
             setIsConfirmed('vote', false)
         } else if (data.state === 'voteend') {
@@ -184,10 +181,11 @@ const Room: Component<{
     const [isGameEnd, setIsGameEnd] = createSignal(false)
 
     api.on('gameEnd', (data) => {
+        setRoles(data.roles)
         setIsGameEnd(true)
-        if (data === 0) {
+        if (data.team === 0) {
             openAlert('游戏异常退出')
-        } else if (data === 1) {
+        } else if (data.team === 1) {
             openAlert('好人获胜')
         } else {
             openAlert('狼人获胜')
