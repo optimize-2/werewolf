@@ -1,3 +1,5 @@
+const debug = false
+
 import http from 'http'
 import { readFile } from 'fs'
 import { Server } from 'socket.io'
@@ -99,7 +101,7 @@ interface LoginResultType {
 io.on('connection', socket => {
     socket.on('login', (token: string) => {
         if (users[socket.id]) {return}
-        const username = getTokens().tokens[md5(token)]
+        const username = debug ? token : getTokens().tokens[md5(token)]
         if (!username) {return}
         if (socketId[username]) {return}
         if (username.length >= 20) {return}
