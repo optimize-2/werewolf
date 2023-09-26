@@ -119,6 +119,8 @@ const Room: Component<{
 
     const [canSendDiscuss, setCanSendDiscuss] = createSignal(false)
 
+    const [voteResults, setVoteResults] = createSignal<Record<number, number>[]>([])
+
     api.on('gameState', (data) => {
         if (data.state === 'werewolf') {
             setIsConfirmed('werewolf', false)
@@ -162,6 +164,11 @@ const Room: Component<{
         }
 
         setCanSendDiscuss(typeof data.waiting !== 'undefined' && data.waiting !== -1 && data.waiting === playerID())
+
+        if (typeof data.voteResult !== 'undefined') {
+            setVoteResults([...voteResults(), data.voteResult])
+            console.log(voteResults())
+        }
 
         setGameData(data)
     })
@@ -314,6 +321,7 @@ const Room: Component<{
                                                     role={role()}
                                                     addDeadPlayers={addDeadPlayers}
                                                     deadPlayers={deadPlayers}
+                                                    voteResults={voteResults}
                                                 />
                                             </CanSendContext.Provider>
                                         </PlayerIDContext.Provider>

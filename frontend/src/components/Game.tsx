@@ -17,6 +17,7 @@ const Game: Component<{
     setSeerTarget: (target: number) => void
     deadPlayers: api.DeadPlayers
     addDeadPlayers: (i: api.DeadPlayer) => void
+    voteResults: () => Record<number, number>[]
     role?: api.Role
 }> = (props) => {
     const playerName = useContext(PlayerNameContext)
@@ -152,6 +153,32 @@ const Game: Component<{
             </div>
 
             <Show
+                when={props.voteResults().length > 0}
+            >
+                投票结果：
+                <div class="vote-results-container">
+                    <For
+                        each={props.voteResults()}
+                    >
+                        {
+                            (result) => (
+                                <div class="vote-result">
+                                    <For
+                                        each={entries(result)}
+                                    >
+                                        {
+                                            ([source, target]) => (<div>{players()[source]}: {target === -1 ? '弃票' : players()[target]}</div>)
+                                        }
+                                    </For>
+                                    <br />
+                                </div>
+                            )
+                        }
+                    </For>
+                </div>
+            </Show>
+
+            <Show
                 when={props.role === 'seer' || playerState() === 'spec'}
             >
                 <div class="seer-results">
@@ -245,21 +272,6 @@ const Game: Component<{
                     </div>
                 </Match>
             </Switch>
-
-            <Show
-                when={typeof gameData().voteResult !== 'undefined'}
-            >
-                投票结果：
-                <div class="vote-result">
-                    <For
-                        each={entries(gameData().voteResult!)}
-                    >
-                        {
-                            ([source, target]) => (<div>{players()[source]}: {target === -1 ? '弃票' : players()[target]}</div>)
-                        }
-                    </For>
-                </div>
-            </Show>
 
             <Show
                 when={canSendDiscuss()}
