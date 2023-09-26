@@ -232,6 +232,7 @@ export const game = {
             dead,
             seerResult: false,
             waiting: -1,
+            voteResult: vote,
             day
         })
     },
