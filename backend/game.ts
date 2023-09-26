@@ -214,6 +214,11 @@ export const game = {
             waiting: discussWaiting,
             day
         })
+        players.forEach(e => {
+            if (playerStates[e] === 'spec') {
+                sendSpecInfo(e)
+            }
+        })
     },
 
     startWerewolf: (vote?: Record<number, number>, dead?: Array<number>) => {
@@ -303,7 +308,8 @@ export const game = {
             playerStates[players[e]] = 'spec'
             if (werewolfKill.includes(e) && canHunt(roles[players[e]])) {
                 pendingHunter.push(e)
-            } else {
+            }
+            if (!werewolfKill.includes(e)) {
                 sendSpecInfo(players[e])
             }
         })
@@ -376,7 +382,7 @@ export const game = {
                 pendingHunter.push(maxVotePerson)
                 sendHunterWait(pendingHunter[0])
             } else {
-                sendSpecInfo(players[maxVotePerson])
+                
             }
         }
     },
@@ -564,7 +570,7 @@ export const game = {
         if (!canHunt(roles[player])) {return}
         const playerId = getId(player)
         if (pendingHunter.length && pendingHunter[0] === playerId) {
-            sendSpecInfo(player)
+            // sendSpecInfo(player)
             pendingHunter.shift()
             hunterKilled.push(id)
             if (checkId(id)) {
