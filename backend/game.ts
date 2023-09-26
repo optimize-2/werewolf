@@ -42,6 +42,9 @@ export const getPlayers = () => players
 export const getPlayerStates = () => playerStates
 export const getRoles = () => roles
 
+export const getLoginResultPlayers = () => gameState === 'idle' ? undefined : players
+export const getLoginResultRoles = () => gameState === 'idle' ? undefined : roles
+
 let discussWaiting: number
 
 let config: ConfigType

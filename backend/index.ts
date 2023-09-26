@@ -13,6 +13,8 @@ import {
     getConfig,
     getGameState,
     getId,
+    getLoginResultPlayers,
+    getLoginResultRoles,
     getPlayerStates,
     getPlayers,
     getRoles,
@@ -85,6 +87,8 @@ const io = new Server(server)
 interface LoginResultType {
     state: GameState
     config: ConfigType
+    players?: Array<string>
+    roles?: Record<string, string>
 }
 
 io.on('connection', socket => {
@@ -100,7 +104,9 @@ io.on('connection', socket => {
         addPlayer(username)
         const result: LoginResultType = {
             state: getGameState(),
-            config: getConfig()
+            config: getConfig(),
+            players: getLoginResultPlayers(),
+            roles: getLoginResultRoles(),
         }
         socket.emit('loginResult', result)
         socket.join(room)
