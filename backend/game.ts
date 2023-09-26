@@ -228,6 +228,11 @@ export const game = {
         werewolfSelect = {}
         werewolfConfirm = {}
         werewolfKill = []
+        players.forEach(e => {
+            if (playerStates[e] === 'spec') {
+                sendSpecInfo(e)
+            }
+        })
         getPlayersByRole('werewolf').forEach(e => {
             werewolfSelect[e] = -1
             werewolfConfirm[e] = false
