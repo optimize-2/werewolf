@@ -76,7 +76,7 @@ export function on(event: 'loginResult', fn: (data: LoginResult) => void): void
 export function on(event: 'updateUsers', fn: (data: PlayerStatesType) => void): void
 export function on(event: 'readyResult', fn: (data: Record<string, boolean>) => void): void
 export function on(event: 'gameStart', fn: (data: { role: Role, players: Array<string> }) => void): void
-export function on(event: 'gameEnd', fn: (data: number) => void): void
+export function on(event: 'gameEnd', fn: (data: { team: number, roles: Record<string, Role> }) => void): void
 
 export function on(
     event: 'gameState',

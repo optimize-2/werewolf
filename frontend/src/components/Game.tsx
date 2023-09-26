@@ -80,81 +80,88 @@ const Game: Component<{
                 当前: {stateMessage[gameData().state]}
             </div>
 
-            <div class="death-container">
-                <For
-                    each={props.deadPlayers}
-                >
-                    {
-                        ({ round, type, deadPlayers}) => (
-                            <div class="death-per-round">
-                                <Switch
-                                    fallback={
-                                        <>这可能是个 bug !</>
-                                    }
-                                >
-                                    <Match
-                                        when={type === 'hunter' && deadPlayers.length > 0}
+            <Show
+                when={props.deadPlayers.length > 0}
+            >
+                <br />
+                <div class="death-container">
+                    <For
+                        each={props.deadPlayers}
+                    >
+                        {
+                            ({ round, type, deadPlayers}) => (
+                                <div class="death-per-round">
+                                    <Switch
+                                        fallback={
+                                            <>这可能是个 bug !</>
+                                        }
                                     >
+                                        <Match
+                                            when={type === 'hunter' && deadPlayers.length > 0}
+                                        >
                                         第{round}轮被猎人击杀的有:
-                                        <For
-                                            each={deadPlayers}
+                                            <For
+                                                each={deadPlayers}
+                                            >
+                                                {
+                                                    (id) => (
+                                                        <div class="death">
+                                                            {players()[id]}
+                                                        </div>
+                                                    )
+                                                }
+                                            </For>
+                                        </Match>
+                                        <Match
+                                            when={type === 'night' && deadPlayers.length > 0}
                                         >
-                                            {
-                                                (id) => (
-                                                    <div class="death">
-                                                        {players()[id]}
-                                                    </div>
-                                                )
-                                            }
-                                        </For>
-                                    </Match>
-                                    <Match
-                                        when={type === 'night' && deadPlayers.length > 0}
-                                    >
-                                        第{round}晚死亡的有:
-                                        <For
-                                            each={deadPlayers}
+                                            第{round}晚死亡的有:
+                                            <For
+                                                each={deadPlayers}
+                                            >
+                                                {
+                                                    (id) => (
+                                                        <div class="death">
+                                                            {players()[id]}
+                                                        </div>
+                                                    )
+                                                }
+                                            </For>
+                                        </Match>
+                                        <Match
+                                            when={type === 'night' && deadPlayers.length === 0}
                                         >
-                                            {
-                                                (id) => (
-                                                    <div class="death">
-                                                        {players()[id]}
-                                                    </div>
-                                                )
-                                            }
-                                        </For>
-                                    </Match>
-                                    <Match
-                                        when={type === 'night' && deadPlayers.length === 0}
-                                    >
                                         第{round}晚是个平安夜
-                                    </Match>
-                                    <Match
-                                        when={type === 'vote' && deadPlayers.length > 0}
-                                    >
-                                        第{round}轮被放逐的有
-                                        <For
-                                            each={deadPlayers}
+                                        </Match>
+                                        <Match
+                                            when={type === 'vote' && deadPlayers.length > 0}
                                         >
-                                            {
-                                                (id) => (
-                                                    <div class="death">
-                                                        {players()[id]}
-                                                    </div>
-                                                )
-                                            }
-                                        </For>
-                                    </Match>
-                                </Switch>
-                            </div>
-                        )
-                    }
-                </For>
-            </div>
+                                        第{round}轮被放逐的有
+                                            <For
+                                                each={deadPlayers}
+                                            >
+                                                {
+                                                    (id) => (
+                                                        <div class="death">
+                                                            {players()[id]}
+                                                        </div>
+                                                    )
+                                                }
+                                            </For>
+                                        </Match>
+                                    </Switch>
+                                </div>
+                            )
+                        }
+                    </For>
+                </div>
+            </Show>
 
             <Show
                 when={props.voteResults().length > 0}
             >
+                <br />
+
                 投票结果：
                 <div class="vote-results-container">
                     <For
@@ -167,7 +174,9 @@ const Game: Component<{
                                         each={entries(result)}
                                     >
                                         {
-                                            ([source, target]) => (<div>{players()[source]}: {target === -1 ? '弃票' : players()[target]}</div>)
+                                            ([source, target]) => (
+                                                <div>{players()[source]}: {target === -1 ? '弃票' : players()[target]}</div>
+                                            )
                                         }
                                     </For>
                                     <br />
@@ -181,6 +190,8 @@ const Game: Component<{
             <Show
                 when={props.role === 'seer' || playerState() === 'spec'}
             >
+                <br />
+
                 <div class="seer-results">
                     <For
                         each={entries(props.seerResults)}
@@ -195,6 +206,8 @@ const Game: Component<{
                     </For>
                 </div>
             </Show>
+
+            <br />
 
             <Switch
                 fallback={
@@ -276,6 +289,8 @@ const Game: Component<{
             <Show
                 when={canSendDiscuss()}
             >
+                <br />
+
                 轮到你发言了！！！
             </Show>
 
@@ -285,6 +300,8 @@ const Game: Component<{
                     && isDead(gameData().dead, playerID())
                 }
             >
+                <br />
+
                 <Show
                     when={
                         isWerewolfKilled(gameData().dead, gameData().werewolfKilled, playerID())
