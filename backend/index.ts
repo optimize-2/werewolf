@@ -30,7 +30,7 @@ import {
     setState
 } from './game'
 import path from 'path'
-import { ConfigType } from './config'
+import { ConfigType, getTokens } from './config'
 
 const users: Record<string, string> = {}
 const socketId: Record<string, string> = {}
@@ -95,10 +95,11 @@ interface LoginResultType {
 }
 
 io.on('connection', socket => {
-    socket.on('login', (username: string) => {
+    socket.on('login', (token: string) => {
         if (users[socket.id]) {return}
-        if (socketId[username]) {return}
+        const username = getTokens().tokens[token]
         if (!username) {return}
+        if (socketId[username]) {return}
         if (username.length >= 20) {return}
         if (['空刀', '弃票', '不开枪', '跳过'].includes(username.trim())) {return}
         users[socket.id] = username
