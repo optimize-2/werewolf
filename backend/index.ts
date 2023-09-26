@@ -13,6 +13,7 @@ import {
     getConfig,
     getGameState,
     getId,
+    getLoginResultDay,
     getLoginResultPlayers,
     getLoginResultRoles,
     getPlayerStates,
