@@ -42,9 +42,11 @@ export const getPlayers = () => players
 export const getPlayerStates = () => playerStates
 export const getRoles = () => roles
 
-export const getLoginResultPlayers = (player: string) => (gameState !== 'idle' && players.includes(player)) ? players : undefined
-export const getLoginResultRoles = (player: string) => (gameState !== 'idle' && players.includes(player)) ? roles : undefined
-export const getLoginResultDay = (player: string) => (gameState !== 'idle' && players.includes(player)) ? day : undefined
+export const canSpec = (player: string) => playerStates[player] === 'spec' && players.includes(player)
+
+export const getLoginResultPlayers = (player: string) => canSpec(player) ? players : undefined
+export const getLoginResultRoles = (player: string) => canSpec(player) ? roles : undefined
+export const getLoginResultDay = (player: string) => canSpec(player) ? day : undefined
 
 let discussWaiting: number
 

@@ -7,6 +7,7 @@ import {
     Role,
     WitchInventory,
     addPlayer,
+    canSpec,
     checkId,
     checkStart,
     game,
@@ -299,7 +300,7 @@ export const sendGameEnd = (team: number) => {
 export const sendWerewolfResult = () => {
     const result: Array<string> = []
     Object.entries(getRoles()).forEach(([k, v]) => {
-        if (isWerewolf(v) || getPlayerStates()[k] !== 'alive') {
+        if (isWerewolf(v) || canSpec(k)) {
             result.push(k)
         }
     })
