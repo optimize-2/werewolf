@@ -42,9 +42,9 @@ export const getPlayers = () => players
 export const getPlayerStates = () => playerStates
 export const getRoles = () => roles
 
-export const getLoginResultPlayers = () => gameState === 'idle' ? undefined : players
-export const getLoginResultRoles = () => gameState === 'idle' ? undefined : roles
-export const getLoginResultDay = () => gameState === 'idle' ? undefined : day
+export const getLoginResultPlayers = (player: string) => (gameState !== 'idle' && players.includes(player)) ? players : undefined
+export const getLoginResultRoles = (player: string) => (gameState !== 'idle' && players.includes(player)) ? roles : undefined
+export const getLoginResultDay = (player: string) => (gameState !== 'idle' && players.includes(player)) ? day : undefined
 
 let discussWaiting: number
 

@@ -107,9 +107,9 @@ io.on('connection', socket => {
         const result: LoginResultType = {
             state: getGameState(),
             config: getConfig(),
-            day: getLoginResultDay(),
-            players: getLoginResultPlayers(),
-            roles: getLoginResultRoles(),
+            day: getLoginResultDay(username),
+            players: getLoginResultPlayers(username),
+            roles: getLoginResultRoles(username),
         }
         socket.emit('loginResult', result)
         socket.join(room)
@@ -306,4 +306,8 @@ export const sendWerewolfResult = () => {
     result.forEach(e => {
         io.to(socketId[e]).emit('werewolfResult', getWerewolfResult())
     })
+}
+
+export const sendSpecInfo = () => {
+    
 }

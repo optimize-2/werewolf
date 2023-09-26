@@ -89,6 +89,10 @@ export interface ConfigType {
 
 参数：`{ select: Record<number, number>, confirm: Record<number, boolean> }`
 
+
+### `specInfo`
+
+参数：`roles: Record<string, string>`
 ## client -> server:
 
 ### `login`（`server` 做完了）
