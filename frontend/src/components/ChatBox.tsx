@@ -18,7 +18,7 @@ const ChatBox: Component<{
     const canSend = useContext(CanSendContext)
 
     props.recvMessage((data) => {
-        console.log('receive', props.type, data)
+        // console.log('receive', props.type, data)
         setMessages([...messages(), data])
         history!.scrollTo({
             top: history!.scrollHeight,

@@ -1,15 +1,13 @@
 import { Component, For, Show, createMemo, createSignal, useContext } from 'solid-js'
-import { WitchInventory, emit } from '../api'
+import { emit } from '../api'
 import Players from './Players'
-import { IsConfirmedContext, PlayersContext, RoundContext } from './Room'
+import { GameDataContext, IsConfirmedContext, PlayersContext } from './Room'
 import { PlayerNameContext } from '../app'
 
-const Witch: Component<{
-    witchInventory: WitchInventory
-    dead: number[]
-}> = (props) => {
+const Witch: Component = () => {
     const players = useContext(PlayersContext)
     const [isConfirmed, setIsConfirmed] = useContext(IsConfirmedContext)!
+    const gameData = useContext(GameDataContext)
 
     const [target, setTarget] = createSignal<string | undefined>()
 
@@ -27,9 +25,8 @@ const Witch: Component<{
         emit('witchPoison', tar)
     }
 
-    const deadName = createMemo(() => props.dead.map((value) => players()[value]))
+    const deadName = createMemo(() => gameData().dead!.map((value) => players()[value]))
 
-    const round = useContext(RoundContext)
     const playerName = useContext(PlayerNameContext)
 
     const skip = () => {
@@ -39,7 +36,7 @@ const Witch: Component<{
     return (
         <div class="witch">
             <Show
-                when={props.witchInventory.save}
+                when={gameData().witchInventory?.save}
                 fallback={
                     <div>
                         你已经没有解药了！
@@ -69,7 +66,7 @@ const Witch: Component<{
                         </For>
                     </div>
                     <Show
-                        when={deadName().length > 0 && (round() === 1 || deadName()[0] !== playerName())}
+                        when={deadName().length > 0 && (gameData().day === 1 || deadName()[0] !== playerName())}
                         fallback={
                             <div>你不能对自己使用解药了qwq</div>
                         }
@@ -84,7 +81,7 @@ const Witch: Component<{
             </Show>
 
             <Show
-                when={props.witchInventory.poison}
+                when={gameData().witchInventory?.poison}
                 fallback={
                     <div>
                         你已经没有毒药了！
@@ -93,7 +90,7 @@ const Witch: Component<{
             >
                 <Players
                     className="select-player"
-                    filter={([name, state]) => state === 'alive' && deadName().findIndex((value) => value === name) === -1}
+                    filter={([, state]) => state === 'alive'}
                     displayState={false}
                     select={{
                         invoke: (t) => {

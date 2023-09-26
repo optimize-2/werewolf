@@ -2,6 +2,7 @@ import { createSignal, type Component, Show, createContext } from 'solid-js'
 import * as api from './api'
 import Room from './components/Room'
 import './app.css'
+import { faker } from '@faker-js/faker'
 
 export const PlayerNameContext = createContext<() => string>(() => '')
 
@@ -9,23 +10,11 @@ const App: Component = () => {
     const [username, setUsername] = createSignal('')
     const [isLoggedin, setIsLoggedin] = createSignal(false)
 
-    const [gameState, setGameState] = createSignal<api.GameState>('idle')
-    const [config, setConfig] = createSignal<api.ConfigType>({
-        pass: [],
-        roles: {
-            hunter: 0,
-            seer: 0,
-            villager: 0,
-            werewolf: 0,
-            witch: 0,
-        },
-        target: 'side',
-    })
+    const [loginResult, setLoginResult] = createSignal<api.LoginResult | undefined>()
 
     api.on('loginResult', (data) => {
         setIsLoggedin(true)
-        setGameState(data.state)
-        setConfig(data.config)
+        setLoginResult(data)
     })
 
     const login = () => {
@@ -33,6 +22,11 @@ const App: Component = () => {
         if (name.length > 0) {
             api.emit('login', name)
         }
+    }
+
+    if (import.meta.env.MODE === 'development') {
+        setUsername(faker.person.firstName())
+        login()
     }
 
     api.on('disconnect', () => {
@@ -76,8 +70,7 @@ const App: Component = () => {
                         <div class="username">{username()}</div>
                     </div>
                     <Room
-                        gameConfig={config()}
-                        gameStateNow={gameState()}
+                        loginResult={loginResult}
                     />
                 </PlayerNameContext.Provider>
             </Show>

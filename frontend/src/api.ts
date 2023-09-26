@@ -26,6 +26,7 @@ export type Role =
     | 'seer'
     | 'witch'
     | 'hunter'
+    | 'spec'
 
 export type WitchInventory = {
     save: number,
@@ -34,6 +35,7 @@ export type WitchInventory = {
 
 export type GameData = {
     state: GameState
+    day: number
     dead?: Array<number>
     seerResult?: boolean
     waiting?: number
@@ -61,8 +63,16 @@ export type ConfigType = {
     pass: Array<string>
 }
 
+export type LoginResult = {
+    state: GameState
+    config: ConfigType
+    day: number
+    players?: string[]
+    roles?: Record<string, Role>
+}
+
 export function on(event: 'login', fn: (data: string) => void): void
-export function on(event: 'loginResult', fn: (data: { state: GameState, config: ConfigType }) => void): void
+export function on(event: 'loginResult', fn: (data: LoginResult) => void): void
 export function on(event: 'updateUsers', fn: (data: PlayerStatesType) => void): void
 export function on(event: 'readyResult', fn: (data: Record<string, boolean>) => void): void
 export function on(event: 'gameStart', fn: (data: { role: Role, players: Array<string> }) => void): void

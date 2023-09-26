@@ -1,4 +1,4 @@
-import { createSignal, type Component, Switch, Match, createContext, useContext, createMemo, createEffect, For } from 'solid-js'
+import { createSignal, type Component, Switch, Match, createContext, useContext, createMemo, For, createEffect } from 'solid-js'
 import * as api from '../api'
 import Ready from './Ready'
 import ChatBox from './ChatBox'
@@ -6,15 +6,19 @@ import Game from './Game'
 import Players from './Players'
 import { PlayerNameContext } from '../app'
 import { SetStoreFunction, createStore } from 'solid-js/store'
-import { isDead, isWerewolfKilled } from '../utils'
+import { isDead, roleInfo } from '../utils'
 import './Room.css'
 import { openAlert } from './Alert'
+import { entries } from '@werewolf/utils'
 
 export const PlayerStatesContext = createContext<() => api.PlayerStatesType>(() => ({}))
 export const PlayersContext = createContext<() => string[]>(() => [])
 export const PlayerIDContext = createContext<() => number>(() => -1)
-export const RoundContext = createContext<() => number>(() => 0)
 export const CanSendContext = createContext<() => boolean>(() => true)
+export const GameDataContext = createContext<() => api.GameData>(() => ({
+    state: 'idle',
+    day: 0,
+} as api.GameData))
 
 type IsConfirmedType = {
     werewolf: boolean
@@ -34,8 +38,7 @@ const targetMsg = {
 }
 
 const Room: Component<{
-    gameConfig: api.ConfigType
-    gameStateNow: api.GameState
+    loginResult: () => api.LoginResult | undefined
 }> = (props) => {
     const playerName = useContext(PlayerNameContext)
 
@@ -50,7 +53,10 @@ const Room: Component<{
     const [playerStates, setPlayerStates] = createSignal<api.PlayerStatesType>({})
     const [players, setPlayers] = createSignal<string[]>([])
 
-    const playerID = createMemo(() => players().findIndex((name) => name === playerName()))
+    const playerID = createMemo(() => {
+        const id = players().findIndex((name) => name === playerName())
+        return id === -1 ? -2 : id
+    })
 
     api.on('updateUsers', (data) => {
         setPlayerStates(data)
@@ -60,20 +66,46 @@ const Room: Component<{
 
     const [role, setRole] = createSignal<api.Role | undefined>(undefined)
 
+    const sendDiscuss = (msg: string) => {
+        api.emit('sendDiscuss', msg)
+    }
+
+    const sendMessage = (msg: string) => {
+        api.emit('sendMessage', msg)
+    }
+
     api.on('gameStart', (data) => {
         // console.log('gameStart')
         setIsGameStart(true)
-        setRole(data.role)
+        setRole(data.role ?? 'sepc')
         setPlayers(data.players)
+
+        if (import.meta.env.MODE === 'development') {
+            sendMessage(`我是${roleInfo[data.role]}`)
+        }
     })
 
     const [gameData, setGameData] = createSignal<api.GameData>({
-        state: props.gameStateNow,
+        state: props.loginResult()?.state ?? 'idle',
+        day: props.loginResult()?.day ?? 1,
     })
+
+    const [roles, setRoles] = createSignal<Record<string, api.Role> | undefined>()
+
+    createEffect(() => {
+        setIsGameStart(props.loginResult()?.state !== 'idle')
+        setGameData({
+            state: props.loginResult()?.state ?? 'idle',
+            day: props.loginResult()?.day ?? 0,
+        })
+        setRoles(props.loginResult()?.roles)
+        if (typeof props.loginResult()?.players !== 'undefined') {
+            setPlayers(props.loginResult()!.players!)
+        }
+    })
+
     const [seerTarget, setSeerTarget] = createSignal(-1)
     const [seerResults, setSeerResults] = createSignal<Record<number, boolean | undefined>>([])
-
-    const [round, setRound] = createSignal<number>(0)
 
     const [deadPlayers, setDeadPlayers] = createStore<api.DeadPlayers>([])
 
@@ -81,19 +113,15 @@ const Room: Component<{
         setDeadPlayers([...deadPlayers, newItem])
     }
 
+    const deadAlert = (type: 'killed' | 'vote') => {
+        openAlert(`人生自古谁无死？不幸的，你已被${type === 'vote' ? '放逐' : '击杀'}！`)
+    }
+
+    const [canSendDiscuss, setCanSendDiscuss] = createSignal(false)
+
     api.on('gameState', (data) => {
         if (data.state === 'werewolf') {
             setIsConfirmed('werewolf', false)
-
-            if (typeof data.dead !== 'undefined' && data.dead.length > 0) {
-                addDeadPlayers({
-                    round: round(),
-                    type: 'hunter',
-                    deadPlayers: data.dead,
-                })
-            }
-
-            setRound(round() + 1)
         } else if (data.state === 'witch') {
             setIsConfirmed('witch', false)
 
@@ -108,65 +136,40 @@ const Room: Component<{
             setIsConfirmed('seer', false)
         } else if (data.state === 'morning') {
             setIsConfirmed('hunter', false)
-            addDeadPlayers({
-                round: round(),
-                type: 'night',
-                deadPlayers: data.dead ?? [],
-            })
+            if (gameData().state !== 'morning') {
+                if (isDead(data.dead, playerID())) {
+                    deadAlert('killed')
+                }
+                addDeadPlayers({
+                    round: data.day - 1,
+                    type: 'night',
+                    deadPlayers: data.dead ?? [],
+                })
+            }
+
         } else if (data.state === 'vote') {
             setIsConfirmed('vote', false)
         } else if (data.state === 'voteend') {
+            if (isDead(data.dead, playerID())) {
+                deadAlert('vote')
+            }
+
             addDeadPlayers({
-                round: round(),
+                round: data.day - 1,
                 type: 'vote',
                 deadPlayers: data.dead ?? [],
             })
-        } else if (data.state === 'discuss') {
-            if (typeof data.dead !== 'undefined') {
-                addDeadPlayers({
-                    round: round(),
-                    type: 'hunter',
-                    deadPlayers: data.dead,
-                })
-            }
         }
 
-        if (data.state === 'vote') {
-            setIsConfirmed('vote', false)
-        }
+        setCanSendDiscuss(typeof data.waiting !== 'undefined' && data.waiting !== -1 && data.waiting === playerID())
+
         setGameData(data)
     })
 
-    createEffect(() => {
-        if (gameData().state !== 'werewolf' && gameData().state !== 'witch' && isDead(gameData().dead, playerID())) {
-            // alert('人生自古谁无死？不幸的，你已被击杀！')
-            openAlert('人生自古谁无死？不幸的，你已被击杀！')
-        }
-    })
-
-    const canSendDiscuss = createMemo(() => {
-        const data = gameData()
-        return !!(
-            data
-            && (
-                (
-                    data.state === 'discuss'
-                    && data.waiting === playerID()
-                )
-                || (
-                    round() === 1
-                    && data.state === 'morning'
-                    && isWerewolfKilled(data.dead, data.werewolfKilled, playerID())
-                )
-                || (
-                    data.state === 'voteend'
-                    && isDead(data.dead, playerID())
-                )
-            )
-        )
-    })
+    const [isGameEnd, setIsGameEnd] = createSignal(false)
 
     api.on('gameEnd', (data) => {
+        setIsGameEnd(true)
         if (data === 0) {
             openAlert('游戏异常退出')
         } else if (data === 1) {
@@ -190,34 +193,85 @@ const Room: Component<{
                         displayState={true}
                     />
 
+                    <br />
+
                     <div
                         class="config"
                     >
                         <div
                             class="pass-msg"
                         >
-                        发言结束关键词：
+                            发言结束关键词：
                             <For
-                                each={props.gameConfig.pass}
+                                each={props.loginResult()?.config.pass ?? []}
                             >
                                 {
                                     (msg) => (<div>{msg}</div>)
                                 }
                             </For>
                         </div>
+
+                        <br />
+
+                        <div
+                            class="game-config"
+                        >
+                            <For
+                                each={entries(props.loginResult()?.config?.roles ?? {
+                                    hunter: 0,
+                                    seer: 0,
+                                    spec: 0,
+                                    villager: 0,
+                                    werewolf: 0,
+                                    witch: 0,
+                                }).filter(([r]) => r !== 'spec')}
+                            >
+                                {
+                                    ([r, num]) => (
+                                        <div>
+                                            {roleInfo[r]}: {num}
+                                        </div>
+                                    )
+                                }
+                            </For>
+                        </div>
+
+                        <br />
+
                         <div
                             class="target"
                         >
-                        游戏目标：
-                            {targetMsg[props.gameConfig.target]}
+                            游戏目标：
+                            {targetMsg[props.loginResult()?.config.target ?? 'side']}
                         </div>
-                        <div class="发言顺序">
+
+                        <br />
+
+                        <div class="turns">
+                            发言顺序{
+                                (
+                                    isGameEnd()
+                                    || typeof role() === 'undefined'
+                                    || role() === 'spec'
+                                    || playerStates()[playerName()] === 'spec'
+                                ) ? '/身份公示' : ''
+                            }：
                             <For
                                 each={players()}
                             >
                                 {
                                     (name) => (
-                                        <div>{name}</div>
+                                        <div>
+                                            {name} {
+                                                (
+                                                    isGameEnd()
+                                                    || typeof role() === 'undefined'
+                                                    || role() === 'spec'
+                                                    || playerStates()[playerName()] === 'spec'
+                                                )
+                                                    ? roleInfo[((roles() ?? {})[name]) ?? 'spec'] : ''
+                                            }
+                                        </div>
                                     )
                                 }
                             </For>
@@ -238,33 +292,34 @@ const Room: Component<{
                         <Match
                             when={isGameStart()}
                         >
-                            <IsConfirmedContext.Provider
-                                value={[isConfirmed, setIsConfirmed]}
+                            <GameDataContext.Provider
+                                value={gameData}
                             >
-                                <PlayersContext.Provider
-                                    value={players}
+                                <IsConfirmedContext.Provider
+                                    value={[isConfirmed, setIsConfirmed]}
                                 >
-                                    <PlayerIDContext.Provider
-                                        value={playerID}
+                                    <PlayersContext.Provider
+                                        value={players}
                                     >
-                                        <RoundContext.Provider
-                                            value={round}
+                                        <PlayerIDContext.Provider
+                                            value={playerID}
                                         >
                                             <CanSendContext.Provider
                                                 value={canSendDiscuss}
                                             >
                                                 <Game
-                                                    gameData={gameData()}
                                                     seerResults={seerResults()}
+                                                    seerTarget={seerTarget}
                                                     setSeerTarget={setSeerTarget}
                                                     role={role()}
+                                                    addDeadPlayers={addDeadPlayers}
                                                     deadPlayers={deadPlayers}
                                                 />
                                             </CanSendContext.Provider>
-                                        </RoundContext.Provider>
-                                    </PlayerIDContext.Provider>
-                                </PlayersContext.Provider>
-                            </IsConfirmedContext.Provider>
+                                        </PlayerIDContext.Provider>
+                                    </PlayersContext.Provider>
+                                </IsConfirmedContext.Provider>
+                            </GameDataContext.Provider>
                         </Match>
                     </Switch>
                 </div>
@@ -283,9 +338,7 @@ const Room: Component<{
                             }))
                         }
                     }
-                    sendMessage={(fn) => {
-                        api.emit('sendDiscuss', fn())
-                    }}
+                    sendMessage={(msg) => sendDiscuss(msg())}
                 />
             </CanSendContext.Provider>
 
@@ -299,11 +352,7 @@ const Room: Component<{
                             api.on('receiveMessage', (data) => { fn(data) })
                         }
                     }
-                    sendMessage={
-                        (fn) => {
-                            api.emit('sendMessage', fn())
-                        }
-                    }
+                    sendMessage={(msg) => sendMessage(msg())}
                 />
             </CanSendContext.Provider>
         </div >

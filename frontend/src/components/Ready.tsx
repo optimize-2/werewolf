@@ -16,6 +16,10 @@ const Ready: Component<{
         api.emit('ready')
     }
 
+    if (import.meta.env.MODE === 'development') {
+        ready()
+    }
+
     const cancelReady = () => {
         api.emit('cancelReady')
         setIsReady(false)
