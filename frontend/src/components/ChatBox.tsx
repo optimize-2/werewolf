@@ -1,4 +1,4 @@
-import { Component, For, Show, createSignal, useContext } from 'solid-js'
+import { Component, For, createMemo, createSignal, useContext } from 'solid-js'
 import './ChatBox.css'
 import { CanSendContext } from './Room'
 
@@ -17,11 +17,8 @@ const ChatBox: Component<{
 
     const canSend = useContext(CanSendContext)
 
-    const [lastSend, setLastSend] = createSignal<string | undefined>()
-
     props.recvMessage((data) => {
-        // console.log('receive', props.type, data)
-        setLastSend(data.username)
+        console.log('receive', props.type, data)
         setMessages([...messages(), data])
         history!.scrollTo({
             top: history!.scrollHeight,
@@ -51,19 +48,45 @@ const ChatBox: Component<{
         }
     }
 
+    const processedMessages = createMemo(() => {
+        const msgs = messages()
+        const res: {
+            username: string,
+            messages: string[]
+        }[] = []
+        for (let i = 0; i < msgs.length; i++) {
+            const now = msgs[i]
+            if (i === 0 || now.username !== msgs[i - 1].username) {
+                res.push({
+                    username: now.username,
+                    messages: [now.message],
+                })
+            } else {
+                res.at(-1)?.messages.push(now.message)
+            }
+        }
+        return res
+    })
+
     return (
         <div class={`${props.type}-container`}>
             <div class={`${props.type}-history`} ref={history}>
-                <For each={messages()}>
+                <For each={processedMessages()}>
                     {
-                        ({ username, message }) => (
+                        ({username, messages}) => (
                             <div class="message-container">
-                                <Show
-                                    when={typeof lastSend() !== 'undefined' || lastSend() !== username}
+                                <div class="message-sender">{username}:</div>
+                                <For
+                                    each={messages}
                                 >
-                                    <div class="message-sender">{username}:</div>
-                                </Show>
-                                <pre class="message">{message}</pre>
+                                    {
+                                        (message) => (
+                                            <pre class="message">{message}</pre>
+                                        )
+                                    }
+                                </For>
+
+                                <hr />
                             </div>
                         )
                     }

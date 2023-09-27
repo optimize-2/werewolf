@@ -3,7 +3,7 @@ import { copyFileSync, readFileSync, writeFileSync } from 'fs'
 
 const dev = process.argv[2]
 
-let minify = false
+let minify = true
 
 let src = readFileSync('./backend/index.ts', 'utf8')
 
@@ -14,9 +14,13 @@ if (dev && dev === 'dev') {
     const s = src.split('\n')
     s[0] = 'const debug = true'
     src = s.join('\n')
+} else {
+    const s = src.split('\n')
+    s[0] = 'const debug = false'
+    src = s.join('\n')
 }
 
-writeFileSync('./backend/tmp_index.ts', src)
+writeFileSync('./backend/index.ts', src)
 
 esbuild.buildSync({
     bundle: true,
