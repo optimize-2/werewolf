@@ -1,4 +1,5 @@
 import { io as socketIO } from 'socket.io-client'
+import { Buffer } from 'buffer'
 
 const io = socketIO()
 
