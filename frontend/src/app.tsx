@@ -69,7 +69,7 @@ const App: Component = () => {
                         class="username-container"
                     >
                         <div class="username-label">用户名: </div>
-                        <div class="username">{token()}</div>
+                        <div class="username">{username()}</div>
                     </div>
                     <Room
                         loginResult={loginResult}

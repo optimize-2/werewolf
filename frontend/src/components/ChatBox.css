@@ -50,6 +50,10 @@
     word-break: break-word;
 }
 
+.message-sender {
+    font-weight: bold;
+}
+
 /* -------------------- discuss -------------------- */
 
 .discuss-container {

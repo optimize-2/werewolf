@@ -3,7 +3,7 @@ import { copyFileSync, readFileSync, writeFileSync } from 'fs'
 
 const dev = process.argv[2]
 
-let minify = true
+let minify = false
 
 let src = readFileSync('./backend/index.ts', 'utf8')
 
@@ -20,8 +20,8 @@ writeFileSync('./backend/tmp_index.ts', src)
 
 esbuild.buildSync({
     bundle: true,
-    entryPoints: ['./backend/tmp_index.ts'],
-    outdir: './dist',
+    entryPoints: ['./backend/index.ts'],
+    outfile: './dist/index.js',
     minify,
     platform: 'node',
 })
