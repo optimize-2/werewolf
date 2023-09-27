@@ -44,7 +44,7 @@ export const getPlayers = () => players
 export const getPlayerStates = () => playerStates
 export const getRoles = () => roles
 
-export const canSpec = (player: string) => playerStates[player] === 'spec' && players.includes(player)
+export const canSpec = (player: string) => playerStates[player] === 'spec' // && players.includes(player)
 
 export const getLoginResultPlayers = (player: string) => canSpec(player) ? players : undefined
 export const getLoginResultRoles = (player: string) => canSpec(player) ? roles : undefined
