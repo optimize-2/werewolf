@@ -127,6 +127,7 @@ io.on('connection', socket => {
         socket.emit('loginResult', result)
         socket.join(room)
         io.to(room).emit('updateUsers', getPlayerStates())
+        sendServerMessage(room, `${username} 加入了游戏。`)
     })
 
     socket.on('sendMessage', (message: string) => {
@@ -137,10 +138,12 @@ io.on('connection', socket => {
         if (getTokens()['admins'].includes(username) && dec.startsWith('/')) {
             // if (parseCommand(message))
             const commandResult = parseCommand(username, dec)
-            io.to(socket.id).emit('receiveMessage', { username: serverUsername, message: aes(commandResult) })
+            // io.to(socket.id).emit('receiveMessage', { username: serverUsername, message: aes(commandResult) })
+            sendServerMessage(socket.id, commandResult)
         } else {
             if (mute[username].getTime() > Date.now()) {
-                io.to(socket.id).emit('receiveMessage', { username: serverUsername, message: aes(`人生自古谁无死？不幸的，你已被禁言。距离解禁还有 ${(mute[username].getTime() - Date.now()) / 1000} 秒。`) })
+                // io.to(socket.id).emit('receiveMessage', { username: serverUsername, message: aes(`人生自古谁无死？不幸的，你已被禁言。距离解禁还有 ${(mute[username].getTime() - Date.now()) / 1000} 秒。`) })
+                sendServerMessage(socket.id, `人生自古谁无死？不幸的，你已被禁言。距离解禁还有 ${(mute[username].getTime() - Date.now()) / 1000} 秒。`)
             } else {
                 io.to(room).emit('receiveMessage', { username, message: aes(dec) })
             }
@@ -156,6 +159,7 @@ io.on('connection', socket => {
         delete mute[username]
         socket.leave(room)
         log('disconnect: ' + username)
+        sendServerMessage(room, `${username} 退出了游戏。`)
         io.to(room).emit('updateUsers', getPlayerStates())
     })
 
@@ -372,10 +376,12 @@ const parseCommand = (player: string, command: string) => {
         //     username: serverUsername,
         //     message: aes(`人生自古谁无死？不幸的，你已被管理员 ${player} 禁言 ${time} 秒。`)
         // })
-        io.to(room).emit('receiveMessage', {
-            username: serverUsername,
-            message: aes(`人生自古谁无死？不幸的，${user} 已被管理员 ${player} 禁言 ${time} 秒。`)
-        })
+
+        // io.to(room).emit('receiveMessage', {
+        //     username: serverUsername,
+        //     message: aes(`人生自古谁无死？不幸的，${user} 已被管理员 ${player} 禁言 ${time} 秒。`)
+        // })
+        sendServerMessage(room, `人生自古谁无死？不幸的，${user} 已被管理员 ${player} 禁言 ${time} 秒。`)
         return `Muted ${user} for ${time} seconds.`
     }
     if (args[0] === '/unmute') {
@@ -387,12 +393,14 @@ const parseCommand = (player: string, command: string) => {
         //     username: serverUsername,
         //     message: aes(`遗憾的，你已被管理员 ${player} 解除禁言。`)
         // })
-        io.to(room).emit('receiveMessage', {
-            username: serverUsername,
-            message: aes(`遗憾的，${user} 已被管理员 ${player} 解除禁言。`)
-        })
+        sendServerMessage(room, `遗憾的，${user} 已被管理员 ${player} 解除禁言。`)
         mute[user] = new Date(0)
         return `Unmuted ${user}.`
     }
     return 'Unknown command.'
 }
+
+export const sendServerMessage = (id: string, message: string) => io.to(id).emit('receiveMessage', {
+    username: serverUsername,
+    message: aes(message)
+})

@@ -84,12 +84,12 @@ export const checkStart = () => {
         players = readyPlayers
         game.assignRoles()
         game.initialize()
-        game.startWerewolf()
         Object.entries(playerStates).forEach(([player, state]) => {
             if (state === 'unready' && player) {
                 playerStates[player] = 'spec'
             }
         })
+        game.startWerewolf()
         return true
     }
     return false
