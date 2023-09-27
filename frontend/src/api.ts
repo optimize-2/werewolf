@@ -42,6 +42,7 @@ export type GameData = {
     voteResult?: Record<number, number>
     witchInventory?: WitchInventory
     werewolfKilled?: Array<number>
+    discussPlayers?: Array<string>
 }
 
 export type DeadPlayer = {

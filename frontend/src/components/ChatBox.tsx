@@ -1,4 +1,4 @@
-import { Component, For, createSignal, useContext } from 'solid-js'
+import { Component, For, Show, createSignal, useContext } from 'solid-js'
 import './ChatBox.css'
 import { CanSendContext } from './Room'
 
@@ -17,8 +17,11 @@ const ChatBox: Component<{
 
     const canSend = useContext(CanSendContext)
 
+    const [lastSend, setLastSend] = createSignal<string | undefined>()
+
     props.recvMessage((data) => {
         // console.log('receive', props.type, data)
+        setLastSend(data.username)
         setMessages([...messages(), data])
         history!.scrollTo({
             top: history!.scrollHeight,
@@ -55,7 +58,11 @@ const ChatBox: Component<{
                     {
                         ({ username, message }) => (
                             <div class="message-container">
-                                {username}:
+                                <Show
+                                    when={typeof lastSend() !== 'undefined' || lastSend() !== username}
+                                >
+                                    <div class="message-sender">{username}:</div>
+                                </Show>
                                 <pre class="message">{message}</pre>
                             </div>
                         )

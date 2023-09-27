@@ -1,4 +1,4 @@
-import { createSignal, type Component, Switch, Match, createContext, useContext, createMemo, For, createEffect } from 'solid-js'
+import { createSignal, type Component, Switch, Match, createContext, useContext, createMemo, For, createEffect, Show } from 'solid-js'
 import * as api from '../api'
 import Ready from './Ready'
 import ChatBox from './ChatBox'
@@ -126,6 +126,7 @@ const Room: Component<{
     }
 
     const [voteResults, setVoteResults] = createSignal<Record<number, number>[]>([])
+    const [discussPlayers, setDiscussPlayers] = createSignal<string[] | undefined>()
 
     api.on('gameState', (data) => {
         if (data.state === 'werewolf') {
@@ -154,6 +155,8 @@ const Room: Component<{
                     deadPlayers: data.dead ?? [],
                 })
             }
+        } else if (data.state === 'discuss') {
+            setDiscussPlayers(data.discussPlayers)
         } else if (data.state === 'vote') {
             setIsConfirmed('vote', false)
         } else if (data.state === 'voteend') {
@@ -270,22 +273,51 @@ const Room: Component<{
                             {targetMsg[props.loginResult()?.config.target ?? 'side']}
                         </div>
 
-                        <br />
+                        <Show
+                            when={gameData().state === 'discuss' && typeof discussPlayers() !== 'undefined'}
+                        >
+                            <br />
 
-                        <div class="turns">
-                            发言顺序{ canShowRoles() ? '/身份公示' : '' }：
-                            <For
-                                each={players()}
-                            >
-                                {
-                                    (name) => (
-                                        <div>
-                                            {name} { canShowRoles() ? roleInfo[((roles() ?? {})[name]) ?? 'spec'] : '' }
-                                        </div>
-                                    )
-                                }
-                            </For>
-                        </div>
+                            <div class="turns">
+                                发言顺序：
+                                <For
+                                    each={discussPlayers()}
+                                >
+                                    {
+                                        (name) => (
+                                            <div>
+                                                {name} {
+                                                    canShowRoles() ? roleInfo[((roles() ?? {})[name]) ?? 'spec'] : ''
+                                                }
+                                            </div>
+                                        )
+                                    }
+                                </For>
+                            </div>
+                        </Show>
+
+                        <Show
+                            when={canShowRoles()}
+                        >
+                            <br />
+
+                            <div class="show-roles">
+                                身份公示
+                                <For
+                                    each={players()}
+                                >
+                                    {
+                                        (name) => (
+                                            <div>
+                                                {name} {
+                                                    roleInfo[((roles() ?? {})[name]) ?? 'spec']
+                                                }
+                                            </div>
+                                        )
+                                    }
+                                </For>
+                            </div>
+                        </Show>
                     </div>
                 </div>
 
