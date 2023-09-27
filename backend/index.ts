@@ -35,7 +35,7 @@ import {
 import path from 'path'
 import { ConfigType, getTokens } from './config'
 import md5 from 'md5'
-import Cryptr from 'cryptr'
+import CryptoJS from 'crypto-js'
 
 const users: Record<string, string> = {}
 const socketId: Record<string, string> = {}
@@ -339,17 +339,19 @@ export const sendSpecInfo = (player: string) => {
     io.to(socketId[player]).emit('specInfo', getRoles())
 }
 
-const cryptr = new Cryptr('hzgang06');
+const secret = 'hzgang06'
 
 const aes = (raw: string) => {
-    return cryptr.encrypt(raw)
+    // return cryptr.encrypt(raw)
+    return CryptoJS.AES.encrypt(raw, secret).toString();
     // const cipher = createCipheriv('aes-256-cbc', key, iv);
     // cipher.update(raw, 'utf8', 'hex')
     // return cipher.final('hex')
 }
 
 const sea = (raw: string) => {
-    return cryptr.decrypt(raw)
+    // return cryptr.decrypt(raw)
+    return CryptoJS.AES.decrypt(raw, secret).toString(CryptoJS.enc.Utf8);
     // const decipher = createDecipheriv('aes-256-cbc', key, iv);
     // decipher.update(raw, 'hex', 'utf8')
     // return decipher.final('utf8')
