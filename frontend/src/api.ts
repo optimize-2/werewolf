@@ -1,5 +1,5 @@
 import { io as socketIO } from 'socket.io-client'
-import { Buffer } from 'buffer'
+import { AES } from 'crypto-js'
 
 const io = socketIO()
 
@@ -78,38 +78,8 @@ export type Message = {
     message: string
 }
 
-const key = await crypto.subtle.importKey(
-    'raw',
-    Buffer.from('0241540e4d413fb0062de00aea0d918fe6a1820e782c5cd4340266be3ff940f0', 'hex'),
-    { name: 'AES-CBC', },
-    false,
-    ['encrypt', 'decrypt']
-)
-
-const iv = Buffer.from('05eec64cc1716184787d03a1a46ef952', 'hex')
-
-const decoder = new TextDecoder('utf-8', { ignoreBOM: true })
-const decodeHex = (hexString: string) => new Uint8Array(hexString.match(/.{1,2}/g)!.map(byte => parseInt(byte, 16)))
-
-const decrypt = async (data: string): Promise<string> => decoder.decode(await crypto.subtle.decrypt(
-    {
-        name: 'AES-CBC',
-        iv,
-        tagLength: 256,
-    },
-    key,
-    decodeHex(data),
-))
-
-const encrypt = (data: string) => crypto.subtle.encrypt(
-    {
-        name: 'AES-CBC',
-        iv,
-        tagLength: 256,
-    },
-    key,
-    Buffer.from(data),
-)
+const decrypt = (data: string) => AES.decrypt(data, 'hzgang06').toString(CryptoJS.enc.Utf8)
+const encrypt = (data: string) => AES.encrypt(data, 'hzgang06').toString()
 
 export function on(event: 'login', fn: (data: string) => void): void
 export function on(event: 'loginResult', fn: (data: LoginResult) => void): void
@@ -143,21 +113,17 @@ export function on<T>(event: string, fn: (data: T) => void) {
 
     if (event === 'receiveDiscuss') {
         work = ((data: { player: string } & Message) => {
-            decrypt(data.message).then((msg) => {
-                fn({
-                    player: data.player,
-                    message: msg,
-                } as T)
-            })
+            fn({
+                player: data.player,
+                message: decrypt(data.message),
+            } as T)
         }) as (data: T) => void
     } else if (event === 'receiveMessage') {
         work = ((data: { username: string } & Message) => {
-            decrypt(data.message).then((msg) => {
-                fn({
-                    username: data.username,
-                    message: msg,
-                } as T)
-            })
+            fn({
+                username: data.username,
+                message: decrypt(data.message),
+            } as T)
         }) as (data: T) => void
     } else {
         work = fn
@@ -198,24 +164,8 @@ export function emit<T>(event: string, data?: T) {
 
     const work = (data?: T) => io.emit(event, data)
 
-    if (event === 'sendDiscuss') {
-        const dat = data as string
-        encrypt(dat).then((msg) => {
-            work(
-                Array.from(new Uint8Array(msg))
-                    .map(byte => byte.toString(16).padStart(2, '0'))
-                    .join('') as T
-            )
-        })
-    } else if (event === 'sendMessage') {
-        const dat = data as string
-        encrypt(dat).then((msg) => {
-            work(
-                Array.from(new Uint8Array(msg))
-                    .map(byte => byte.toString(16).padStart(2, '0'))
-                    .join('') as T
-            )
-        })
+    if (event === 'sendDiscuss' || event === 'sendMessage') {
+        work(encrypt(data as string) as T)
     } else {
         work(data)
     }
