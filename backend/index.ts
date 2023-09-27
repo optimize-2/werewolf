@@ -368,9 +368,13 @@ const parseCommand = (player: string, command: string) => {
         const date = new Date(Date.now() + time * 1000)
         if (!socketId[user]) return `${user} is offline.`
         mute[user] = date
-        io.to(socketId[user]).emit('receiveMessage', {
+        // io.to(socketId[user]).emit('receiveMessage', {
+        //     username: serverUsername,
+        //     message: aes(`人生自古谁无死？不幸的，你已被管理员 ${player} 禁言 ${time} 秒。`)
+        // })
+        io.to(room).emit('receiveMessage', {
             username: serverUsername,
-            message: aes(`人生自古谁无死？不幸的，你已被管理员 ${player} 禁言 ${time} 秒。`)
+            message: aes(`人生自古谁无死？不幸的，${user} 已被管理员 ${player} 禁言 ${time} 秒。`)
         })
         return `Muted ${user} for ${time} seconds.`
     }
@@ -379,9 +383,13 @@ const parseCommand = (player: string, command: string) => {
         const user = args[1]
         if (!socketId[user]) return `${user} is offline.`
         if (mute[user].getTime() < Date.now()) return `${user} isn't muted now.`
-        io.to(socketId[user]).emit('receiveMessage', {
+        // io.to(socketId[user]).emit('receiveMessage', {
+        //     username: serverUsername,
+        //     message: aes(`遗憾的，你已被管理员 ${player} 解除禁言。`)
+        // })
+        io.to(room).emit('receiveMessage', {
             username: serverUsername,
-            message: aes(`遗憾的，你已被管理员 ${player} 解除禁言。`)
+            message: aes(`遗憾的，${user} 已被管理员 ${player} 解除禁言。`)
         })
         mute[user] = new Date(0)
         return `Unmuted ${user}.`
