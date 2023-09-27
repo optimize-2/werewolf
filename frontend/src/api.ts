@@ -101,7 +101,7 @@ export function on(
     fn: (data: { select: Record<number, number>, confirm: Record<number, boolean> }) => void
 ): void
 
-export function on(event: 'receiveDiscuss', fn: (data: { plsyer: string } & Message) => void): void
+export function on(event: 'receiveDiscuss', fn: (data: { player: string } & Message) => void): void
 
 export function on(event: 'hunterWait', fn: (data: number) => void): void
 export function on(event: 'hunterKilled', fn: (data: { player: number, target: number }) => void): void

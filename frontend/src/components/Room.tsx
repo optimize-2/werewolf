@@ -171,7 +171,15 @@ const Room: Component<{
             })
         }
 
-        setCanSendDiscuss(typeof data.waiting !== 'undefined' && data.waiting !== -1 && data.waiting === playerID())
+        setCanSendDiscuss(
+            typeof data.waiting !== 'undefined'
+            && data.waiting !== -1
+            && (
+                data.state !== 'discuss'
+                    ? data.waiting === playerID()
+                    : data.waiting === discussPlayers()?.indexOf(playerName())
+            )
+        )
 
         if (typeof data.voteResult !== 'undefined') {
             setVoteResults([...voteResults(), data.voteResult])
