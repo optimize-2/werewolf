@@ -407,6 +407,7 @@ export const game = {
                         updateState({
                             state: 'discuss',
                             waiting: discussWaiting,
+                            discussPlayers,
                             day
                         })
                     }
