@@ -8,7 +8,8 @@ export interface ConfigType {
 }
 
 export interface TokenConfigType {
-    tokens: Record<string, string>
+    tokens: Record<string, string>,
+    admins: Array<string>
 }
 
 export const loadConfig = (): ConfigType => JSON.parse(fs.readFileSync('./cfg.json').toString())

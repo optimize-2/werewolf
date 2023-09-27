@@ -38,6 +38,7 @@ import md5 from 'md5'
 
 const users: Record<string, string> = {}
 const socketId: Record<string, string> = {}
+const mute: Record<string, Date> = {}
 const room = 'hzgang06'
 
 const server = http.createServer((req, res) => {
@@ -82,6 +83,8 @@ const server = http.createServer((req, res) => {
 
 
 loadGame()
+
+const serverUsername = 'Server'
 
 const port = 1335
 server.listen(port, () => {
@@ -128,8 +131,18 @@ io.on('connection', socket => {
         const username = users[socket.id]
         if (!username) {return}
         if (message.trim().length === 0) {return}
+        const dec = sea(message)
+        if (getTokens()['admins'].includes(username) && dec.startsWith('/')) {
+            // if (parseCommand(message))
+            io.to(socket.id).emit('receiveMessage', { username: serverUsername, message: aes(parseCommand(username, message)) })
+        } else {
+            if (mute[username].getTime() > Date.now()) {
+                io.to(room).emit('receiveMessage', { username: serverUsername, message: aes(`人生自古谁无死？不幸的，你已被禁言。距离解禁还有 ${(mute[username].getTime() - Date.now()) / 1000} 秒。`) })
+            } else {
+                io.to(room).emit('receiveMessage', { username, message: aes(dec) })
+            }
+        }
         // io.to(room).emit('receiveMessage', { username, message: aes(message) })
-        io.to(room).emit('receiveMessage', { username, message })
     })
 
     socket.on('disconnect', () => {
@@ -335,4 +348,30 @@ const aes = (raw: string) => {
 const sea = (raw: string) => {
     decipher.update(raw, 'hex', 'utf8')
     return decipher.final('utf8')
+}
+
+const parseCommand = (player: string, command: string) => {
+    const args = command.split(' ')
+    if (args[0] === '/mute') {
+        if (args.length !== 3) return `excepted 2 arguments but got ${args.length - 1}.`
+        const time = parseInt(args[2])
+        if (Number.isNaN(time)) return `${args[2]} is illegal.`
+        const user = args[1]
+        const date = new Date(Date.now() + time * 1000)
+        if (!socketId[user]) return `${user} is offline.`
+        mute[user] = date
+        io.to(socketId[user]).emit('receiveMessage', {
+            username: serverUsername,
+            message: aes(`人生自古谁无死？不幸的，你已被管理员 ${player} 禁言 ${time} 秒。`)
+        })
+        return `Muted ${user} for ${time} seconds.`
+    }
+    if (args[0] === '/unmute') {
+        if (args.length !== 2) return `excepted 1 arguments but got ${args.length - 1}.`
+        const user = args[1]
+        if (!socketId[user]) return `${user} is offline.`
+        mute[user] = new Date(0)
+        return `Unmuted ${user}.`
+    }
+    return 'Unknown command.'
 }
