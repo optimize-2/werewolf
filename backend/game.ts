@@ -397,7 +397,7 @@ export const game = {
 
     handleDiscuss: (player: string, message: string) => {
         if (gameState === 'discuss') {
-            if (player === players[discussWaiting]) {
+            if (player === discussPlayers[discussWaiting]) {
                 sendDiscuss(player, message)
                 if (config.pass.includes(message)) {
                     discussWaiting++
