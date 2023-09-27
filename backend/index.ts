@@ -1,4 +1,4 @@
-const debug = true
+const debug = false
 
 import http from 'http'
 import { readFile } from 'fs'
@@ -35,6 +35,7 @@ import {
 import path from 'path'
 import { ConfigType, getTokens } from './config'
 import md5 from 'md5'
+import Cryptr from 'cryptr'
 
 const users: Record<string, string> = {}
 const socketId: Record<string, string> = {}
@@ -135,7 +136,8 @@ io.on('connection', socket => {
         const dec = sea(message)
         if (getTokens()['admins'].includes(username) && dec.startsWith('/')) {
             // if (parseCommand(message))
-            io.to(socket.id).emit('receiveMessage', { username: serverUsername, message: aes(parseCommand(username, message)) })
+            const commandResult = parseCommand(username, message)
+            io.to(socket.id).emit('receiveMessage', { username: serverUsername, message: aes(commandResult) })
         } else {
             if (mute[username].getTime() > Date.now()) {
                 io.to(room).emit('receiveMessage', { username: serverUsername, message: aes(`人生自古谁无死？不幸的，你已被禁言。距离解禁还有 ${(mute[username].getTime() - Date.now()) / 1000} 秒。`) })
@@ -337,19 +339,20 @@ export const sendSpecInfo = (player: string) => {
     io.to(socketId[player]).emit('specInfo', getRoles())
 }
 
-const key = Buffer.from('0241540e4d413fb0062de00aea0d918fe6a1820e782c5cd4340266be3ff940f0', 'hex')
-const iv = Buffer.from('05eec64cc1716184787d03a1a46ef952', 'hex')
-const cipher = createCipheriv('aes-256-cbc', key, iv);
-const decipher = createDecipheriv('aes-256-cbc', key, iv);
+const cryptr = new Cryptr('hzgang06');
 
 const aes = (raw: string) => {
-    cipher.update(raw, 'utf8', 'hex')
-    return cipher.final('hex')
+    return cryptr.encrypt(raw)
+    // const cipher = createCipheriv('aes-256-cbc', key, iv);
+    // cipher.update(raw, 'utf8', 'hex')
+    // return cipher.final('hex')
 }
 
 const sea = (raw: string) => {
-    decipher.update(raw, 'hex', 'utf8')
-    return decipher.final('utf8')
+    return cryptr.decrypt(raw)
+    // const decipher = createDecipheriv('aes-256-cbc', key, iv);
+    // decipher.update(raw, 'hex', 'utf8')
+    // return decipher.final('utf8')
 }
 
 const parseCommand = (player: string, command: string) => {

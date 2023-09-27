@@ -12,7 +12,7 @@ console.log(dev)
 if (dev && dev === 'dev') {
     minify = false
     const s = src.split('\n')
-    s[0] = 'const debug = true'
+    s[0] = 'const debug = false'
     src = s.join('\n')
 } else {
     const s = src.split('\n')
