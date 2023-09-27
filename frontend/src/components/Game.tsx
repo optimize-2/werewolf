@@ -49,7 +49,7 @@ const Game: Component<{
     createEffect(() => {
         if (typeof hunterTarget() !== 'undefined') {
             props.addDeadPlayers({
-                round: gameData().day,
+                round: gameData().day - 1,
                 type: 'hunter',
                 deadPlayers: [hunterTarget()!],
             })
