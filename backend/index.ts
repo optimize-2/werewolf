@@ -1,4 +1,4 @@
-const debug = false
+const debug = true
 
 import http from 'http'
 import { readFile } from 'fs'
@@ -112,6 +112,7 @@ io.on('connection', socket => {
         if (['空刀', '弃票', '不开枪', '跳过'].includes(username.trim())) {return}
         users[socket.id] = username
         socketId[username] = socket.id
+        mute[username] = new Date(0)
         log('login: ' + username)
         addPlayer(username)
         const result: LoginResultType = {
@@ -150,6 +151,7 @@ io.on('connection', socket => {
         game.handleLeave(username)
         delete users[socket.id]
         delete socketId[username]
+        delete mute[username]
         socket.leave(room)
         log('disconnect: ' + username)
         io.to(room).emit('updateUsers', getPlayerStates())
