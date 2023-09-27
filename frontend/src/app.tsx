@@ -7,25 +7,27 @@ import { faker } from '@faker-js/faker'
 export const PlayerNameContext = createContext<() => string>(() => '')
 
 const App: Component = () => {
+    const [token, setToken] = createSignal('')
     const [username, setUsername] = createSignal('')
     const [isLoggedin, setIsLoggedin] = createSignal(false)
 
     const [loginResult, setLoginResult] = createSignal<api.LoginResult | undefined>()
 
     api.on('loginResult', (data) => {
+        setUsername(data.username)
         setIsLoggedin(true)
         setLoginResult(data)
     })
 
     const login = () => {
-        const name = username()
+        const name = token()
         if (name.length > 0) {
             api.emit('login', name)
         }
     }
 
     if (import.meta.env.MODE === 'development') {
-        setUsername(faker.person.firstName())
+        setToken(faker.person.firstName())
         login()
     }
 
@@ -44,10 +46,10 @@ const App: Component = () => {
                         <div
                             class="username-container"
                         >
-                            <div class="username-label">用户名: </div>
+                            <div class="username-label">Token: </div>
                             <input
                                 class="username"
-                                onInput={(e) => setUsername(e.currentTarget.value)}
+                                onInput={(e) => setToken(e.currentTarget.value)}
                                 style="width: 200px"
                             />
                         </div>
@@ -67,7 +69,7 @@ const App: Component = () => {
                         class="username-container"
                     >
                         <div class="username-label">用户名: </div>
-                        <div class="username">{username()}</div>
+                        <div class="username">{token()}</div>
                     </div>
                     <Room
                         loginResult={loginResult}

@@ -64,6 +64,7 @@ export type ConfigType = {
 }
 
 export type LoginResult = {
+    username: string
     state: GameState
     config: ConfigType
     day: number
