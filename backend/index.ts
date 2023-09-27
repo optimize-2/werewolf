@@ -363,7 +363,7 @@ const parseCommand = (player: string, command: string) => {
     if (args[0] === '/mute') {
         if (args.length !== 3) return `excepted 2 arguments but got ${args.length - 1}.`
         const time = parseInt(args[2])
-        if (Number.isNaN(time)) return `${args[2]} is illegal.`
+        if (Number.isNaN(time) || time <= 0) return `${args[2]} is illegal.`
         const user = args[1]
         const date = new Date(Date.now() + time * 1000)
         if (!socketId[user]) return `${user} is offline.`
