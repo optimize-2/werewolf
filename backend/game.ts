@@ -38,6 +38,8 @@ let players: Array<string> = []
 const playerStates: Record<string, PlayerState> = {}
 const roles: Record<string, Role> = {}
 
+export let discussPlayers: Array<string> = []
+
 export const getPlayers = () => players
 export const getPlayerStates = () => playerStates
 export const getRoles = () => roles
@@ -206,12 +208,13 @@ export const game = {
         console.log('start discuss')
         gameState = 'discuss'
         discussWaiting = 0
-        while (discussWaiting < requiredPlayers && playerStates[players[discussWaiting]] !== 'alive') {discussWaiting++}
+        discussPlayers = _.shuffle(players.filter(e => playerStates[e] === 'alive'))
         updateState({
             state: gameState,
             dead,
             seerResult: false,
             waiting: discussWaiting,
+            discussPlayers,
             day
         })
         players.forEach(e => {
@@ -398,8 +401,7 @@ export const game = {
                 sendDiscuss(player, message)
                 if (config.pass.includes(message)) {
                     discussWaiting++
-                    while (discussWaiting < requiredPlayers && playerStates[players[discussWaiting]] !== 'alive') {discussWaiting++}
-                    if (discussWaiting === requiredPlayers) {
+                    if (discussWaiting === discussPlayers.length) {
                         game.startVote()
                     } else {
                         updateState({

@@ -43,7 +43,7 @@ export interface ConfigType {
 
 ### `gameState`
 
-参数：`{ state: GameState, dead: Array<number>, seerResult: boolean, waiting: number, voteResult: Record<number, number>, witchInventory: WitchInventory, werewolfKilled: Array<number> }`
+参数：`{ state: GameState, dead: Array<number>, seerResult: boolean, waiting: number, voteResult: Record<number, number>, witchInventory: WitchInventory, werewolfKilled: Array<number>, discussPlayers: Array<string> }`
 
 `dead` 代表在上一轮死亡的人，不会重复发送。
 

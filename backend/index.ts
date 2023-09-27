@@ -4,6 +4,7 @@ import http from 'http'
 import { readFile } from 'fs'
 import { Server } from 'socket.io'
 import { log } from './utils'
+import { createCipheriv, createDecipheriv } from 'crypto'
 import {
     GameState,
     Role,
@@ -127,6 +128,7 @@ io.on('connection', socket => {
         const username = users[socket.id]
         if (!username) {return}
         if (message.trim().length === 0) {return}
+        // io.to(room).emit('receiveMessage', { username, message: aes(message) })
         io.to(room).emit('receiveMessage', { username, message })
     })
 
@@ -226,8 +228,8 @@ io.on('connection', socket => {
         const player = users[socket.id]
         if (!player) {return}
         if (message.trim().length === 0) {return}
-        console.log('sendDiscuss1', player, message)
-        game.handleDiscuss(player, message)
+        console.log('sendDiscuss1', player, message, sea(message))
+        game.handleDiscuss(player, sea(message))
     })
 
     socket.on('sendHunter', id => {
@@ -245,7 +247,8 @@ export interface StateType {
     waiting?: number,
     voteResult?: Record<number, number>,
     witchInventory?: WitchInventory,
-    werewolfKilled?: Array<number>
+    werewolfKilled?: Array<number>,
+    discussPlayers?: Array<string>
 }
 
 const sendStart = (players: Array<string>, roles: Record<string, Role>) => {
@@ -265,7 +268,7 @@ export const updateState = (state: StateType, id = room) => {
 
 export const sendDiscuss = (player: string, message: string) => io.to(room).emit('receiveDiscuss', {
     player,
-    message,
+    message: aes(message),
 })
 
 export const updateWitchState = (day: number) => {
@@ -317,4 +320,19 @@ export const sendWerewolfResult = () => {
 
 export const sendSpecInfo = (player: string) => {
     io.to(socketId[player]).emit('specInfo', getRoles())
+}
+
+const key = Buffer.from('0241540e4d413fb0062de00aea0d918fe6a1820e782c5cd4340266be3ff940f0', 'hex')
+const iv = Buffer.from('05eec64cc1716184787d03a1a46ef952', 'hex')
+const cipher = createCipheriv('aes-256-cbc', key, iv);
+const decipher = createDecipheriv('aes-256-cbc', key, iv);
+
+const aes = (raw: string) => {
+    cipher.update(raw, 'utf8', 'hex')
+    return cipher.final('hex')
+}
+
+const sea = (raw: string) => {
+    decipher.update(raw, 'hex', 'utf8')
+    return decipher.final('utf8')
 }
