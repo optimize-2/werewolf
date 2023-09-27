@@ -1,4 +1,4 @@
-const debug = true
+const debug = false
 
 import http from 'http'
 import { readFile } from 'fs'
@@ -136,11 +136,11 @@ io.on('connection', socket => {
         const dec = sea(message)
         if (getTokens()['admins'].includes(username) && dec.startsWith('/')) {
             // if (parseCommand(message))
-            const commandResult = parseCommand(username, message)
+            const commandResult = parseCommand(username, dec)
             io.to(socket.id).emit('receiveMessage', { username: serverUsername, message: aes(commandResult) })
         } else {
             if (mute[username].getTime() > Date.now()) {
-                io.to(room).emit('receiveMessage', { username: serverUsername, message: aes(`人生自古谁无死？不幸的，你已被禁言。距离解禁还有 ${(mute[username].getTime() - Date.now()) / 1000} 秒。`) })
+                io.to(socket.id).emit('receiveMessage', { username: serverUsername, message: aes(`人生自古谁无死？不幸的，你已被禁言。距离解禁还有 ${(mute[username].getTime() - Date.now()) / 1000} 秒。`) })
             } else {
                 io.to(room).emit('receiveMessage', { username, message: aes(dec) })
             }
@@ -359,6 +359,7 @@ const sea = (raw: string) => {
 
 const parseCommand = (player: string, command: string) => {
     const args = command.split(' ')
+    console.log(args)
     if (args[0] === '/mute') {
         if (args.length !== 3) return `excepted 2 arguments but got ${args.length - 1}.`
         const time = parseInt(args[2])
@@ -377,6 +378,11 @@ const parseCommand = (player: string, command: string) => {
         if (args.length !== 2) return `excepted 1 arguments but got ${args.length - 1}.`
         const user = args[1]
         if (!socketId[user]) return `${user} is offline.`
+        if (mute[user].getTime() < Date.now()) return `${user} isn't muted now.`
+        io.to(socketId[user]).emit('receiveMessage', {
+            username: serverUsername,
+            message: aes(`遗憾的，你已被管理员 ${player} 解除禁言。`)
+        })
         mute[user] = new Date(0)
         return `Unmuted ${user}.`
     }
