@@ -1,4 +1,4 @@
-const debug = false
+const debug = true
 
 import http from 'http'
 import { readFile } from 'fs'

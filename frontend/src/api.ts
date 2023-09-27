@@ -1,5 +1,5 @@
 import { io as socketIO } from 'socket.io-client'
-import { AES } from 'crypto-js'
+import CryptoJS from 'crypto-js'
 
 const io = socketIO()
 
@@ -78,8 +78,8 @@ export type Message = {
     message: string
 }
 
-const decrypt = (data: string) => AES.decrypt(data, 'hzgang06').toString(CryptoJS.enc.Utf8)
-const encrypt = (data: string) => AES.encrypt(data, 'hzgang06').toString()
+const decrypt = (data: string) => CryptoJS.AES.decrypt(data, 'hzgang06').toString(CryptoJS.enc.Utf8)
+const encrypt = (data: string) => CryptoJS.AES.encrypt(data, 'hzgang06').toString()
 
 export function on(event: 'login', fn: (data: string) => void): void
 export function on(event: 'loginResult', fn: (data: LoginResult) => void): void
