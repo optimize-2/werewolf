@@ -7,9 +7,10 @@ import Witch from './Witch'
 import Seer from './Seer'
 import Vote from './Vote'
 import Hunter from './Hunter'
-const { isDead, isWerewolfKilled, roleInfo, stateMessage } = await import('../utils')
-const { entries } = await import('@werewolf/utils')
-const { openAlert } = await import('./Alert')
+
+import { entries } from '@werewolf/utils'
+import { isDead, isWerewolfKilled, roleInfo, stateMessage } from '../utils'
+import { openAlert } from './Alert'
 
 const Game: Component<{
     seerResults: Record<number, boolean | undefined>
