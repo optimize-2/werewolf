@@ -2,7 +2,8 @@ import { Component, For, createMemo, createSignal, useContext } from 'solid-js'
 import { PlayerState } from '../api'
 import { PlayerStatesContext } from './Room'
 import './Players.css'
-import { entries } from '@werewolf/utils'
+
+const { entries } = await import('@werewolf/utils')
 
 const Players: Component<{
     className: 'alive' | 'players' | 'select-player'
