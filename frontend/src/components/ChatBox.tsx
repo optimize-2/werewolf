@@ -19,10 +19,20 @@ const ChatBox: Component<{
 
     props.recvMessage((data) => {
         console.log('receive', props.type, data)
+
+        let isBottom = false
+        console.log(history!.scrollTop, history!.scrollHeight)
+        if (history!.scrollTop + history!.clientHeight === history!.scrollHeight) {
+            isBottom = true
+        }
+
         setMessages([...messages(), data])
-        history!.scrollTo({
-            top: history!.scrollHeight,
-        })
+
+        if (isBottom) {
+            history!.scrollTo({
+                top: history!.scrollHeight,
+            })
+        }
     })
 
     const sendMessage = () => {

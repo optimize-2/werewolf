@@ -34,13 +34,15 @@ export type WitchInventory = {
     poison: number,
 }
 
+export type VoteResult = Record<number, number>
+
 export type GameData = {
     state: GameState
     day: number
     dead?: Array<number>
     seerResult?: boolean
     waiting?: number
-    voteResult?: Record<number, number>
+    voteResult?: VoteResult
     witchInventory?: WitchInventory
     werewolfKilled?: Array<number>
     discussPlayers?: Array<string>
@@ -78,6 +80,12 @@ export type Message = {
     message: string
 }
 
+export type GameEnd = {
+    team: number
+    roles: Record<string, Role>
+    voteResult?: VoteResult
+}
+
 const decrypt = (data: string) => CryptoJS.AES.decrypt(data, 'hzgang06').toString(CryptoJS.enc.Utf8)
 const encrypt = (data: string) => CryptoJS.AES.encrypt(data, 'hzgang06').toString()
 
@@ -86,7 +94,7 @@ export function on(event: 'loginResult', fn: (data: LoginResult) => void): void
 export function on(event: 'updateUsers', fn: (data: PlayerStatesType) => void): void
 export function on(event: 'readyResult', fn: (data: Record<string, boolean>) => void): void
 export function on(event: 'gameStart', fn: (data: { role: Role, players: Array<string> }) => void): void
-export function on(event: 'gameEnd', fn: (data: { team: number, roles: Record<string, Role> }) => void): void
+export function on(event: 'gameEnd', fn: (data: GameEnd) => void): void
 
 export function on(
     event: 'gameState',

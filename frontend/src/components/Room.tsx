@@ -6,10 +6,11 @@ import Game from './Game'
 import Players from './Players'
 import { PlayerNameContext } from '../app'
 import { SetStoreFunction, createStore } from 'solid-js/store'
-import { isDead, roleInfo } from '../utils'
 import './Room.css'
-import { openAlert } from './Alert'
-import { entries } from '@werewolf/utils'
+
+const { isDead, roleInfo } = await import('../utils')
+const { openAlert } = await import('./Alert')
+const { entries } = await import('@werewolf/utils')
 
 export const PlayerStatesContext = createContext<() => api.PlayerStatesType>(() => ({}))
 export const PlayersContext = createContext<() => string[]>(() => [])

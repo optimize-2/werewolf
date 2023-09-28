@@ -3,8 +3,9 @@ import Players from './Players'
 import * as api from '../api'
 import { createStore } from 'solid-js/store'
 import { IsConfirmedContext, PlayerStatesContext, PlayersContext } from './Room'
-import { entries } from '@werewolf/utils'
 import { PlayerNameContext } from '../app'
+
+const { entries } = await import('@werewolf/utils')
 
 const Werewolf: Component = () => {
     const players = useContext(PlayersContext)

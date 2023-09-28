@@ -1,15 +1,15 @@
 import { Component, For, Match, Show, Switch, createEffect, createSignal, useContext } from 'solid-js'
 import * as api from '../api'
 import { PlayerNameContext } from '../app'
-import { CanSendContext, GameDataContext, PlayerIDContext, PlayerStatesContext as PlayerStatesContext, PlayersContext } from './Room'
+import { CanSendContext, GameDataContext, PlayerIDContext, PlayerStatesContext , PlayersContext } from './Room'
 import Werewolf from './Werewolf'
 import Witch from './Witch'
 import Seer from './Seer'
 import Vote from './Vote'
-import { entries } from '@werewolf/utils'
 import Hunter from './Hunter'
-import { isDead, isWerewolfKilled, roleInfo, stateMessage } from '../utils'
-import { openAlert } from './Alert'
+const { isDead, isWerewolfKilled, roleInfo, stateMessage } = await import('../utils')
+const { entries } = await import('@werewolf/utils')
+const { openAlert } = await import('./Alert')
 
 const Game: Component<{
     seerResults: Record<number, boolean | undefined>
