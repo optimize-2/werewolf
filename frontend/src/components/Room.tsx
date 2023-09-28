@@ -1,4 +1,4 @@
-import { createSignal, type Component, Switch, Match, createContext, useContext, createMemo, For, createEffect, Show } from 'solid-js'
+import { createSignal, type Component, createContext, useContext, createMemo, For, createEffect, Show } from 'solid-js'
 import * as api from '../api'
 import Ready from './Ready'
 import ChatBox from './ChatBox'
@@ -41,8 +41,33 @@ const targetMsg = {
 const Room: Component<{
     loginResult: () => api.LoginResult | undefined
 }> = (props) => {
+    // contexts
     const playerName = useContext(PlayerNameContext)
 
+    // signals
+    const [playerStates, setPlayerStates] = createSignal<api.PlayerStatesType>({})
+    const [players, setPlayers] = createSignal<string[]>([])
+
+    const [isGameStart, setIsGameStart] = createSignal(false)
+    const [isGameEnd, setIsGameEnd] = createSignal(false)
+
+    const [role, setRole] = createSignal<api.Role | undefined>(undefined)
+
+    const [canSendDiscuss, setCanSendDiscuss] = createSignal(false)
+
+    const [deadPlayers, setDeadPlayers] = createStore<api.DeadPlayers>([])
+
+    const [gameData, setGameData] = createSignal<api.GameData>({
+        state: props.loginResult()?.state ?? 'idle',
+        day: props.loginResult()?.day ?? 1,
+    })
+
+    const [roles, setRoles] = createSignal<Record<string, api.Role> | undefined>()
+
+    const [seerTarget, setSeerTarget] = createSignal(-1)
+    const [seerResults, setSeerResults] = createSignal<Record<number, boolean | undefined>>([])
+
+    // stores
     const [isConfirmed, setIsConfirmed] = createStore({
         werewolf: false,
         witch: false,
@@ -51,23 +76,38 @@ const Room: Component<{
         vote: false,
     })
 
-    const [playerStates, setPlayerStates] = createSignal<api.PlayerStatesType>({})
-    const [players, setPlayers] = createSignal<string[]>([])
-
+    // memos
     const playerID = createMemo(() => {
         const id = players().findIndex((name) => name === playerName())
         return id === -1 ? -2 : id
     })
 
+    const canShowRoles = createMemo(() => {
+        return (
+            (
+                isGameEnd()
+                || typeof role() === 'undefined'
+                || role() === 'spec'
+                || playerStates()[playerName()] === 'spec'
+            )
+            && !canSendDiscuss()
+        )
+    })
+
+    // effects
+    createEffect(() => {
+        setIsGameStart(props.loginResult()?.state !== 'idle')
+        setGameData({
+            state: props.loginResult()?.state ?? 'idle',
+            day: props.loginResult()?.day ?? 0,
+        })
+        setRoles(props.loginResult()?.roles)
+        setPlayers(props.loginResult()?.players ?? [])
+    })
+
     api.on('updateUsers', (data) => {
         setPlayerStates(data)
     })
-
-    const [isGameStart, setIsGameStart] = createSignal(false)
-
-    const [role, setRole] = createSignal<api.Role | undefined>(undefined)
-
-    const [canSendDiscuss, setCanSendDiscuss] = createSignal(false)
 
     const sendDiscuss = (msg: string) => {
         console.log(props.loginResult()?.config.pass)
@@ -84,39 +124,22 @@ const Room: Component<{
     api.on('gameStart', (data) => {
         // console.log('gameStart')
         setIsGameStart(true)
+        setIsGameEnd(false)
         setRole(data.role ?? 'sepc')
         setPlayers(data.players)
+
+        setDeadPlayers([])
+        setVoteResults([])
+        setSeerResults([])
 
         if (import.meta.env.MODE === 'development') {
             sendMessage(`我是${roleInfo[data.role]}`)
         }
     })
 
-    const [gameData, setGameData] = createSignal<api.GameData>({
-        state: props.loginResult()?.state ?? 'idle',
-        day: props.loginResult()?.day ?? 1,
-    })
-
-    const [roles, setRoles] = createSignal<Record<string, api.Role> | undefined>()
-
-    createEffect(() => {
-        setIsGameStart(props.loginResult()?.state !== 'idle')
-        setGameData({
-            state: props.loginResult()?.state ?? 'idle',
-            day: props.loginResult()?.day ?? 0,
-        })
-        setRoles(props.loginResult()?.roles)
-        setPlayers(props.loginResult()?.players ?? [])
-    })
-
     api.on('specInfo', (data) => {
         setRoles(data)
     })
-
-    const [seerTarget, setSeerTarget] = createSignal(-1)
-    const [seerResults, setSeerResults] = createSignal<Record<number, boolean | undefined>>([])
-
-    const [deadPlayers, setDeadPlayers] = createStore<api.DeadPlayers>([])
 
     const addDeadPlayers = (newItem: api.DeadPlayer) => {
         setDeadPlayers([...deadPlayers, newItem])
@@ -190,11 +213,10 @@ const Room: Component<{
         setGameData(data)
     })
 
-    const [isGameEnd, setIsGameEnd] = createSignal(false)
-
     api.on('gameEnd', (data) => {
         setRoles(data.roles)
         setIsGameEnd(true)
+        setIsGameStart(false)
         if (data.team === 0) {
             openAlert('游戏异常退出')
         } else if (data.team === 1) {
@@ -202,18 +224,6 @@ const Room: Component<{
         } else {
             openAlert('狼人获胜')
         }
-    })
-
-    const canShowRoles = createMemo(() => {
-        return (
-            (
-                isGameEnd()
-                || typeof role() === 'undefined'
-                || role() === 'spec'
-                || playerStates()[playerName()] === 'spec'
-            )
-            && !canSendDiscuss()
-        )
     })
 
     return (
@@ -330,50 +340,44 @@ const Room: Component<{
                     </div>
                 </div>
 
-                <div class="panel">
-                    <Switch>
-                        <Match
-                            when={!isGameStart() && playerStates()[playerName()] !== 'spec'}
-                        >
-                            <Ready
-                                setPlayerStates={(players) => setPlayerStates(players)}
-                            />
-                        </Match>
+                <Show
+                    when={!isGameStart()}
+                >
+                    <Ready
+                        setPlayerStates={(players) => setPlayerStates(players)}
+                    />
+                </Show>
 
-                        <Match
-                            when={isGameStart()}
+                <div class="panel">
+                    <GameDataContext.Provider
+                        value={gameData}
+                    >
+                        <IsConfirmedContext.Provider
+                            value={[isConfirmed, setIsConfirmed]}
                         >
-                            <GameDataContext.Provider
-                                value={gameData}
+                            <PlayersContext.Provider
+                                value={players}
                             >
-                                <IsConfirmedContext.Provider
-                                    value={[isConfirmed, setIsConfirmed]}
+                                <PlayerIDContext.Provider
+                                    value={playerID}
                                 >
-                                    <PlayersContext.Provider
-                                        value={players}
+                                    <CanSendContext.Provider
+                                        value={canSendDiscuss}
                                     >
-                                        <PlayerIDContext.Provider
-                                            value={playerID}
-                                        >
-                                            <CanSendContext.Provider
-                                                value={canSendDiscuss}
-                                            >
-                                                <Game
-                                                    seerResults={seerResults()}
-                                                    seerTarget={seerTarget}
-                                                    setSeerTarget={setSeerTarget}
-                                                    role={role()}
-                                                    addDeadPlayers={addDeadPlayers}
-                                                    deadPlayers={deadPlayers}
-                                                    voteResults={voteResults}
-                                                />
-                                            </CanSendContext.Provider>
-                                        </PlayerIDContext.Provider>
-                                    </PlayersContext.Provider>
-                                </IsConfirmedContext.Provider>
-                            </GameDataContext.Provider>
-                        </Match>
-                    </Switch>
+                                        <Game
+                                            seerResults={seerResults()}
+                                            seerTarget={seerTarget}
+                                            setSeerTarget={setSeerTarget}
+                                            role={role()}
+                                            addDeadPlayers={addDeadPlayers}
+                                            deadPlayers={deadPlayers}
+                                            voteResults={voteResults}
+                                        />
+                                    </CanSendContext.Provider>
+                                </PlayerIDContext.Provider>
+                            </PlayersContext.Provider>
+                        </IsConfirmedContext.Provider>
+                    </GameDataContext.Provider>
                 </div>
             </PlayerStatesContext.Provider>
 
