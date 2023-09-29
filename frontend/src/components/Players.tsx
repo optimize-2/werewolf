@@ -3,7 +3,7 @@ import { PlayerState } from '../api'
 import { PlayerStatesContext } from './Room'
 import './Players.css'
 
-const { entries } = await import('@werewolf/utils')
+import { entries } from '@werewolf/utils'
 
 const Players: Component<{
     className: 'alive' | 'players' | 'select-player'
