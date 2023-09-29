@@ -88,7 +88,7 @@ loadGame()
 
 const serverUsername = 'Server'
 
-const port = 7432
+const port = 1335
 server.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`)
 })
