@@ -1,8 +1,7 @@
 import {
     sendDiscuss, sendHunterWait, sendHunterKilled,
-    updateState, updateWitchState,
+    updateState, updateWitchState, updateGuardState,
     sendGameEnd, sendWerewolfResult, sendSpecInfo,
-    sendGuardLastProtect,
 } from '.'
 import { loadConfig, ConfigType } from './config'
 import { log } from './utils'
@@ -121,7 +120,7 @@ let seerSelect: Record<number, number> = {}
 let guardProtect: Array<number> = []
 let guardSelect: Record<number, number> = {}
 let guardSkipped: Record<number, boolean> = {}
-let guardLastSelect: Record<number, number> = {}
+let guardLastProtect: Record<number, number> = {}
 
 let witchSaveUsed: Record<number, boolean> = {}
 let witchPoisonUsed: Record<number, boolean> = {}
@@ -317,21 +316,17 @@ export const game = {
                     guardSkipped[e] = false
                 })
             }
-            guardLastSelect = guardSelect
+            guardLastProtect = guardSelect
             guardSelect = {}
             guardSkipped = {}
             guards.forEach(e => {
                 guardSelect[e] = -1
                 guardSkipped[e] = false
-                sendGuardLastProtect(players[e], guardLastSelect[e] !== -1 ? players[guardLastSelect[e]] : '')
             })
+            updateGuardState(day)
         } else {
             setTimeout(() => { game.startWitch() }, getRandom())
         }
-        updateState({
-            state: gameState,
-            day
-        })
     },
 
     startWitch: () => {
@@ -581,7 +576,7 @@ export const game = {
         const playerId = getId(player)
         if (guardSkipped[playerId] || guardSelect[playerId] !== -1) return
         if (!checkId(id)) return
-        if (guardLastSelect[playerId] === id) return
+        if (guardLastProtect[playerId] === id) return
         console.log('guardProtect', player, id, guardSkipped[playerId], guardSelect[playerId])
         guardSelect[playerId] = id
         if (Object.entries(guardSelect).every(
@@ -742,12 +737,13 @@ export const game = {
 
 const survive = (e: string, id = getId(e)) => playerStates[e] === 'alive' && !werewolfKill.includes(id) && !pendingHunter.includes(id)
 
-export const isGod = (e: Role) => e === 'hunter' || e === 'seer' || e === 'witch'
+export const isGod = (e: Role) => e === 'hunter' || e === 'seer' || e === 'witch' || e === 'guard'
 export const isVillager = (e: Role) => e === 'villager'
 export const isWerewolf = (e: Role) => e === 'werewolf'
 export const canHunt = (e: Role) => e === 'hunter'
 
 export const getWitchInventory = (player: string) => witchInventories[getId(player)]
+export const getGuardLastProtect = (player: string) => players[guardLastProtect[getId(player)]] ?? ''
 
 export const getConfig = () => config
 

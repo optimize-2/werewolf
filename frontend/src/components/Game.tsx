@@ -72,12 +72,6 @@ const Game: Component<{
         }
     })
 
-    const [guardLastProtect, setGuardLastProtect] = createSignal<string | undefined>()
-
-    api.on('guardLastProtect', (data) => {
-        setGuardLastProtect(data)
-    })
-
     return (
         <div class="game">
             <div class="identity">

@@ -27,6 +27,7 @@ import {
     getWerewolfKill,
     getWerewolfResult,
     getWitchInventory,
+    getGuardLastProtect,
     hasSave,
     isWerewolf,
     loadGame,
@@ -280,6 +281,7 @@ export interface StateType {
     waiting?: number,
     voteResult?: Record<number, number>,
     witchInventory?: WitchInventory,
+    guardLastProtect?: string,
     werewolfKilled?: Array<number>,
     discussPlayers?: Array<string>
 }
@@ -324,6 +326,24 @@ export const updateWitchState = (day: number) => {
     })
 }
 
+export const updateGuardState = (day: number) => {
+    Object.entries(users).forEach(([id, name]) => {
+        const playerId = getId(name)
+        let guardLastProtect: string = ''
+        const role = getRoles()[name]
+        if (checkId(playerId)) {
+            if (role === 'guard' && getPlayerStates()[name] === 'alive') {
+                guardLastProtect = getGuardLastProtect(name)
+            }
+        }
+        updateState({
+            state: 'guard',
+            guardLastProtect,
+            day
+        }, id)
+    })
+}
+
 export const sendHunterKilled = (player: number, target: number) => {
     io.to(room).emit('hunterKilled', {
         player,
@@ -349,10 +369,6 @@ export const sendWerewolfResult = () => {
     result.forEach(e => {
         io.to(socketId[e]).emit('werewolfResult', getWerewolfResult())
     })
-}
-
-export const sendGuardLastProtect = (player: string, lastSelect: number) => {
-    io.to(socketId[player]).emit('guardLastProtect', lastSelect)
 }
 
 export const sendSpecInfo = (player: string) => {

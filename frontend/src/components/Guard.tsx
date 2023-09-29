@@ -28,7 +28,7 @@ const Guard: Component = () => {
         <div class="guard">
             <Players
                 className="select-player"
-                filter={([name, state]) => state === 'alive'}
+                filter={([name, state]) => state === 'alive' && name !== gameData().guardLastProtect}
                 select={{
                     invoke: (t) => {
                         setTarget(t)
