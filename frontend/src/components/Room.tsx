@@ -167,6 +167,8 @@ const Room: Component<{
             }
         } else if (data.state === 'seer') {
             setIsConfirmed('seer', false)
+        } else if (data.state === 'guard') {
+            setIsConfirmed('guard', false)
         } else if (data.state === 'morning') {
             setIsConfirmed('hunter', false)
             if (gameData().state !== 'morning') {
