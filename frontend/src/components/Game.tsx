@@ -5,6 +5,7 @@ import { CanSendContext, GameDataContext, PlayerIDContext, PlayerStatesContext ,
 import Werewolf from './Werewolf'
 import Witch from './Witch'
 import Seer from './Seer'
+import Guard from './Guard'
 import Vote from './Vote'
 import Hunter from './Hunter'
 
@@ -69,6 +70,12 @@ const Game: Component<{
             // alert('轮到你发言了')
             openAlert('轮到你发言了')
         }
+    })
+
+    const [guardLastProtect, setGuardLastProtect] = createSignal<string | undefined>()
+
+    api.on('guardLastProtect', (data) => {
+        setGuardLastProtect(data)
     })
 
     return (
@@ -272,6 +279,15 @@ const Game: Component<{
                     <Seer
                         setSeerTarget={props.setSeerTarget}
                     />
+                </Match>
+                <Match
+                    when={
+                        gameData().state === 'guard'
+                        && props.role === 'guard'
+                        && playerState() === 'alive'
+                    }
+                >
+                    <Guard/>
                 </Match>
                 <Match
                     when={gameData().state === 'vote' && props.role && playerState() === 'alive'}

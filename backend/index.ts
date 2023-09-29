@@ -87,7 +87,7 @@ loadGame()
 
 const serverUsername = 'Server'
 
-const port = 1335
+const port = 7432
 server.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`)
 })
@@ -221,6 +221,18 @@ io.on('connection', socket => {
         game.handleSeer(player, id)
     })
 
+    socket.on('guardProtect', id => {
+        const player = users[socket.id]
+        if (!player) {return}
+        game.handleGuardProtect(player, id)
+    })
+
+    socket.on('guardSkip', () => {
+        const player = users[socket.id]
+        if (!player) {return}
+        game.handleGuardSkip(player)
+    })
+
     socket.on('witchSave', () => {
         const player = users[socket.id]
         if (!player) {return}
@@ -337,6 +349,10 @@ export const sendWerewolfResult = () => {
     result.forEach(e => {
         io.to(socketId[e]).emit('werewolfResult', getWerewolfResult())
     })
+}
+
+export const sendGuardLastProtect = (player: string, lastSelect: number) => {
+    io.to(socketId[player]).emit('guardLastProtect', lastSelect)
 }
 
 export const sendSpecInfo = (player: string) => {

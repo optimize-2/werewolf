@@ -1,4 +1,9 @@
-import { sendDiscuss, sendHunterWait, sendHunterKilled, updateState, updateWitchState, sendGameEnd, sendWerewolfResult, sendSpecInfo } from '.'
+import {
+    sendDiscuss, sendHunterWait, sendHunterKilled,
+    updateState, updateWitchState,
+    sendGameEnd, sendWerewolfResult, sendSpecInfo,
+    sendGuardLastProtect,
+} from '.'
 import { loadConfig, ConfigType } from './config'
 import { log } from './utils'
 
@@ -17,6 +22,7 @@ export type Role =
         | 'seer'
         | 'witch'
         | 'hunter'
+        | 'guard'
 
 export type Target =
         | 'villagers'
@@ -33,6 +39,7 @@ export type GameState =
         | 'werewolf'
         | 'witch'
         | 'seer'
+        | 'guard'
 
 let players: Array<string> = []
 const playerStates: Record<string, PlayerState> = {}
@@ -110,6 +117,11 @@ let werewolfConfirm: Record<number, boolean> = {}
 let werewolfKill: Array<number> = []
 
 let seerSelect: Record<number, number> = {}
+
+let guardProtect: Array<number> = []
+let guardSelect: Record<number, number> = {}
+let guardSkipped: Record<number, boolean> = {}
+let guardLastSelect: Record<number, number> = {}
 
 let witchSaveUsed: Record<number, boolean> = {}
 let witchPoisonUsed: Record<number, boolean> = {}
@@ -202,6 +214,9 @@ export const game = {
         getPlayersByRole('witch').forEach(e => {
             witchInventories[e] = { save: 1, poison: 1 }
         })
+        getPlayersByRole('guard').forEach(e => {
+            guardSelect[e] = -1
+        })
     },
 
     startDiscuss: (dead?: Array<number>) => {
@@ -266,7 +281,7 @@ export const game = {
 
     startSeer: () => {
         if (!config.roles.seer) {
-            game.startWitch()
+            game.startGuard()
             return
         }
         console.log('start seer')
@@ -278,9 +293,41 @@ export const game = {
                 seerSelect[e] = -1
             })
         } else {
-            setTimeout(() => { game.startWitch() }, getRandom())
+            setTimeout(() => { game.startGuard() }, getRandom())
         }
         gameState = 'seer'
+        updateState({
+            state: gameState,
+            day
+        })
+    },
+
+    startGuard: () => {
+        if (!config.roles.guard) {
+            game.startWitch()
+            return
+        }
+        console.log('start guard')
+        gameState = 'guard'
+        const guards = getPlayersByRole('guard')
+        if (guards.length) {
+            if (day === 1) {
+                guards.forEach(e => {
+                    guardSelect[e] = -1
+                    guardSkipped[e] = false
+                })
+            }
+            guardLastSelect = guardSelect
+            guardSelect = {}
+            guardSkipped = {}
+            guards.forEach(e => {
+                guardSelect[e] = -1
+                guardSkipped[e] = false
+                sendGuardLastProtect(players[e], guardLastSelect[e] !== -1 ? players[guardLastSelect[e]] : '')
+            })
+        } else {
+            setTimeout(() => { game.startWitch() }, getRandom())
+        }
         updateState({
             state: gameState,
             day
@@ -309,7 +356,8 @@ export const game = {
     startMorning: () => {
         console.log('start morning')
         day++
-        console.log('morning', werewolfKill, witchPoisionPlayers)
+        console.log('morning', werewolfKill, witchPoisionPlayers, guardProtect)
+        werewolfKill = werewolfKill.filter(x => !guardProtect.includes(x))
         dead = werewolfKill.concat(Array.from(new Set(witchPoisionPlayers)))
         pendingHunter = []
         dead.forEach(e => {
@@ -521,9 +569,43 @@ export const game = {
                     ([k, v], _1, _2, name: string = players[_.toInteger(k)]) =>
                         v !== -1 || roles[name] !== 'seer' || playerStates[name] !== 'alive'
                 )) {
-                    game.startWitch()
+                    game.startGuard()
                 }
             }
+        }
+    },
+
+    handleGuardProtect: (player: string, id: number) => {
+        if (gameState !== 'guard') return
+        if (roles[player] !== 'guard' || playerStates[player] !== 'alive') return
+        const playerId = getId(player)
+        if (guardSkipped[playerId] || guardSelect[playerId] !== -1) return
+        if (!checkId(id)) return
+        if (guardLastSelect[playerId] === id) return
+        console.log('guardProtect', player, id, guardSkipped[playerId], guardSelect[playerId])
+        guardSelect[playerId] = id
+        if (Object.entries(guardSelect).every(
+            ([k, v], _1, _2, name: string = players[_.toInteger(k)]) =>
+                v !== -1 || guardSkipped[k] || roles[name] !== 'guard' || playerStates[name] !== 'alive'
+        )) {
+            guardProtect = Array.from(new Set(Object.entries(guardSelect).map(([k, v]) => v)))
+            game.startWitch()
+        }
+    },
+
+    handleGuardSkip: (player: string) => {
+        if (gameState !== 'guard') return
+        if (roles[player] !== 'guard' || playerStates[player] !== 'alive') return
+        const playerId = getId(player)
+        if (guardSkipped[playerId] || guardSelect[playerId] !== -1) return
+        console.log('guardSkip', player)
+        guardSkipped[playerId] = true
+        if (Object.entries(guardSelect).every(
+            ([k, v], _1, _2, name: string = players[_.toInteger(k)]) =>
+                v !== -1 || guardSkipped[k] || roles[name] !== 'guard' || playerStates[name] !== 'alive'
+        )) {
+            guardProtect = Array.from(new Set(Object.entries(guardSelect).filter(v => v !== -1).map(([k, v]) => v)))
+            game.startWitch()
         }
     },
 
@@ -532,8 +614,9 @@ export const game = {
         if (roles[player] === 'witch' && playerStates[player] === 'alive') {
             const playerId = getId(player)
             if (witchInventories[playerId].save > 0 && !witchSaveUsed[playerId] && (day === 1 || !werewolfKill.includes(playerId)) && !witchSkipped[playerId]) {
-                witchSaved = true
-                werewolfKill = []
+                if (werewolfKill.length > 0 && guardProtect.includes(werewolfKill[0]))
+                    guardProtect = guardProtect.filter(e => e !== werewolfKill[0])
+                else werewolfKill = []
                 witchSaveUsed[playerId] = true
                 witchInventories[playerId].save -= 1
                 witchSkipped[playerId] = true
@@ -551,6 +634,7 @@ export const game = {
             if (witchInventories[playerId].poison > 0 && !witchPoisonUsed[playerId] && !witchSkipped[playerId]) {
                 witchPoisionPlayers.push(id)
                 werewolfKill = werewolfKill.filter(e => e !== id)
+                guardProtect = guardProtect.filter(e => e !== id)
                 witchPoisonUsed[playerId] = true
                 witchInventories[playerId].poison -= 1
                 witchSkipped[playerId] = true
