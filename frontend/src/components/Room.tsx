@@ -125,7 +125,7 @@ const Room: Component<{
         // console.log('gameStart')
         setIsGameStart(true)
         setIsGameEnd(false)
-        setRole(data.role ?? 'sepc')
+        setRole(data.role ?? 'spec')
         setPlayers(data.players)
 
         setDeadPlayers([])
