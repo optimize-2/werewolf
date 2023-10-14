@@ -27,6 +27,7 @@ import {
     getWerewolfKill,
     getWerewolfResult,
     getWitchInventory,
+    getGuardLastProtect,
     hasSave,
     isWerewolf,
     loadGame,
@@ -221,6 +222,18 @@ io.on('connection', socket => {
         game.handleSeer(player, id)
     })
 
+    socket.on('guardProtect', id => {
+        const player = users[socket.id]
+        if (!player) {return}
+        game.handleGuardProtect(player, id)
+    })
+
+    socket.on('guardSkip', () => {
+        const player = users[socket.id]
+        if (!player) {return}
+        game.handleGuardSkip(player)
+    })
+
     socket.on('witchSave', () => {
         const player = users[socket.id]
         if (!player) {return}
@@ -268,6 +281,7 @@ export interface StateType {
     waiting?: number,
     voteResult?: Record<number, number>,
     witchInventory?: WitchInventory,
+    guardLastProtect?: string,
     werewolfKilled?: Array<number>,
     discussPlayers?: Array<string>
 }
@@ -307,6 +321,24 @@ export const updateWitchState = (day: number) => {
             dead: hasSave(name) ? getWerewolfKill() : [],
             seerResult,
             witchInventory: getWitchInventory(name),
+            day
+        }, id)
+    })
+}
+
+export const updateGuardState = (day: number) => {
+    Object.entries(users).forEach(([id, name]) => {
+        const playerId = getId(name)
+        let guardLastProtect: string = ''
+        const role = getRoles()[name]
+        if (checkId(playerId)) {
+            if (role === 'guard' && getPlayerStates()[name] === 'alive') {
+                guardLastProtect = getGuardLastProtect(name)
+            }
+        }
+        updateState({
+            state: 'guard',
+            guardLastProtect,
             day
         }, id)
     })

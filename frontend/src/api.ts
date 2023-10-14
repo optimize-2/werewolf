@@ -44,6 +44,7 @@ export type GameData = {
     waiting?: number
     voteResult?: VoteResult
     witchInventory?: WitchInventory
+    guardLastProtect?: string,
     werewolfKilled?: Array<number>
     discussPlayers?: Array<string>
 }
