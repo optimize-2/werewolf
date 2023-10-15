@@ -509,7 +509,7 @@ export const game = {
     },
 
     handleSeer: (player: string, id: number) => {
-        if (!checkId(id)) {return}
+        if (!checkId(id)) {return} 
         console.log('handle seer', player, id, getId(player), seerSelect, seerSelect[getId(player)])
         if (gameState !== 'seer') {return}
         console.log('seeeeeeeer', roles[player], playerStates[player])

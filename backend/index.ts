@@ -135,6 +135,7 @@ io.on('connection', socket => {
         if (!username) {return}
         if (message.trim().length === 0) {return}
         const dec = sea(message)
+        if (dec.trim().length === 0) {return}
         if (getTokens()['admins'].includes(username) && dec.startsWith('/')) {
             // if (parseCommand(message))
             const commandResult = parseCommand(username, dec)
@@ -153,6 +154,7 @@ io.on('connection', socket => {
 
     socket.on('disconnect', () => {
         const username = users[socket.id]
+        if (!username) {return}
         game.handleLeave(username)
         delete users[socket.id]
         delete socketId[username]
