@@ -31,6 +31,7 @@ export const stateMessage = {
     werewolf: '狼人请睁眼',
     witch: '女巫请睁眼',
     seer: '预言家请睁眼',
+    guard: '守卫请睁眼',
     discuss: '等待发言',
     vote: '等待投票',
     voteend: '投票结束',
@@ -42,5 +43,6 @@ export const roleInfo = {
     seer: '预言家',
     witch: '女巫',
     hunter: '猎人',
+    guard: '守卫',
     spec: '旁观者',
 }
